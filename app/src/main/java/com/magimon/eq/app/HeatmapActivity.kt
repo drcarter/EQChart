@@ -15,20 +15,18 @@ class HeatmapActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Create the heatmap view
         val heatmapView = StockHeatmapView(this).apply {
-            // Set sample data
-            setData(StockHeatmapHelper.createSampleData())
+            setSections(StockHeatmapHelper.createSampleSections())
 
-            // Set click listener
             setOnItemClickListener { item ->
-                val message = "${item.symbol}: ${StockHeatmapHelper.formatChange(item.change)} " +
-                        "| Market Cap: ${StockHeatmapHelper.formatMarketCap(item.marketCap)}"
+                val ratioPart = item.sizeRatio?.let { " | Ratio: ${String.format("%.1f", it)}" } ?: ""
+                val message = "${item.symbol}: ${StockHeatmapHelper.formatChange(item.changePct)}" +
+                    " | Market Cap: ${StockHeatmapHelper.formatMarketCap(item.marketCap)}" +
+                    ratioPart
                 Toast.makeText(this@HeatmapActivity, message, Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Wrap in ScrollView for scrolling support
         val scrollView = ScrollView(this).apply {
             addView(heatmapView)
         }
@@ -36,4 +34,3 @@ class HeatmapActivity : AppCompatActivity() {
         setContentView(scrollView)
     }
 }
-

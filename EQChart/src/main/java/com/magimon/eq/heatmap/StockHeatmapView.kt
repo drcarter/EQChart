@@ -1,390 +1,489 @@
 package com.magimon.eq.heatmap
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.sqrt
 
 /**
- * A custom View that displays a stock heatmap similar to TradingView
- * - Block size represents market cap
- * - Block color represents price change (green for positive, red for negative)
- * - Stocks are grouped by sector
+ * 트레이딩뷰 스타일에 가까운 주식 히트맵 뷰.
+ *
+ * - 블록 색상: [StockHeatmapItem.changePct] 기반 매핑
+ * - 블록 면적: `sizeRatio` 우선, 없으면 `marketCap` 기반
+ * - 그룹 배치: 2단계 스퀘어리파이드 트리맵 레이아웃
  */
 class StockHeatmapView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
 
-    private var sectorGroups: List<SectorGroup> = emptyList()
-    private var selectedItem: StockHeatmapItem? = null
-    private var onItemClickListener: ((StockHeatmapItem) -> Unit)? = null
+    private val sections = mutableListOf<StockHeatmapSection>()
 
-    // Drawing components
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val sectorLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val selectedPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-    // Layout parameters
-    private var padding = 16f
-    private var sectorSpacing = 24f
-    private var blockSpacing = 4f
-    private var minBlockSize = 40f
-    private var maxBlockSize = 120f
-    private var sectorLabelHeight = 32f
-
-    // Color configuration
-    private val positiveColor = Color.parseColor("#26A69A") // Green
-    private val negativeColor = Color.parseColor("#EF5350") // Red
-    private val neutralColor = Color.parseColor("#78909C") // Gray
-    private val backgroundColor = Color.parseColor("#FFFFFF")
-    private val textColor = Color.parseColor("#FFFFFF")
-    private val sectorLabelColor = Color.parseColor("#424242")
-    private val selectedStrokeColor = Color.parseColor("#FFC107")
-    private val selectedStrokeWidth = 4f
-
-    // Layout data
-    private data class BlockLayout(
+    private data class BlockRect(
         val item: StockHeatmapItem,
         val rect: RectF,
-        val sector: String,
-        val blockSize: Float
     )
 
-    private var blockLayouts: MutableList<BlockLayout> = mutableListOf()
-    private var sectorLabelRects: Map<String, RectF> = emptyMap()
+    private val blocks = mutableListOf<BlockRect>()
 
-    init {
-        setupPaints()
+    private val density: Float = resources.displayMetrics.density
+    private val outerPadding = 6f * density
+    private val sectionGap = 3f * density
+    private val blockGap = 2f * density
+    private val sectionHeaderHeight: Float = 20f * density
+
+    private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#111316")
     }
 
-    private fun setupPaints() {
-        textPaint.apply {
-            color = textColor
-            textSize = 12f
-            textAlign = Paint.Align.CENTER
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
+    private val rectPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 1f
+        color = 0x55000000
+    }
 
-        sectorLabelPaint.apply {
-            color = sectorLabelColor
-            textSize = 14f
-            textAlign = Paint.Align.LEFT
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
+    private val symbolPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textAlign = Paint.Align.LEFT
+        textSize = 12f * resources.displayMetrics.scaledDensity
+        isFakeBoldText = true
+    }
 
-        selectedPaint.apply {
-            style = Paint.Style.STROKE
-            strokeWidth = selectedStrokeWidth
-            color = selectedStrokeColor
-        }
+    private val changePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textAlign = Paint.Align.LEFT
+        textSize = 10f * resources.displayMetrics.scaledDensity
+    }
+
+    private data class SectionLayout(
+        val group: SectionGroup,
+        val headerRect: RectF,
+    )
+
+    private val sectionLayouts = mutableListOf<SectionLayout>()
+
+    private val sectionTitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFFE9EEF5.toInt()
+        textAlign = Paint.Align.LEFT
+        textSize = 11f * resources.displayMetrics.scaledDensity
+        isFakeBoldText = true
+    }
+
+    private val sectionHeaderBgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    private var itemClickListener: ((StockHeatmapItem) -> Unit)? = null
+
+    /**
+     * 종목 블록 클릭 리스너를 설정한다.
+     */
+    fun setOnItemClickListener(listener: (StockHeatmapItem) -> Unit) {
+        itemClickListener = listener
     }
 
     /**
-     * Set the stock data to display
+     * 하위 호환 API.
+     *
+     * 평탄한 종목 목록을 받아 `item.sector` 기준으로 자동 그룹핑한다.
      */
-    fun setData(items: List<StockHeatmapItem>) {
-        sectorGroups = items
-            .groupBy { it.sector }
-            .map { (sector, items) -> SectorGroup(sector, items) }
-            .sortedByDescending { it.totalMarketCap }
+    fun setData(data: List<StockHeatmapItem>) {
+        val grouped = data.groupBy { it.sector }
+        val mapped = grouped.map { (sector, stocks) ->
+            StockHeatmapSection(
+                name = sector,
+                color = StockHeatmapHelper.mapSectorToColor(sector),
+                stocks = stocks,
+            )
+        }
+        setSections(mapped)
+    }
 
+    /**
+     * 권장 API.
+     *
+     * 섹션 이름/색상/종목 목록을 명시적으로 전달한다.
+     */
+    fun setSections(data: List<StockHeatmapSection>) {
+        sections.clear()
+        data.forEach { section ->
+            val validStocks = section.stocks.filter { itemWeight(it) > 0f }
+            if (section.name.isNotBlank() && validStocks.isNotEmpty()) {
+                sections.add(section.copy(stocks = validStocks))
+            }
+        }
         requestLayout()
         invalidate()
     }
 
-    /**
-     * Set click listener for stock items
-     */
-    fun setOnItemClickListener(listener: (StockHeatmapItem) -> Unit) {
-        onItemClickListener = listener
-    }
-
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val width = MeasureSpec.getSize(widthMeasureSpec)
-        val height = calculateHeight(width)
+        val desiredWidth = 800 * density
+        val desiredHeight = 1200 * density
+
+        val width = resolveSize(desiredWidth.toInt(), widthMeasureSpec)
+        val height = resolveSize(desiredHeight.toInt(), heightMeasureSpec)
+
         setMeasuredDimension(width, height)
     }
 
-    private fun calculateHeight(width: Int): Int {
-        if (sectorGroups.isEmpty()) {
-            return (padding * 2).toInt()
-        }
-
-        var currentY = padding + sectorLabelHeight
-        val availableWidth = width - padding * 2
-
-        sectorGroups.forEach { group ->
-            currentY += blockSpacing
-            
-            // Simulate layout to calculate actual height
-            val sortedItems = group.items.sortedByDescending { it.marketCap }
-            val maxMarketCap = sortedItems.firstOrNull()?.marketCap ?: 0L
-            val minMarketCap = sortedItems.lastOrNull()?.marketCap ?: 0L
-            val avgBlockSize = calculateAverageBlockSize(sortedItems, maxMarketCap, minMarketCap)
-            
-            var x = padding
-            var y = currentY
-            var maxRowHeight = 0f
-
-            sortedItems.forEach { item ->
-                val itemBlockSize = calculateItemBlockSize(item.marketCap, maxMarketCap, minMarketCap)
-                val rowHeight = itemBlockSize + blockSpacing
-                
-                if (x + itemBlockSize > width - padding && x > padding) {
-                    x = padding
-                    y += maxRowHeight
-                    maxRowHeight = rowHeight
-                } else {
-                    maxRowHeight = max(maxRowHeight, rowHeight)
-                }
-
-                x += itemBlockSize + blockSpacing
-            }
-
-            currentY = y + maxRowHeight + sectorSpacing
-        }
-
-        return (currentY + padding).toInt()
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        recomputeLayout(w, h)
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        if (changed) {
-            calculateLayouts()
-        }
-    }
+    /**
+     * 현재 크기와 섹션 데이터를 기준으로 전체 트리맵 배치를 다시 계산한다.
+     */
+    private fun recomputeLayout(width: Int, height: Int) {
+        blocks.clear()
+        sectionLayouts.clear()
+        if (width <= 0 || height <= 0 || sections.isEmpty()) return
 
-    private fun calculateLayouts() {
-        if (sectorGroups.isEmpty()) return
+        val rootRect = RectF(
+            outerPadding,
+            outerPadding,
+            width.toFloat() - outerPadding,
+            height.toFloat() - outerPadding,
+        )
 
-        blockLayouts.clear()
-        val sectorLabelRectsMap = mutableMapOf<String, RectF>()
-
-        var currentY = padding + sectorLabelHeight
-        val availableWidth = width - padding * 2
-
-        sectorGroups.forEach { group ->
-            // Sector label
-            val labelRect = RectF(
-                padding,
-                currentY - sectorLabelHeight,
-                width - padding,
-                currentY
+        if (sections.size <= 1) {
+            val flatItems = sections.first().stocks
+            val flatBlocks = layoutSquarified(
+                flatItems.map { WeightedItem(it, itemWeight(it)) },
+                rootRect,
             )
-            sectorLabelRectsMap[group.sector] = labelRect
-            currentY += blockSpacing
+            blocks.addAll(
+                flatBlocks.mapNotNull {
+                    val inset = insetRect(it.rect, blockGap)
+                    if (inset.width() > 0f && inset.height() > 0f) BlockRect(it.item, inset) else null
+                },
+            )
+            return
+        }
 
-            // Calculate block layout with individual sizes
-            val sortedItems = group.items.sortedByDescending { it.marketCap }
-            val maxMarketCap = sortedItems.firstOrNull()?.marketCap ?: 0L
-            val minMarketCap = sortedItems.lastOrNull()?.marketCap ?: 0L
-            
-            // Calculate average block size for row calculation
-            val avgBlockSize = calculateAverageBlockSize(sortedItems, maxMarketCap, minMarketCap)
-            val blocksPerRow = calculateBlocksPerRow(availableWidth, avgBlockSize)
-            
-            var x = padding
-            var y = currentY
-            var column = 0
-            var maxRowHeight = 0f
+        val sectionWeighted = sections.map { section ->
+            val total = section.stocks.sumOf { itemWeight(it).toDouble() }.toFloat().coerceAtLeast(0.01f)
+            SectionGroup(section.name, section.color, total, section.stocks)
+        }
 
-            sortedItems.forEach { item ->
-                val itemBlockSize = calculateItemBlockSize(item.marketCap, maxMarketCap, minMarketCap)
-                val rowHeight = itemBlockSize + blockSpacing
-                
-                // Check if we need to wrap to next row
-                if (column > 0 && x + itemBlockSize > width - padding) {
-                    column = 0
-                    x = padding
-                    y += maxRowHeight
-                    maxRowHeight = rowHeight
-                } else {
-                    maxRowHeight = max(maxRowHeight, rowHeight)
+        val sectionRects = layoutSquarified(
+            sectionWeighted.map { WeightedItem(it, it.totalWeight) },
+            rootRect,
+        )
+
+        sectionRects.forEach { sectionBlock ->
+            val group = sectionBlock.item
+            val fullRect = insetRect(sectionBlock.rect, sectionGap)
+            if (fullRect.width() <= 0f || fullRect.height() <= 0f) return@forEach
+
+            if (fullRect.height() <= sectionHeaderHeight * 1.5f) {
+                val itemRects = layoutSquarified(
+                    group.items.map { WeightedItem(it, itemWeight(it)) },
+                    fullRect,
+                )
+                itemRects.forEach { itemBlock ->
+                    val inset = insetRect(itemBlock.rect, blockGap)
+                    if (inset.width() > 0f && inset.height() > 0f) {
+                        blocks.add(BlockRect(itemBlock.item, inset))
+                    }
                 }
+            } else {
+                val headerRect = RectF(
+                    fullRect.left,
+                    fullRect.top,
+                    fullRect.right,
+                    fullRect.top + sectionHeaderHeight,
+                )
+                val contentRect = RectF(
+                    fullRect.left,
+                    headerRect.bottom,
+                    fullRect.right,
+                    fullRect.bottom,
+                )
 
-                val rect = RectF(
+                sectionLayouts.add(
+                    SectionLayout(
+                        group = group,
+                        headerRect = headerRect,
+                    ),
+                )
+
+                val itemRects = layoutSquarified(
+                    group.items.map { WeightedItem(it, itemWeight(it)) },
+                    contentRect,
+                )
+                itemRects.forEach { itemBlock ->
+                    val inset = insetRect(itemBlock.rect, blockGap)
+                    if (inset.width() > 0f && inset.height() > 0f) {
+                        blocks.add(BlockRect(itemBlock.item, inset))
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 항목의 면적 가중치를 계산한다.
+     *
+     * `sizeRatio`가 유효하면 우선 사용하고, 아니면 `marketCap`을 사용한다.
+     */
+    private fun itemWeight(item: StockHeatmapItem): Float {
+        val ratio = item.sizeRatio ?: 0.0
+        return if (ratio > 0.0) ratio.toFloat() else item.marketCap.toFloat().coerceAtLeast(0f)
+    }
+
+    /**
+     * 사각형 안쪽으로 동일한 여백을 적용한 새 Rect를 반환한다.
+     */
+    private fun insetRect(src: RectF, inset: Float): RectF {
+        return RectF(src.left + inset, src.top + inset, src.right - inset, src.bottom - inset)
+    }
+
+    /**
+     * 기존 색상에 alpha 값을 덮어쓴 색상을 반환한다.
+     */
+    private fun withAlpha(color: Int, alpha: Int): Int {
+        return Color.argb(alpha.coerceIn(0, 255), Color.red(color), Color.green(color), Color.blue(color))
+    }
+
+    private data class WeightedItem<T>(
+        val item: T,
+        val weight: Float,
+    )
+
+    private data class SectionGroup(
+        val name: String,
+        val color: Int,
+        val totalWeight: Float,
+        val items: List<StockHeatmapItem>,
+    )
+
+    private data class LayoutBlock<T>(
+        val item: T,
+        val rect: RectF,
+    )
+
+    /**
+     * 스퀘어리파이드 트리맵 알고리즘으로 가중치 목록을 사각형 영역에 배치한다.
+     */
+    private fun <T> layoutSquarified(
+        items: List<WeightedItem<T>>,
+        bounds: RectF,
+    ): List<LayoutBlock<T>> {
+        if (items.isEmpty()) return emptyList()
+
+        val totalWeight = items.sumOf { it.weight.toDouble() }.toFloat()
+        if (totalWeight <= 0f || bounds.width() <= 0f || bounds.height() <= 0f) {
+            return emptyList()
+        }
+        val area = bounds.width() * bounds.height()
+        val scale = area / totalWeight
+
+        val scaled = items
+            .filter { it.weight > 0f }
+            .sortedByDescending { it.weight }
+            .map { it.copy(weight = max(it.weight * scale, 1f)) }
+
+        if (scaled.isEmpty()) return emptyList()
+
+        val result = mutableListOf<LayoutBlock<T>>()
+        squarify(
+            remaining = scaled.toMutableList(),
+            currentRow = mutableListOf(),
+            rect = RectF(bounds),
+            outBlocks = result,
+        )
+        return result
+    }
+
+    /**
+     * 현재 행의 종횡비를 악화시키지 않도록 항목을 순차 배치한다.
+     */
+    private fun <T> squarify(
+        remaining: MutableList<WeightedItem<T>>,
+        currentRow: MutableList<WeightedItem<T>>,
+        rect: RectF,
+        outBlocks: MutableList<LayoutBlock<T>>,
+    ) {
+        if (remaining.isEmpty()) {
+            if (currentRow.isNotEmpty()) {
+                layoutRow(currentRow, rect, outBlocks)
+            }
+            return
+        }
+
+        val item = remaining.removeAt(0)
+        if (currentRow.isEmpty()) {
+            currentRow.add(item)
+            squarify(remaining, currentRow, rect, outBlocks)
+            return
+        }
+
+        val w = min(rect.width(), rect.height())
+        val currentWorst = worstAspectRatio(currentRow, w)
+        val newRow = ArrayList(currentRow)
+        newRow.add(item)
+        val newWorst = worstAspectRatio(newRow, w)
+
+        if (newWorst <= currentWorst) {
+            currentRow.add(item)
+            squarify(remaining, currentRow, rect, outBlocks)
+        } else {
+            val newRect = layoutRow(currentRow, rect, outBlocks)
+            currentRow.clear()
+            currentRow.add(item)
+            squarify(remaining, currentRow, newRect, outBlocks)
+        }
+    }
+
+    /**
+     * 현재 행(row)을 실제 사각형으로 확정 배치하고, 남은 Rect를 반환한다.
+     */
+    private fun <T> layoutRow(
+        row: List<WeightedItem<T>>,
+        rect: RectF,
+        outBlocks: MutableList<LayoutBlock<T>>,
+    ): RectF {
+        val totalArea = row.sumOf { it.weight.toDouble() }.toFloat()
+        val isHorizontal = rect.width() >= rect.height()
+
+        return if (isHorizontal) {
+            val rowHeight = totalArea / rect.width()
+            var x = rect.left
+            val y = rect.top
+            row.forEach { item ->
+                val itemWidth = item.weight / rowHeight
+                val blockRect = RectF(
                     x,
                     y,
-                    x + itemBlockSize,
-                    y + itemBlockSize
+                    min(x + itemWidth, rect.right),
+                    min(y + rowHeight, rect.bottom),
                 )
-                blockLayouts.add(BlockLayout(item, rect, group.sector, itemBlockSize))
-
-                column++
-                x += itemBlockSize + blockSpacing
+                outBlocks.add(LayoutBlock(item.item, blockRect))
+                x += itemWidth
             }
-
-            currentY = y + maxRowHeight + sectorSpacing
-        }
-
-        sectorLabelRects = sectorLabelRectsMap
-    }
-
-    private fun calculateBlocksPerRow(availableWidth: Float, avgBlockSize: Float): Int {
-        val blocksPerRow = ((availableWidth + blockSpacing) / (avgBlockSize + blockSpacing)).toInt()
-        return max(1, blocksPerRow)
-    }
-
-    private fun calculateAverageBlockSize(items: List<StockHeatmapItem>, maxMarketCap: Long, minMarketCap: Long): Float {
-        if (items.isEmpty()) return (minBlockSize + maxBlockSize) / 2
-        if (maxMarketCap == minMarketCap) return (minBlockSize + maxBlockSize) / 2
-        
-        // Calculate average market cap
-        val avgMarketCap = items.map { it.marketCap }.average().toLong()
-        return calculateItemBlockSize(avgMarketCap, maxMarketCap, minMarketCap)
-    }
-
-    private fun calculateItemBlockSize(marketCap: Long, maxMarketCap: Long, minMarketCap: Long): Float {
-        if (maxMarketCap == minMarketCap) return (minBlockSize + maxBlockSize) / 2
-        
-        // Use logarithmic scaling for better visual distribution
-        // This ensures larger market caps get proportionally larger blocks
-        val logMax = kotlin.math.ln(maxMarketCap.toDouble())
-        val logMin = kotlin.math.ln(minMarketCap.toDouble())
-        val logCurrent = kotlin.math.ln(marketCap.toDouble())
-        
-        val normalized = if (logMax > logMin) {
-            ((logCurrent - logMin) / (logMax - logMin)).toFloat()
+            RectF(rect.left, y + rowHeight, rect.right, rect.bottom)
         } else {
-            0.5f
+            val columnWidth = totalArea / rect.height()
+            val x = rect.left
+            var y = rect.top
+            row.forEach { item ->
+                val itemHeight = item.weight / columnWidth
+                val blockRect = RectF(
+                    x,
+                    y,
+                    min(x + columnWidth, rect.right),
+                    min(y + itemHeight, rect.bottom),
+                )
+                outBlocks.add(LayoutBlock(item.item, blockRect))
+                y += itemHeight
+            }
+            RectF(x + columnWidth, rect.top, rect.right, rect.bottom)
         }
-        
-        val sizeRange = maxBlockSize - minBlockSize
-        return minBlockSize + (sizeRange * normalized)
+    }
+
+    /**
+     * 행(row) 항목들의 최악 종횡비를 계산한다.
+     *
+     * 값이 작을수록 정사각형에 가까운 배치다.
+     */
+    private fun worstAspectRatio(
+        row: List<WeightedItem<*>>,
+        w: Float,
+    ): Float {
+        if (row.isEmpty() || w <= 0f) return Float.MAX_VALUE
+
+        var worst = 0f
+        val sumArea = row.sumOf { it.weight.toDouble() }.toFloat()
+        val sideShort = min(w, sumArea / w)
+
+        row.forEach { item ->
+            val area = item.weight
+            if (area <= 0f) return@forEach
+            val side1 = area / sideShort
+            val side2 = sideShort
+            val ratio = max(side1 / side2, side2 / side1)
+            worst = max(worst, ratio)
+        }
+        return if (worst == 0f) Float.MAX_VALUE else worst
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Draw background
-        canvas.drawColor(backgroundColor)
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), backgroundPaint)
 
-        if (sectorGroups.isEmpty()) return
+        blocks.forEach { block ->
+            val color = StockHeatmapHelper.mapChangeToColor(block.item.changePct)
+            rectPaint.color = color
+            canvas.drawRect(block.rect, rectPaint)
+            canvas.drawRect(block.rect, borderPaint)
 
-        // Draw sector labels
-        sectorLabelRects.forEach { (sector, rect) ->
-            val group = sectorGroups.find { it.sector == sector }
-            val text = "$sector (${group?.items?.size ?: 0})"
-            val y = rect.centerY() + (sectorLabelPaint.textSize / 3)
-            canvas.drawText(text, rect.left, y, sectorLabelPaint)
+            drawItemText(canvas, block)
         }
 
-        // Draw blocks
-        blockLayouts.forEach { blockLayout ->
-            val item = blockLayout.item
-            val rect = blockLayout.rect
+        sectionLayouts.forEach { sectionLayout ->
+            val header = sectionLayout.headerRect
+            val group = sectionLayout.group
 
-            // Draw block with color based on change
-            paint.color = getColorForChange(item.change)
-            canvas.drawRoundRect(rect, 4f, 4f, paint)
+            sectionHeaderBgPaint.color = withAlpha(group.color, 170)
+            canvas.drawRect(header, sectionHeaderBgPaint)
+            canvas.drawRect(header, borderPaint)
 
-            // Draw selected border
-            if (selectedItem?.symbol == item.symbol) {
-                canvas.drawRoundRect(
-                    rect.left - selectedStrokeWidth / 2,
-                    rect.top - selectedStrokeWidth / 2,
-                    rect.right + selectedStrokeWidth / 2,
-                    rect.bottom + selectedStrokeWidth / 2,
-                    4f,
-                    4f,
-                    selectedPaint
-                )
-            }
-
-            // Draw symbol text
-            if (rect.width() > 30) {
-                val textY = rect.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
-                canvas.drawText(item.symbol, rect.centerX(), textY, textPaint)
-            }
+            val padding = 4f * density
+            val x = header.left + padding
+            val y = header.top + sectionTitlePaint.textSize + padding / 2f
+            canvas.drawText(group.name, x, y, sectionTitlePaint)
         }
     }
 
-    private fun getColorForChange(change: Float): Int {
-        return when {
-            change > 0 -> interpolateColor(neutralColor, positiveColor, min(change / 5f, 1f))
-            change < 0 -> interpolateColor(neutralColor, negativeColor, min(-change / 5f, 1f))
-            else -> neutralColor
+    /**
+     * 블록 크기에 따라 티커/등락률 텍스트를 조건부로 렌더링한다.
+     */
+    private fun drawItemText(canvas: Canvas, block: BlockRect) {
+        val rect = block.rect
+        val w = rect.width()
+        val h = rect.height()
+
+        val minWidthForSymbol = 42f * density
+        val minHeightForSymbol = 22f * density
+        if (w < minWidthForSymbol || h < minHeightForSymbol) return
+
+        val padding = 4f * density
+        val textScale = (min(w, h) / (58f * density)).coerceIn(0.85f, 1.45f)
+        symbolPaint.textSize = 12f * resources.displayMetrics.scaledDensity * textScale
+        changePaint.textSize = 10f * resources.displayMetrics.scaledDensity * textScale
+
+        val symbolX = rect.left + padding
+        val symbolY = rect.top + padding + symbolPaint.textSize
+        canvas.drawText(block.item.symbol, symbolX, symbolY, symbolPaint)
+
+        val minHeightForChange = 36f * density
+        if (h >= minHeightForChange) {
+            val changeText = StockHeatmapHelper.formatChange(block.item.changePct)
+            val changeY = symbolY + changePaint.textSize + (2f * density)
+            canvas.drawText(changeText, symbolX, changeY, changePaint)
         }
-    }
-
-    private fun interpolateColor(color1: Int, color2: Int, factor: Float): Int {
-        val clampedFactor = max(0f, min(1f, factor))
-        val r1 = Color.red(color1)
-        val g1 = Color.green(color1)
-        val b1 = Color.blue(color1)
-        val r2 = Color.red(color2)
-        val g2 = Color.green(color2)
-        val b2 = Color.blue(color2)
-
-        return Color.rgb(
-            (r1 + (r2 - r1) * clampedFactor).toInt(),
-            (g1 + (g2 - g1) * clampedFactor).toInt(),
-            (b1 + (b2 - b1) * clampedFactor).toInt()
-        )
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                val clickedItem = findItemAt(event.x, event.y)
-                if (clickedItem != null) {
-                    selectedItem = clickedItem
-                    invalidate()
-                    onItemClickListener?.invoke(clickedItem)
+            MotionEvent.ACTION_UP -> {
+                val x = event.x
+                val y = event.y
+                val hit = blocks.firstOrNull { it.rect.contains(x, y) }
+                if (hit != null) {
+                    itemClickListener?.invoke(hit.item)
                     return true
                 }
             }
         }
-        return super.onTouchEvent(event)
-    }
-
-    private fun findItemAt(x: Float, y: Float): StockHeatmapItem? {
-        return blockLayouts.find { it.rect.contains(x, y) }?.item
-    }
-
-    /**
-     * Configuration methods
-     */
-    fun setPadding(padding: Float) {
-        this.padding = padding
-        requestLayout()
-        invalidate()
-    }
-
-    fun setBlockSpacing(spacing: Float) {
-        this.blockSpacing = spacing
-        requestLayout()
-        invalidate()
-    }
-
-    fun setSectorSpacing(spacing: Float) {
-        this.sectorSpacing = spacing
-        requestLayout()
-        invalidate()
-    }
-
-    fun setBlockSizeRange(min: Float, max: Float) {
-        this.minBlockSize = min
-        this.maxBlockSize = max
-        requestLayout()
-        invalidate()
-    }
-
-    fun setPositiveColor(color: Int) {
-        // This would require updating the color calculation
-        invalidate()
-    }
-
-    fun setNegativeColor(color: Int) {
-        // This would require updating the color calculation
-        invalidate()
+        return true
     }
 }
-

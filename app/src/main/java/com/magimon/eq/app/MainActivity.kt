@@ -1,35 +1,51 @@
 package com.magimon.eq.app
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.ScrollView
-import android.widget.Toast
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.magimon.eq.heatmap.StockHeatmapHelper
-import com.magimon.eq.heatmap.StockHeatmapView
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Create the heatmap view
-        val heatmapView = StockHeatmapView(this).apply {
-            // Set sample data
-            setData(StockHeatmapHelper.createSampleData())
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            val padding = (24 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+        }
 
-            // Set click listener
-            setOnItemClickListener { item ->
-                val message = "${item.symbol}: ${StockHeatmapHelper.formatChange(item.change)} " +
-                        "| Market Cap: ${StockHeatmapHelper.formatMarketCap(item.marketCap)}"
-                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+        val buttonParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+        ).apply {
+            topMargin = (8 * resources.displayMetrics.density).toInt()
+            bottomMargin = (8 * resources.displayMetrics.density).toInt()
+        }
+
+        val heatmapButton = Button(this).apply {
+            text = "Open Heatmap Chart"
+            layoutParams = buttonParams
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, HeatmapActivity::class.java))
             }
         }
 
-        // Wrap in ScrollView for scrolling support
-        val scrollView = ScrollView(this@MainActivity).apply {
-            addView(heatmapView)
+        val bubbleButton = Button(this).apply {
+            text = "Open Bubble Chart"
+            layoutParams = buttonParams
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, BubbleActivity::class.java))
+            }
         }
 
-        setContentView(scrollView)
+        container.addView(heatmapButton)
+        container.addView(bubbleButton)
+
+        setContentView(container)
     }
 }

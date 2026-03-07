@@ -27,6 +27,11 @@
             android:exported="true"
             android:label="Stock Heatmap"
             android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".BubbleActivity"
+            android:exported="true"
+            android:label="Bubble Chart"
+            android:theme="@style/Theme.EQChart" />
     </application>
 
 </manifest>
