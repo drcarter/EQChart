@@ -31,21 +31,82 @@ It currently provides `Heatmap`, `Bubble`, `PCM Waveform`, `Radar`, `Pie`, and `
 - AGP: 8.11.1
 - Java / JVM Target: 11
 
+## Versioning
+
+- Release version format: `YYYY.MM.DD`
+- Same-day republish format: `YYYY.MM.DD.N` (`N = 1, 2, 3 ...`)
+- Examples:
+  - First release of the day: `2026.03.08`
+  - Second release on the same day: `2026.03.08.1`
+
 ## Installation
 
-`app/build.gradle.kts`:
+### 1) GitHub Packages repository
+
+`settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/drcarter/EQChart")
+            credentials {
+                username = providers.gradleProperty("gpr.user")
+                    .orElse(providers.environmentVariable("GPR_USER"))
+                    .orElse(providers.environmentVariable("GITHUB_ACTOR"))
+                    .orNull
+                password = providers.gradleProperty("gpr.key")
+                    .orElse(providers.environmentVariable("GPR_KEY"))
+                    .orElse(providers.environmentVariable("GITHUB_TOKEN"))
+                    .orNull
+            }
+        }
+    }
+}
+```
+
+`github.properties` (project root) or `~/.gradle/gradle.properties`:
+
+```properties
+gpr.user=YOUR_GITHUB_USERNAME
+gpr.key=YOUR_GITHUB_TOKEN_WITH_read:packages
+```
+
+### 2) Maven dependencies
 
 ```kotlin
 dependencies {
-    // Shared models (optional if already transitively included)
-    implementation(project(":EQChart-common"))
-
     // View charts
-    implementation(project(":EQChart"))
+    implementation("com.magimon.eq:eqchart:2026.03.08")
 
     // Compose charts
+    implementation("com.magimon.eq:eqchart-compose:2026.03.08")
+}
+```
+
+`eqchart` and `eqchart-compose` transitively include `eqchart-common`,
+so `eqchart-common` usually does not need to be added separately.
+
+### 3) Local multi-module usage (this repository)
+
+```kotlin
+dependencies {
+    implementation(project(":EQChart"))
     implementation(project(":EQChart-compose"))
 }
+```
+
+## Publish
+
+```bash
+# First release of the day
+./gradlew publish -PpublishDate=2026.03.08
+
+# Same-day republish
+./gradlew publish -PpublishDate=2026.03.08 -PpublishIncrement=1
 ```
 
 ## Run Sample App
