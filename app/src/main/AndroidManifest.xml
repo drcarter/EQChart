@@ -42,6 +42,16 @@
             android:exported="true"
             android:label="Radar Chart"
             android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".PieActivity"
+            android:exported="true"
+            android:label="Pie Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".DonutActivity"
+            android:exported="true"
+            android:label="Donut Chart"
+            android:theme="@style/Theme.EQChart" />
     </application>
 
 </manifest>

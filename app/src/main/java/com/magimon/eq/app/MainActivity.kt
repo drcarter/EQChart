@@ -59,10 +59,28 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val pieButton = Button(this).apply {
+            text = "Open Pie Chart"
+            layoutParams = buttonParams
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, PieActivity::class.java))
+            }
+        }
+
+        val donutButton = Button(this).apply {
+            text = "Open Donut Chart"
+            layoutParams = buttonParams
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, DonutActivity::class.java))
+            }
+        }
+
         container.addView(heatmapButton)
         container.addView(bubbleButton)
         container.addView(waveformButton)
         container.addView(radarButton)
+        container.addView(pieButton)
+        container.addView(donutButton)
 
         setContentView(container)
     }

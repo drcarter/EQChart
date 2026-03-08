@@ -1,7 +1,7 @@
 # EQChart
 
 Android 커스텀 차트 라이브러리입니다.  
-현재 `Heatmap`, `Bubble`, `PCM Waveform`, `Radar` 차트를 제공합니다.
+현재 `Heatmap`, `Bubble`, `PCM Waveform`, `Radar`, `Pie`, `Donut` 차트를 제공합니다.
 
 ## 프로젝트 구성
 
@@ -16,6 +16,8 @@ Android 커스텀 차트 라이브러리입니다.
 - Bubble: Scatter / Packed 버블 차트
 - PCM Waveform: 실시간 16-bit mono PCM 파형 렌더링
 - Radar: 다중 시리즈 레이더 차트(범례/애니메이션/포인트 클릭)
+- Pie: 비율 기반 파이 차트(범례/레이블/클릭)
+- Donut: 중앙 텍스트/레이블/클릭을 지원하는 도넛 차트
 
 ## 개발 환경
 
@@ -205,6 +207,58 @@ setContentView(radarView)
 
 주의:
 - 각 `RadarSeries.values` 개수는 축 개수와 동일해야 렌더링됩니다.
+
+### 5) Pie / Donut
+
+핵심 클래스:
+- `PieChartView`, `DonutChartView`
+- `PieSlice`
+- `PieDonutStyleOptions`, `PieDonutPresentationOptions`
+
+기본 사용 예시:
+
+```kotlin
+val slices = listOf(
+    PieSlice("Direct", 43.0, Color.parseColor("#2B80FF")),
+    PieSlice("Social", 18.0, Color.parseColor("#13C3A3")),
+    PieSlice("Search", 26.0, Color.parseColor("#FF9F1C")),
+    PieSlice("Referral", 13.0, Color.parseColor("#EF476F")),
+)
+
+val pieChart = PieChartView(this).apply {
+    setPresentationOptions(
+        PieDonutPresentationOptions(
+            showLegend = true,
+            showLabels = true,
+            labelPosition = PieLabelPosition.AUTO,
+            enableSelectionExpand = true,
+            selectedSliceExpandDp = 10f,
+        ),
+    )
+    setData(slices)
+}
+
+val donutChart = DonutChartView(this).apply {
+    setDonutInnerRadiusRatio(0.58f)
+    setPresentationOptions(
+        PieDonutPresentationOptions(
+            showLegend = true,
+            enableSelectionExpand = true,
+            centerText = "Total",
+            centerSubText = "100",
+        ),
+    )
+    setData(slices)
+    setOnSliceClickListener { index, slice, payload ->
+        // slice.label, slice.value, payload 사용
+    }
+}
+```
+
+주의:
+- `PieSlice.value`는 `> 0`인 유한값만 렌더링됩니다.
+- 유효 데이터 합계가 0이면 `emptyText`가 표시됩니다.
+- 선택 확대 효과는 `enableSelectionExpand`, `selectedSliceExpandDp`, `selectedSliceExpandAnimMs`로 제어합니다.
 
 ## 테스트
 
