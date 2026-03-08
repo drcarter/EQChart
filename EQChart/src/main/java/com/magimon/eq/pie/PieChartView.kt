@@ -4,10 +4,10 @@ import android.content.Context
 import android.util.AttributeSet
 
 /**
- * 일반 파이 차트 View.
+ * Standard pie chart view.
  *
- * [BasePieDonutChartView] 공용 API(`setData`, `setStyleOptions`, `setPresentationOptions`,
- * `setOnSliceClickListener`)를 그대로 사용하며, 내부 홀 반경을 0으로 고정한다.
+ * Uses the shared [BasePieDonutChartView] API (`setData`, `setStyleOptions`,
+ * `setPresentationOptions`, `setOnSliceClickListener`) and fixes inner-hole ratio to `0`.
  */
 class PieChartView @JvmOverloads constructor(
     context: Context,

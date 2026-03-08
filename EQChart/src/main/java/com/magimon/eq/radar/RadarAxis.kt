@@ -1,9 +1,9 @@
 package com.magimon.eq.radar
 
 /**
- * 레이더 차트의 단일 축 정의.
+ * Definition of a single radar chart axis.
  *
- * @property label 축 끝에 렌더링할 텍스트 라벨
+ * @property label Text label rendered at the axis end
  */
 data class RadarAxis(
     val label: String,

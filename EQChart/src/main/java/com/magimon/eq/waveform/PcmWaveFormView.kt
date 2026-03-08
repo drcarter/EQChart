@@ -7,13 +7,13 @@ import android.util.AttributeSet
 import android.view.View
 
 /**
- * PCM(16-bit mono) 데이터를 실시간 파형으로 렌더링하는 View.
+ * View that renders PCM (16-bit mono) data as a real-time waveform.
  *
- * - 입력: [appendPcm16Mono], [setPcm16Mono]
- * - 렌더링: 픽셀당 min/max 다운샘플링
- * - 메모리: 최근 Nms 윈도우만 링버퍼로 유지
+ * - Input: [appendPcm16Mono], [setPcm16Mono]
+ * - Rendering: min/max downsampling per pixel
+ * - Memory: keeps only a recent N-ms window in a ring buffer
  *
- * v1 기준으로 모노 16-bit PCM(`ShortArray`)만 지원한다.
+ * v1 supports only mono 16-bit PCM (`ShortArray`).
  */
 class PcmWaveFormView @JvmOverloads constructor(
     context: Context,
@@ -43,9 +43,9 @@ class PcmWaveFormView @JvmOverloads constructor(
     }
 
     /**
-     * 렌더링 스타일을 설정한다.
+     * Sets rendering style options.
      *
-     * @param options 배경/선색/선두께/진폭 스케일 등 스타일 옵션
+     * @param options Style options such as background/stroke color, stroke width, and amplitude scale
      */
     fun setStyleOptions(options: PcmWaveFormStyleOptions) {
         styleOptions = options
@@ -54,11 +54,11 @@ class PcmWaveFormView @JvmOverloads constructor(
     }
 
     /**
-     * 표시 윈도우 길이(ms)를 설정한다.
+     * Sets visible window duration in milliseconds.
      *
-     * 너무 작은 값은 보정되며, 변경 시 내부 링버퍼 용량도 함께 재계산된다.
+     * Very small values are clamped, and ring-buffer capacity is recalculated.
      *
-     * @param durationMs 표시할 최근 구간 길이(ms)
+     * @param durationMs Duration of the recent window to display (ms)
      */
     fun setWindowDurationMs(durationMs: Int) {
         val target = durationMs.coerceIn(200, 60_000)
@@ -72,11 +72,11 @@ class PcmWaveFormView @JvmOverloads constructor(
     }
 
     /**
-     * 입력 PCM의 샘플레이트(Hz)를 설정한다.
+     * Sets input PCM sample rate (Hz).
      *
-     * 샘플레이트가 바뀌면 동일한 윈도우 길이를 유지하도록 버퍼 용량을 재계산한다.
+     * Recalculates buffer capacity to preserve the same window duration.
      *
-     * @param hz 입력 PCM 샘플레이트(Hz)
+     * @param hz Input PCM sample rate (Hz)
      */
     fun setSampleRateHz(hz: Int) {
         val target = hz.coerceIn(8_000, 192_000)
@@ -90,9 +90,9 @@ class PcmWaveFormView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 버퍼를 비운다.
+     * Clears the current buffer.
      *
-     * 실시간 스트림 재시작 시 이전 파형 흔적을 제거할 때 사용한다.
+     * Useful for removing previous waveform traces when restarting a live stream.
      */
     fun clear() {
         ringBuffer.clear()
@@ -100,9 +100,9 @@ class PcmWaveFormView @JvmOverloads constructor(
     }
 
     /**
-     * 전체 PCM 버퍼를 교체한다.
+     * Replaces the entire PCM buffer.
      *
-     * @param samples 16-bit mono PCM 샘플 배열
+     * @param samples 16-bit mono PCM sample array
      */
     fun setPcm16Mono(samples: ShortArray) {
         ringBuffer.setAll(samples)
@@ -110,9 +110,9 @@ class PcmWaveFormView @JvmOverloads constructor(
     }
 
     /**
-     * PCM 샘플 청크를 뒤에 추가한다.
+     * Appends a PCM sample chunk.
      *
-     * @param samples 16-bit mono PCM 청크
+     * @param samples 16-bit mono PCM chunk
      */
     fun appendPcm16Mono(samples: ShortArray) {
         if (samples.isEmpty()) return
@@ -168,7 +168,7 @@ class PcmWaveFormView @JvmOverloads constructor(
     }
 
     /**
-     * 스타일 옵션을 Paint 객체에 반영한다.
+     * Applies style options to paint objects.
      */
     private fun applyStyle() {
         backgroundPaint.color = styleOptions.backgroundColor
@@ -178,7 +178,7 @@ class PcmWaveFormView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 샘플레이트/윈도우 길이 조합에 필요한 링버퍼 용량을 계산한다.
+     * Computes required ring-buffer capacity from sample rate and window duration.
      */
     private fun computeCapacity(sampleRateHz: Int, windowDurationMs: Int): Int {
         val value = (sampleRateHz.toLong() * windowDurationMs.toLong()) / 1_000L

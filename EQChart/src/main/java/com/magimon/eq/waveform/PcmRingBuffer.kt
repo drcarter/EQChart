@@ -1,9 +1,9 @@
 package com.magimon.eq.waveform
 
 /**
- * PCM 샘플을 최근 구간만 유지하기 위한 고정 길이 링버퍼.
+ * Fixed-length ring buffer that keeps only the most recent PCM samples.
  *
- * 내부 저장소 용량을 초과하면 가장 오래된 샘플부터 자동으로 덮어쓴다.
+ * When capacity is exceeded, the oldest samples are overwritten first.
  */
 internal class PcmRingBuffer(capacity: Int) {
     private var data = ShortArray(capacity.coerceAtLeast(1))
@@ -11,7 +11,7 @@ internal class PcmRingBuffer(capacity: Int) {
     private var size = 0
 
     /**
-     * 버퍼를 비운다.
+     * Clears the buffer.
      */
     @Synchronized
     fun clear() {
@@ -20,9 +20,9 @@ internal class PcmRingBuffer(capacity: Int) {
     }
 
     /**
-     * 버퍼 용량을 변경한다.
+     * Changes buffer capacity.
      *
-     * 용량 축소 시 최신 샘플을 우선 보존한다.
+     * On shrink, the newest samples are preserved first.
      */
     @Synchronized
     fun setCapacity(newCapacity: Int) {
@@ -39,9 +39,9 @@ internal class PcmRingBuffer(capacity: Int) {
     }
 
     /**
-     * 버퍼 내용을 전달된 샘플로 완전히 교체한다.
+     * Replaces buffer contents with the provided sample array.
      *
-     * 입력이 용량보다 크면 뒤쪽(최신 구간)만 유지한다.
+     * If input is larger than capacity, only the tail (most recent part) is kept.
      */
     @Synchronized
     fun setAll(samples: ShortArray) {
@@ -51,11 +51,11 @@ internal class PcmRingBuffer(capacity: Int) {
     }
 
     /**
-     * 샘플 구간을 버퍼 뒤에 추가한다.
+     * Appends a sample range to the end of the buffer.
      *
-     * @param samples 입력 PCM 샘플 배열
-     * @param fromIndex 포함 시작 인덱스
-     * @param toIndex 제외 끝 인덱스
+     * @param samples Input PCM sample array
+     * @param fromIndex Inclusive start index
+     * @param toIndex Exclusive end index
      */
     @Synchronized
     fun append(samples: ShortArray, fromIndex: Int = 0, toIndex: Int = samples.size) {
@@ -71,25 +71,25 @@ internal class PcmRingBuffer(capacity: Int) {
     }
 
     /**
-     * 현재 저장된 샘플을 시간 순서대로 복사해 반환한다.
+     * Returns a time-ordered copy of currently stored samples.
      */
     @Synchronized
     fun snapshot(): ShortArray = snapshotUnsafe()
 
     /**
-     * 내부 버퍼 최대 용량(샘플 수)을 반환한다.
+     * Returns maximum buffer capacity in sample count.
      */
     @Synchronized
     fun capacity(): Int = data.size
 
     /**
-     * 현재 저장된 샘플 수를 반환한다.
+     * Returns current number of stored samples.
      */
     @Synchronized
     fun size(): Int = size
 
     /**
-     * 동기화가 걸린 상태에서 스냅샷을 생성한다.
+     * Builds a snapshot while synchronization is held.
      */
     private fun snapshotUnsafe(): ShortArray {
         if (size == 0) return ShortArray(0)

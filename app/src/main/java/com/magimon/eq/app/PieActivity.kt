@@ -11,7 +11,7 @@ import com.magimon.eq.pie.PieLabelPosition
 import com.magimon.eq.pie.PieSlice
 
 /**
- * 파이 차트 데모 화면.
+ * Pie chart demo screen.
  */
 class PieActivity : AppCompatActivity() {
 

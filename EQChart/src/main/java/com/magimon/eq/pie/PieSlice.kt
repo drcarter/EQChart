@@ -1,12 +1,12 @@
 package com.magimon.eq.pie
 
 /**
- * 파이/도넛 차트의 단일 조각 데이터.
+ * Data model for a single pie/donut slice.
  *
- * @property label 조각 레이블(범례/레이블 표시용)
- * @property value 조각 비율 계산 값(`>0` 이고 유한한 값만 렌더링)
- * @property color 조각 채우기 색상
- * @property payload 클릭 콜백으로 전달할 원본 데이터(옵션)
+ * @property label Slice label used for legend/label rendering
+ * @property value Value used for ratio calculation (`>0` and finite values are renderable)
+ * @property color Slice fill color
+ * @property payload Optional source data delivered to click callbacks
  */
 data class PieSlice(
     val label: String,

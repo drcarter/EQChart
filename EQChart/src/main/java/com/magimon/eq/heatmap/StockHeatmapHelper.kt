@@ -6,14 +6,14 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * 주식 히트맵에서 사용하는 샘플 데이터/색상/포맷 유틸리티.
+ * Sample data, color, and formatting utilities for the stock heatmap.
  */
 object StockHeatmapHelper {
 
     /**
-     * 섹션 단위 샘플 데이터를 생성한다.
+     * Creates sample data grouped by section.
      *
-     * 각 섹션은 고유 색상을 가지며 5개 종목으로 구성된다.
+     * Each section has its own color and contains five stock items.
      */
     fun createSampleSections(): List<StockHeatmapSection> {
         return listOf(
@@ -76,16 +76,16 @@ object StockHeatmapHelper {
     }
 
     /**
-     * 하위 호환용 샘플 API.
+     * Backward-compatible sample API.
      *
-     * [createSampleSections] 결과를 평탄화해 단일 목록으로 반환한다.
+     * Flattens [createSampleSections] into a single list.
      */
     fun createSampleData(): List<StockHeatmapItem> {
         return createSampleSections().flatMap { it.stocks }
     }
 
     /**
-     * `setData()`만 사용될 때 업종명 기반으로 섹션 색상을 매핑한다.
+     * Maps a sector name to a section color when only `setData()` is used.
      */
     fun mapSectorToColor(sector: String): Int {
         val palette = listOf(
@@ -103,11 +103,11 @@ object StockHeatmapHelper {
     }
 
     /**
-     * 등락률(%)을 히트맵 블록 색상으로 매핑한다.
+     * Maps percentage change to a heatmap block color.
      *
-     * - 강한 하락: 진한 빨강
-     * - 중립: 짙은 회색
-     * - 강한 상승: 진한 초록
+     * - Strong decline: dark red
+     * - Neutral: dark gray
+     * - Strong rise: dark green
      */
     fun mapChangeToColor(changePct: Double): Int {
         val maxAbs = 6.0
@@ -126,7 +126,7 @@ object StockHeatmapHelper {
     }
 
     /**
-     * 두 색상을 선형 보간해 중간 색상을 계산한다.
+     * Computes an intermediate color by linearly interpolating two colors.
      */
     private fun interpolateColor(from: Int, to: Int, t: Float): Int {
         val clampedT = t.coerceIn(0f, 1f)
@@ -149,14 +149,14 @@ object StockHeatmapHelper {
     }
 
     /**
-     * 등락률을 `+1.23%` 형식 문자열로 변환한다.
+     * Formats percentage change as `+1.23%`.
      */
     fun formatChange(changePct: Double): String {
         return String.format("%+.2f%%", changePct)
     }
 
     /**
-     * 시가총액 숫자를 T/B/M 단위 축약 문자열로 변환한다.
+     * Formats market cap as an abbreviated T/B/M string.
      */
     fun formatMarketCap(marketCap: Double): String {
         val trillion = 1_000_000_000_000.0

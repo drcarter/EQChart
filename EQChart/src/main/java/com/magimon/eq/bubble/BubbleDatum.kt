@@ -1,15 +1,15 @@
 package com.magimon.eq.bubble
 
 /**
- * [BubbleChartView]에서 사용하는 버블 데이터 모델.
+ * Data model for one bubble used by [BubbleChartView].
  *
- * @property x [BubbleLayoutMode.SCATTER] 모드에서 사용하는 X 값
- * @property y [BubbleLayoutMode.SCATTER] 모드에서 사용하는 Y 값
- * @property size 버블 반지름 매핑에 사용하는 값
- * @property color 버블 채우기 색상
- * @property label 버블 내부 라벨(옵션). `\n`을 사용하면 여러 줄로 표시 가능
- * @property legendGroup 자동 범례 생성 시 사용할 그룹 라벨(옵션)
- * @property payload 클릭 콜백으로 전달할 임의 객체(옵션)
+ * @property x X value used in [BubbleLayoutMode.SCATTER]
+ * @property y Y value used in [BubbleLayoutMode.SCATTER]
+ * @property size Value used to map bubble radius
+ * @property color Bubble fill color
+ * @property label Optional label rendered inside the bubble. Use `\n` for multiline text.
+ * @property legendGroup Optional group label used for auto legend generation
+ * @property payload Optional custom object delivered in click callbacks
  */
 data class BubbleDatum(
     val x: Double,

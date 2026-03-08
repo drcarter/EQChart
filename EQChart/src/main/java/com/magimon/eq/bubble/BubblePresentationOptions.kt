@@ -3,10 +3,10 @@ package com.magimon.eq.bubble
 import android.graphics.Color
 
 /**
- * 축/스케일과 분리된 표현 옵션.
+ * Presentation options separated from axis/scale behavior.
  *
- * [BubbleAxisOptions]가 축/그리드에 집중하도록 유지하고,
- * 이 타입은 제목/범례 렌더링만 담당한다.
+ * [BubbleAxisOptions] stays focused on axes/grid, while this type controls
+ * title and legend rendering.
  */
 data class BubblePresentationOptions(
     val title: String? = null,

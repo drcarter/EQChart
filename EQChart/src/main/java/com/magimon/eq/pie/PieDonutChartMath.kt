@@ -6,7 +6,7 @@ import kotlin.math.sin
 import kotlin.math.cos
 
 /**
- * 파이/도넛 좌표/각도 계산 유틸리티.
+ * Pie/donut coordinate and angle math helpers.
  */
 internal object PieDonutChartMath {
 

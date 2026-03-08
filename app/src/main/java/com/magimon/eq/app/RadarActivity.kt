@@ -12,7 +12,7 @@ import com.magimon.eq.radar.RadarSeries
 import kotlin.math.roundToInt
 
 /**
- * GIF 스타일 레이더 차트 데모 화면.
+ * GIF-style radar chart demo screen.
  */
 class RadarActivity : AppCompatActivity() {
 

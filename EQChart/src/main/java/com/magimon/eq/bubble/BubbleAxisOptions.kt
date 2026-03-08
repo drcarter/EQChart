@@ -1,7 +1,7 @@
 package com.magimon.eq.bubble
 
 /**
- * 축/그리드 렌더링 옵션.
+ * Axis and grid rendering options.
  */
 data class BubbleAxisOptions(
     val showAxes: Boolean = true,

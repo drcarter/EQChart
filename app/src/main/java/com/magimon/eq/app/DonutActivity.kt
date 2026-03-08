@@ -12,7 +12,7 @@ import com.magimon.eq.pie.PieSlice
 import kotlin.math.roundToInt
 
 /**
- * 도넛 차트 데모 화면.
+ * Donut chart demo screen.
  */
 class DonutActivity : AppCompatActivity() {
 

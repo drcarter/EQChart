@@ -3,15 +3,15 @@ package com.magimon.eq.waveform
 import android.graphics.Color
 
 /**
- * [PcmWaveFormView]의 렌더링 스타일 옵션.
+ * Rendering style options for [PcmWaveFormView].
  *
- * @property backgroundColor 차트 배경색
- * @property waveColor 파형 선 색상
- * @property centerLineColor 중앙 기준선 색상
- * @property strokeWidthDp 파형 선 두께(dp)
- * @property contentPaddingDp 파형 영역 안쪽 여백(dp)
- * @property showCenterLine 중앙 기준선 표시 여부
- * @property amplitudeScale 진폭 배율(1.0 기본, 클수록 파형 높이 증가)
+ * @property backgroundColor Chart background color
+ * @property waveColor Waveform stroke color
+ * @property centerLineColor Center guideline color
+ * @property strokeWidthDp Waveform stroke width (dp)
+ * @property contentPaddingDp Inner padding for the waveform area (dp)
+ * @property showCenterLine Whether to render the center guideline
+ * @property amplitudeScale Amplitude scale factor (default 1.0, larger values increase visual height)
  */
 data class PcmWaveFormStyleOptions(
     val backgroundColor: Int = Color.parseColor("#101418"),

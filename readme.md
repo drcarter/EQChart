@@ -1,25 +1,25 @@
 # EQChart
 
-Android 커스텀 차트 라이브러리입니다.  
-현재 `Heatmap`, `Bubble`, `PCM Waveform`, `Radar`, `Pie`, `Donut` 차트를 제공합니다.
+EQChart is an Android custom chart library.
+It currently provides `Heatmap`, `Bubble`, `PCM Waveform`, `Radar`, `Pie`, and `Donut` charts.
 
-## 프로젝트 구성
+## Project Structure
 
 - `:EQChart`
-  - 차트 컴포넌트 라이브러리 모듈
+  - Chart component library module
 - `:app`
-  - 라이브러리 동작 예제를 확인할 수 있는 샘플 앱
+  - Sample app for trying each chart
 
-## 지원 차트
+## Supported Charts
 
-- Heatmap: 섹션 기반 트리맵 스타일 히트맵
-- Bubble: Scatter / Packed 버블 차트
-- PCM Waveform: 실시간 16-bit mono PCM 파형 렌더링
-- Radar: 다중 시리즈 레이더 차트(범례/애니메이션/포인트 클릭)
-- Pie: 비율 기반 파이 차트(범례/레이블/클릭)
-- Donut: 중앙 텍스트/레이블/클릭을 지원하는 도넛 차트
+- Heatmap: Section-based treemap-style stock heatmap
+- Bubble: Scatter / Packed bubble chart
+- PCM Waveform: Real-time 16-bit mono PCM waveform rendering
+- Radar: Multi-series radar chart (legend/animation/point click)
+- Pie: Ratio-based pie chart (legend/labels/click)
+- Donut: Donut chart with center text/labels/click
 
-## 개발 환경
+## Development Environment
 
 - Min SDK: 24
 - Compile / Target SDK: 36
@@ -27,7 +27,7 @@ Android 커스텀 차트 라이브러리입니다.
 - AGP: 8.11.1
 - Java / JVM Target: 11
 
-## 설치/연동
+## Installation
 
 `app/build.gradle.kts`:
 
@@ -37,24 +37,24 @@ dependencies {
 }
 ```
 
-## 샘플 앱 실행
+## Run Sample App
 
 ```bash
 ./gradlew :app:installDebug
 ```
 
-실행 후 `MainActivity`에서 각 차트 데모 화면으로 진입할 수 있습니다.
+After launch, open each demo screen from `MainActivity`.
 
-## 차트별 사용법
+## Usage by Chart
 
 ### 1) Heatmap
 
-핵심 클래스:
+Key classes:
 - `StockHeatmapView`
 - `StockHeatmapSection`
 - `StockHeatmapItem`
 
-기본 사용 예시:
+Basic example:
 
 ```kotlin
 val heatmapView = StockHeatmapView(this).apply {
@@ -72,30 +72,30 @@ val heatmapView = StockHeatmapView(this).apply {
     )
 
     setOnItemClickListener { item ->
-        // item.symbol, item.changePct, item.marketCap 사용
+        // use item.symbol, item.changePct, item.marketCap
     }
 }
 
 setContentView(ScrollView(this).apply { addView(heatmapView) })
 ```
 
-참고:
-- `setData(List<StockHeatmapItem>)`도 지원(하위호환)
-- `sizeRatio`가 있으면 면적 계산에 우선 사용
+Notes:
+- `setData(List<StockHeatmapItem>)` is also supported (backward compatible)
+- If `sizeRatio` exists, it is used first for area weighting
 
 ### 2) Bubble
 
-핵심 클래스:
+Key classes:
 - `BubbleChartView`
 - `BubbleDatum`
 - `BubbleLayoutMode`
 - `BubblePresentationOptions`, `BubbleAxisOptions`
 
-기본 사용 예시:
+Basic example:
 
 ```kotlin
 val bubbleView = BubbleChartView(this).apply {
-    setLayoutMode(BubbleLayoutMode.PACKED) // 또는 SCATTER
+    setLayoutMode(BubbleLayoutMode.PACKED) // or SCATTER
     setChartBackgroundColor(Color.parseColor("#E6E6E6"))
 
     setPresentationOptions(
@@ -122,7 +122,7 @@ val bubbleView = BubbleChartView(this).apply {
     )
 
     setOnBubbleClickListener { datum ->
-        // datum.label, datum.payload 사용
+        // use datum.label, datum.payload
     }
 }
 
@@ -131,11 +131,11 @@ setContentView(bubbleView)
 
 ### 3) PCM Waveform
 
-핵심 클래스:
+Key classes:
 - `PcmWaveFormView`
 - `PcmWaveFormStyleOptions`
 
-기본 사용 예시:
+Basic example:
 
 ```kotlin
 val waveformView = PcmWaveFormView(this).apply {
@@ -151,23 +151,23 @@ val waveformView = PcmWaveFormView(this).apply {
     )
 }
 
-// 실시간 PCM 청크 추가 (16-bit mono)
+// append real-time PCM chunk (16-bit mono)
 waveformView.appendPcm16Mono(shortArrayOf(120, -300, 520, -120))
 ```
 
-참고:
-- 입력 데이터는 `ShortArray`(16-bit mono PCM)
-- 내부적으로 최근 N ms 윈도우만 유지
+Notes:
+- Input data type is `ShortArray` (16-bit mono PCM)
+- Internally keeps only a recent N-ms window
 
 ### 4) Radar
 
-핵심 클래스:
+Key classes:
 - `RadarChartView`
 - `RadarAxis`
 - `RadarSeries`
 - `RadarChartStyleOptions`, `RadarChartPresentationOptions`
 
-기본 사용 예시:
+Basic example:
 
 ```kotlin
 val radarView = RadarChartView(this).apply {
@@ -198,24 +198,24 @@ val radarView = RadarChartView(this).apply {
     )
 
     setOnPointClickListener { seriesIndex, axisIndex, value, payload ->
-        // 포인트 클릭 정보 처리
+        // handle selected point info
     }
 }
 
 setContentView(radarView)
 ```
 
-주의:
-- 각 `RadarSeries.values` 개수는 축 개수와 동일해야 렌더링됩니다.
+Note:
+- Each `RadarSeries.values` size must match axis count to render.
 
 ### 5) Pie / Donut
 
-핵심 클래스:
+Key classes:
 - `PieChartView`, `DonutChartView`
 - `PieSlice`
 - `PieDonutStyleOptions`, `PieDonutPresentationOptions`
 
-기본 사용 예시:
+Basic example:
 
 ```kotlin
 val slices = listOf(
@@ -250,20 +250,20 @@ val donutChart = DonutChartView(this).apply {
     )
     setData(slices)
     setOnSliceClickListener { index, slice, payload ->
-        // slice.label, slice.value, payload 사용
+        // use slice.label, slice.value, payload
     }
 }
 ```
 
-주의:
-- `PieSlice.value`는 `> 0`인 유한값만 렌더링됩니다.
-- 유효 데이터 합계가 0이면 `emptyText`가 표시됩니다.
-- 선택 확대 효과는 `enableSelectionExpand`, `selectedSliceExpandDp`, `selectedSliceExpandAnimMs`로 제어합니다.
+Notes:
+- `PieSlice.value` must be finite and `> 0` to render
+- If valid total is 0, `emptyText` is shown
+- Selection explode effect is controlled by `enableSelectionExpand`, `selectedSliceExpandDp`, and `selectedSliceExpandAnimMs`
 
-## 테스트
+## Test
 
 ```bash
 ./gradlew test
 ```
 
-단위 테스트는 차트 수학/유틸 로직 중심으로 포함되어 있습니다.
+Unit tests currently focus on chart math/utility logic.

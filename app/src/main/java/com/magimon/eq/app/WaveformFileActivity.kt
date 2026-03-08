@@ -18,17 +18,17 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
 
 /**
- * 샘플 오디오 파일 재생과 파형 시각화를 함께 보여주는 데모 Activity.
+ * Demo activity that plays a sample audio file and visualizes its waveform.
  *
- * 재생은 [MediaPlayer], PCM 추출은 [MediaExtractor]/[MediaCodec]를 사용한다.
+ * Playback uses [MediaPlayer], while PCM extraction uses [MediaExtractor]/[MediaCodec].
  */
 class WaveformFileActivity : AppCompatActivity() {
 
     /**
-     * 디코딩된 PCM 결과 모델.
+     * Decoded PCM result model.
      *
-     * @property sampleRateHz PCM 샘플레이트(Hz)
-     * @property samples 모노 16-bit PCM 샘플
+     * @property sampleRateHz PCM sample rate (Hz)
+     * @property samples Mono 16-bit PCM samples
      */
     private data class DecodedPcm(
         val sampleRateHz: Int,
@@ -47,7 +47,7 @@ class WaveformFileActivity : AppCompatActivity() {
     private var lastPushedSampleIndex = 0
 
     /**
-     * 현재 재생 위치를 기준으로 PCM 청크를 [waveformView]에 주입하는 루프.
+     * Loop that feeds PCM chunks into [waveformView] based on current playback position.
      */
     private val feedRunnable = object : Runnable {
         override fun run() {
@@ -148,18 +148,18 @@ class WaveformFileActivity : AppCompatActivity() {
     }
 
     /**
-     * 샘플 오디오 재생을 시작하고 파형 주입 루프를 시작한다.
+     * Starts sample audio playback and starts the waveform feed loop.
      */
     private fun playSample() {
         val decoded = decodedPcm
         if (decoded == null) {
-            Toast.makeText(this, "오디오 파일 준비 중입니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Preparing audio file.", Toast.LENGTH_SHORT).show()
             return
         }
 
         val player = mediaPlayer ?: createPlayer()
         if (player == null) {
-            Toast.makeText(this, "오디오 플레이어 생성에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Failed to create audio player.", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -176,7 +176,7 @@ class WaveformFileActivity : AppCompatActivity() {
     }
 
     /**
-     * 재생을 일시정지하고 파형 주입 루프를 멈춘다.
+     * Pauses playback and stops the waveform feed loop.
      */
     private fun pauseSample() {
         val player = mediaPlayer ?: return
@@ -187,9 +187,9 @@ class WaveformFileActivity : AppCompatActivity() {
     }
 
     /**
-     * 재생을 종료하고 플레이어를 해제한다.
+     * Stops playback and releases the player.
      *
-     * @param resetWave `true`면 파형 버퍼도 함께 비운다.
+     * @param resetWave If `true`, clears the waveform buffer as well
      */
     private fun stopSample(resetWave: Boolean) {
         stopFeedLoop()
@@ -206,7 +206,7 @@ class WaveformFileActivity : AppCompatActivity() {
     }
 
     /**
-     * 샘플 오디오용 [MediaPlayer]를 생성한다.
+     * Creates a [MediaPlayer] for the sample audio.
      */
     private fun createPlayer(): MediaPlayer? {
         val player = MediaPlayer.create(this, R.raw.sample_tone) ?: return null
@@ -218,30 +218,30 @@ class WaveformFileActivity : AppCompatActivity() {
     }
 
     /**
-     * 백그라운드에서 샘플 오디오를 PCM으로 디코딩한다.
+     * Decodes sample audio to PCM on a background thread.
      */
     private fun decodeSampleAudioAsync(@RawRes resId: Int) {
         decodeExecutor.execute {
             val decoded = decodePcm16MonoFromRaw(resId)
             runOnUiThread {
                 if (decoded == null) {
-                    Toast.makeText(this, "PCM 디코드에 실패했습니다.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "PCM decode failed.", Toast.LENGTH_LONG).show()
                     return@runOnUiThread
                 }
 
                 decodedPcm = decoded
                 waveformView.setSampleRateHz(decoded.sampleRateHz)
                 playButton.isEnabled = true
-                Toast.makeText(this, "샘플 오디오 준비 완료", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Sample audio is ready.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     /**
-     * `res/raw` 오디오를 디코딩해 16-bit mono PCM으로 변환한다.
+     * Decodes `res/raw` audio and converts it to 16-bit mono PCM.
      *
-     * @param resId `res/raw` 리소스 ID
-     * @return 디코드 성공 시 PCM 결과, 실패 시 `null`
+     * @param resId `res/raw` resource ID
+     * @return PCM result on success, or `null` on failure
      */
     private fun decodePcm16MonoFromRaw(@RawRes resId: Int): DecodedPcm? {
         val afd = resources.openRawResourceFd(resId) ?: return null
@@ -362,9 +362,9 @@ class WaveformFileActivity : AppCompatActivity() {
     }
 
     /**
-     * PCM 16-bit 바이트 배열을 모노 샘플로 변환한다.
+     * Converts PCM 16-bit byte array into mono samples.
      *
-     * 채널 수가 2 이상이면 프레임 단위 평균값으로 다운믹스한다.
+     * When channel count is 2 or more, downmixes by averaging per frame.
      */
     private fun convertPcm16ToMono(bytes: ByteArray, channelCount: Int): ShortArray {
         if (bytes.isEmpty()) return ShortArray(0)
@@ -394,7 +394,7 @@ class WaveformFileActivity : AppCompatActivity() {
     }
 
     /**
-     * 재생 위치 기반 파형 주입 루프를 시작한다.
+     * Starts the playback-position-based waveform feed loop.
      */
     private fun startFeedLoop() {
         stopFeedLoop()
@@ -402,7 +402,7 @@ class WaveformFileActivity : AppCompatActivity() {
     }
 
     /**
-     * 파형 주입 루프를 중단한다.
+     * Stops the waveform feed loop.
      */
     private fun stopFeedLoop() {
         mainHandler.removeCallbacks(feedRunnable)

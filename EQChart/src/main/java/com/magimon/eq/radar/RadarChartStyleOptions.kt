@@ -3,32 +3,32 @@ package com.magimon.eq.radar
 import android.graphics.Color
 
 /**
- * 레이더 차트 렌더링 스타일 옵션.
+ * Radar chart rendering style options.
  *
- * @property backgroundColor 차트 배경색
- * @property gridColor 동심 다각형 그리드 선 색상
- * @property axisColor 중심-축 라인 색상
- * @property axisLabelColor 축 라벨 텍스트 색상
- * @property legendTextColor 범례 텍스트 색상
- * @property polygonStrokeWidthDp 시리즈 외곽선 두께(dp)
- * @property gridStrokeWidthDp 그리드 선 두께(dp)
- * @property axisStrokeWidthDp 축 선 두께(dp)
- * @property axisDashLengthDp 축 점선의 dash 길이(dp)
- * @property axisDashGapDp 축 점선의 gap 길이(dp)
- * @property fillAlpha 시리즈 면 채우기 alpha(0..255)
- * @property pointRadiusDp 포인트 원 반지름(dp)
- * @property pointCoreRadiusDp 포인트 내부 코어 반지름(dp)
- * @property pointGlowRadiusDp 포인트 glow 반지름(dp)
- * @property pointGlowAlpha 포인트 glow alpha(0..255)
- * @property selectedPointRadiusDp 선택 포인트 하이라이트 반지름(dp)
- * @property selectedStrokeWidthDp 선택 포인트 하이라이트 선 두께(dp)
- * @property contentPaddingDp 차트 영역 외곽 패딩(dp)
- * @property axisLabelOffsetDp 축 끝점에서 라벨까지 거리(dp)
- * @property legendMarkerSizeDp 범례 색상 마커 크기(dp)
- * @property legendItemGapDp 범례 항목 간 가로 간격(dp)
- * @property legendRowGapDp 범례 줄 간 세로 간격(dp)
- * @property legendBottomGapDp 범례와 차트 사이 하단 간격(dp)
- * @property touchHitRadiusDp 포인트 클릭 판정 반경(dp)
+ * @property backgroundColor Chart background color
+ * @property gridColor Concentric polygon grid line color
+ * @property axisColor Center-to-axis line color
+ * @property axisLabelColor Axis label text color
+ * @property legendTextColor Legend text color
+ * @property polygonStrokeWidthDp Series polygon stroke width (dp)
+ * @property gridStrokeWidthDp Grid line stroke width (dp)
+ * @property axisStrokeWidthDp Axis line stroke width (dp)
+ * @property axisDashLengthDp Dash length for axis dashed line (dp)
+ * @property axisDashGapDp Dash gap for axis dashed line (dp)
+ * @property fillAlpha Series fill alpha (0..255)
+ * @property pointRadiusDp Point marker radius (dp)
+ * @property pointCoreRadiusDp Inner core radius of point marker (dp)
+ * @property pointGlowRadiusDp Glow radius around point marker (dp)
+ * @property pointGlowAlpha Point glow alpha (0..255)
+ * @property selectedPointRadiusDp Highlight ring radius for selected point (dp)
+ * @property selectedStrokeWidthDp Highlight ring stroke width for selected point (dp)
+ * @property contentPaddingDp Outer padding around chart content (dp)
+ * @property axisLabelOffsetDp Distance from axis end to label anchor (dp)
+ * @property legendMarkerSizeDp Legend color marker size (dp)
+ * @property legendItemGapDp Horizontal gap between legend items (dp)
+ * @property legendRowGapDp Vertical gap between legend rows (dp)
+ * @property legendBottomGapDp Bottom gap between legend and chart body (dp)
+ * @property touchHitRadiusDp Touch hit radius for point selection (dp)
  */
 data class RadarChartStyleOptions(
     val backgroundColor: Int = Color.WHITE,

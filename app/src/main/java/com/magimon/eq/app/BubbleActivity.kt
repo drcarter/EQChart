@@ -15,7 +15,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 /**
- * BubbleChartView의 packed 버블 + 제목/범례 옵션 사용 예시.
+ * Demo screen showing packed bubbles with title/legend options in [BubbleChartView].
  */
 class BubbleActivity : AppCompatActivity() {
 

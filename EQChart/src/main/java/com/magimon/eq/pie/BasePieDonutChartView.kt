@@ -19,10 +19,10 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /**
- * 파이/도넛 차트 공용 렌더링 뷰.
+ * Shared rendering view for pie and donut charts.
  *
- * 공개 API는 데이터/스타일/표시 옵션 설정과 조각 클릭 콜백을 제공한다.
- * 실제 모양(파이/도넛)은 내부 반경 비율로 결정되며, 하위 클래스에서 지정한다.
+ * Public API covers data/style/presentation configuration and slice click callbacks.
+ * The actual shape (pie vs donut) is determined by the inner-radius ratio set by subclasses.
  */
 abstract class BasePieDonutChartView @JvmOverloads constructor(
     context: Context,
@@ -115,9 +115,9 @@ abstract class BasePieDonutChartView @JvmOverloads constructor(
     }
 
     /**
-     * 조각 데이터 목록을 설정한다.
+     * Sets the slice data list.
      *
-     * 유효 조건(`value > 0` && finite)을 만족하는 항목만 렌더링 대상이 된다.
+     * Only values that satisfy (`value > 0` and finite) are renderable.
      */
     fun setData(items: List<PieSlice>) {
         rawSlices = items
@@ -136,14 +136,14 @@ abstract class BasePieDonutChartView @JvmOverloads constructor(
     }
 
     /**
-     * 임의 타입 목록을 [PieSlice]로 매핑해 설정한다.
+     * Sets data by mapping arbitrary source items to [PieSlice].
      */
     fun <T> setData(items: List<T>, mapper: (T) -> PieSlice) {
         setData(items.map(mapper))
     }
 
     /**
-     * 렌더링 스타일 옵션을 설정한다.
+     * Sets rendering style options.
      */
     fun setStyleOptions(options: PieDonutStyleOptions) {
         styleOptions = options
@@ -152,7 +152,7 @@ abstract class BasePieDonutChartView @JvmOverloads constructor(
     }
 
     /**
-     * 표시/애니메이션 옵션을 설정한다.
+     * Sets presentation and animation options.
      */
     fun setPresentationOptions(options: PieDonutPresentationOptions) {
         presentationOptions = options
@@ -172,16 +172,16 @@ abstract class BasePieDonutChartView @JvmOverloads constructor(
     }
 
     /**
-     * 조각 클릭 콜백을 설정한다.
+     * Sets the slice click callback.
      *
-     * 콜백 파라미터는 `(sliceIndex, slice, payload)` 순서다.
+     * Callback arguments are ordered as `(sliceIndex, slice, payload)`.
      */
     fun setOnSliceClickListener(listener: (sliceIndex: Int, slice: PieSlice, payload: Any?) -> Unit) {
         onSliceClickListener = listener
     }
 
     /**
-     * 진입 애니메이션을 수동으로 재생한다.
+     * Manually plays the enter animation.
      */
     fun playEnterAnimation() {
         if (segments.isEmpty()) return
@@ -200,9 +200,9 @@ abstract class BasePieDonutChartView @JvmOverloads constructor(
     }
 
     /**
-     * 내부 홀 반경 비율을 설정한다.
+     * Sets the inner-hole radius ratio.
      *
-     * 파이 차트는 `0`, 도넛 차트는 `0보다 큰 값`을 사용한다.
+     * Use `0` for pie charts and values greater than `0` for donut charts.
      */
     protected fun setInnerRadiusRatio(ratio: Float) {
         innerRadiusRatio = ratio.coerceIn(0f, 0.92f)
@@ -210,7 +210,7 @@ abstract class BasePieDonutChartView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 내부 홀 반경 비율을 반환한다.
+     * Returns the current inner-hole radius ratio.
      */
     protected fun currentInnerRadiusRatio(): Float = innerRadiusRatio
 

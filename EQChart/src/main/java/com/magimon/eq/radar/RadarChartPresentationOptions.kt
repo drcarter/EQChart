@@ -1,20 +1,20 @@
 package com.magimon.eq.radar
 
 /**
- * 레이더 차트 표시/애니메이션 옵션.
+ * Radar chart presentation and animation options.
  *
- * @property showLegend 범례 표시 여부
- * @property showAxisLabels 축 라벨 표시 여부
- * @property showPoints 포인트 점 표시 여부
- * @property gridLevels 동심 다각형 레벨 수
- * @property animateOnDataChange 데이터 변경 시 등장 애니메이션 자동 재생 여부
- * @property enterAnimationDurationMs 등장 애니메이션 길이(ms)
- * @property enterAnimationDelayMs 등장 애니메이션 시작 지연(ms)
- * @property startAngleDeg 첫 번째 축 시작 각도(도). 기본 -90도는 12시 방향 시작
- * @property legendTextSizeSp 범례 텍스트 크기(sp)
- * @property axisLabelTextSizeSp 축 라벨 텍스트 크기(sp)
- * @property legendLeftMarginDp 범례 좌측 여백(dp)
- * @property legendTopMarginDp 범례 상단 여백(dp)
+ * @property showLegend Whether to show the legend
+ * @property showAxisLabels Whether to render axis labels
+ * @property showPoints Whether to render point markers
+ * @property gridLevels Number of concentric polygon grid levels
+ * @property animateOnDataChange Whether to auto-play enter animation on data changes
+ * @property enterAnimationDurationMs Enter animation duration in milliseconds
+ * @property enterAnimationDelayMs Enter animation start delay in milliseconds
+ * @property startAngleDeg Start angle of the first axis in degrees. `-90` starts at 12 o'clock.
+ * @property legendTextSizeSp Legend text size in sp
+ * @property axisLabelTextSizeSp Axis label text size in sp
+ * @property legendLeftMarginDp Legend left margin in dp
+ * @property legendTopMarginDp Legend top margin in dp
  */
 data class RadarChartPresentationOptions(
     val showLegend: Boolean = true,

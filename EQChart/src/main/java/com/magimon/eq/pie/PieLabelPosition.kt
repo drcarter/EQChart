@@ -1,28 +1,28 @@
 package com.magimon.eq.pie
 
 /**
- * 조각 레이블 배치 정책.
+ * Slice label placement policy.
  */
 enum class PieLabelPosition {
     /**
-     * 레이블을 조각 내부에 배치한다.
+     * Places labels inside each slice.
      *
-     * 조각 면적이 작아도 내부 배치를 유지하므로 텍스트가 겹치거나 잘릴 수 있다.
+     * Keeps labels inside even for small slices, so text may overlap or clip.
      */
     INSIDE,
 
     /**
-     * 레이블을 조각 외부에 배치하고 리더라인으로 연결한다.
+     * Places labels outside slices and connects them with leader lines.
      *
-     * 좁은 조각에서도 가독성이 높지만, 바깥 영역 사용량이 늘어난다.
+     * Improves readability for narrow slices, but uses more outer area.
      */
     OUTSIDE,
 
     /**
-     * 조각 각도/텍스트 폭을 기준으로 내부 배치 가능 여부를 판단해 자동 선택한다.
+     * Automatically chooses inside/outside using slice angle and text width.
      *
-     * 공간이 충분하면 내부, 부족하면 외부 레이블로 전환한다.
-     * 현재 구현 기준으로는 조각 각도(약 20도 이상)와 예상 텍스트 폭을 함께 사용한다.
+     * Uses inside labels when space is sufficient; otherwise switches to outside labels.
+     * Current implementation uses approximately 20+ degree slices plus text-width fit checks.
      */
     AUTO,
 }
