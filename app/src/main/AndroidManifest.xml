@@ -32,6 +32,11 @@
             android:exported="true"
             android:label="Bubble Chart"
             android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".WaveformFileActivity"
+            android:exported="true"
+            android:label="PCM Waveform"
+            android:theme="@style/Theme.EQChart" />
     </application>
 
 </manifest>

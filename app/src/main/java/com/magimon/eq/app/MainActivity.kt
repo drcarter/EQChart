@@ -43,8 +43,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val waveformButton = Button(this).apply {
+            text = "Open PCM Waveform"
+            layoutParams = buttonParams
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, WaveformFileActivity::class.java))
+            }
+        }
+
         container.addView(heatmapButton)
         container.addView(bubbleButton)
+        container.addView(waveformButton)
 
         setContentView(container)
     }
