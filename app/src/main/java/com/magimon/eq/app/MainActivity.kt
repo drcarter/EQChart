@@ -51,9 +51,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val radarButton = Button(this).apply {
+            text = "Open Radar Chart"
+            layoutParams = buttonParams
+            setOnClickListener {
+                startActivity(Intent(this@MainActivity, RadarActivity::class.java))
+            }
+        }
+
         container.addView(heatmapButton)
         container.addView(bubbleButton)
         container.addView(waveformButton)
+        container.addView(radarButton)
 
         setContentView(container)
     }

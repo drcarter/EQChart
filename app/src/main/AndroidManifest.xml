@@ -37,6 +37,11 @@
             android:exported="true"
             android:label="PCM Waveform"
             android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".RadarActivity"
+            android:exported="true"
+            android:label="Radar Chart"
+            android:theme="@style/Theme.EQChart" />
     </application>
 
 </manifest>
