@@ -1,5 +1,6 @@
 package com.magimon.eq.app.ui.compose
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,39 +8,89 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import com.magimon.eq.app.ui.SAMPLE_CHROME_COLOR_HEX
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun ComposeSamplePage(
     title: String,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF6F7FB))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-        )
+    val activity = LocalContext.current as? Activity
+    val chromeColorInt = android.graphics.Color.parseColor(SAMPLE_CHROME_COLOR_HEX)
+    val chromeColor = Color(chromeColorInt)
 
-        Box(
+    SideEffect {
+        val window = activity?.window ?: return@SideEffect
+        window.statusBarColor = chromeColorInt
+        WindowCompat.getInsetsController(window, window.decorView)?.isAppearanceLightStatusBars = false
+    }
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.statusBarsPadding(),
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = chromeColor,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                ),
+                title = {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { activity?.finish() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                },
+            )
+        },
+    ) { contentPadding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .background(Color.White),
-            content = content,
-        )
+                .fillMaxSize()
+                .background(Color(0xFFF6F7FB))
+                .padding(contentPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.Start,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp)
+                    .background(Color.White),
+                content = content,
+            )
+        }
     }
 }

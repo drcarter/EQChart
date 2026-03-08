@@ -1,11 +1,14 @@
 package com.magimon.eq.compose
 
 import android.graphics.Paint
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -93,6 +97,27 @@ private fun PieDonutChartInternal(
     }
 
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
+    val drawProgress = remember { Animatable(1f) }
+
+    LaunchedEffect(
+        segments,
+        presentationOptions.animateOnDataChange,
+        presentationOptions.enterAnimationDurationMs,
+        presentationOptions.enterAnimationDelayMs,
+    ) {
+        if (presentationOptions.animateOnDataChange && segments.isNotEmpty()) {
+            drawProgress.snapTo(0f)
+            drawProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = presentationOptions.enterAnimationDurationMs.toInt().coerceAtLeast(0),
+                    delayMillis = presentationOptions.enterAnimationDelayMs.toInt().coerceAtLeast(0),
+                ),
+            )
+        } else {
+            drawProgress.snapTo(1f)
+        }
+    }
 
     Box(
         modifier = modifier.pointerInput(segments, donutInnerRatio) {
@@ -171,6 +196,8 @@ private fun PieDonutChartInternal(
             val inner = radius * donutInnerRatio.coerceIn(0f, 0.92f)
             val strokeWidth = if (inner > 0f) radius - inner else 0f
             val strokeStyle = if (inner > 0f) Stroke(width = strokeWidth.coerceAtLeast(1f)) else null
+            val progress = drawProgress.value.coerceIn(0f, 1f)
+            val segmentPath = Path()
 
             segments.forEach { segment ->
                 val selected = selectedIndex == segment.index
@@ -181,23 +208,39 @@ private fun PieDonutChartInternal(
                 }
                 val offset = degreeToOffset(segment.mid, offsetDistance)
                 val drawCenter = center + offset
+                val sweep = segment.sweep * progress
+                if (abs(sweep) < 0.01f) return@forEach
                 val drawRect = Rect(drawCenter - Offset(radius, radius), Size(radius * 2f, radius * 2f))
+                val innerRect = Rect(
+                    drawCenter - Offset(inner, inner),
+                    Size(inner * 2f, inner * 2f),
+                )
 
                 if (strokeStyle != null) {
-                    drawArc(
-                        color = segment.slice.color.toComposeColor(),
-                        startAngle = segment.start,
-                        sweepAngle = segment.sweep,
-                        useCenter = false,
-                        topLeft = drawRect.topLeft,
-                        size = drawRect.size,
-                        style = strokeStyle,
+                    val outerStart = drawCenter + degreeToOffset(segment.start, radius)
+                    val innerEnd = drawCenter + degreeToOffset(segment.start + sweep, inner)
+                    segmentPath.reset()
+                    segmentPath.moveTo(outerStart.x, outerStart.y)
+                    segmentPath.arcTo(
+                        rect = drawRect,
+                        startAngleDegrees = segment.start,
+                        sweepAngleDegrees = sweep,
+                        forceMoveTo = false,
                     )
+                    segmentPath.lineTo(innerEnd.x, innerEnd.y)
+                    segmentPath.arcTo(
+                        rect = innerRect,
+                        startAngleDegrees = segment.start + sweep,
+                        sweepAngleDegrees = -sweep,
+                        forceMoveTo = false,
+                    )
+                    segmentPath.close()
+                    drawPath(segmentPath, color = segment.slice.color.toComposeColor())
                 } else {
                     drawArc(
                         color = segment.slice.color.toComposeColor(),
                         startAngle = segment.start,
-                        sweepAngle = segment.sweep,
+                        sweepAngle = sweep,
                         useCenter = true,
                         topLeft = drawRect.topLeft,
                         size = drawRect.size,
@@ -217,26 +260,29 @@ private fun PieDonutChartInternal(
                     val offset = degreeToOffset(segment.mid, offsetDistance)
                     val drawCenter = center + offset
                     val drawRect = Rect(drawCenter - Offset(radius, radius), Size(radius * 2f, radius * 2f))
-                    if (strokeStyle != null) {
-                        drawArc(
-                            color = styleOptions.sliceStrokeColor.toComposeColor(),
-                            startAngle = segment.start,
-                            sweepAngle = segment.sweep,
-                            useCenter = false,
-                            topLeft = drawRect.topLeft,
-                            size = drawRect.size,
-                            style = Stroke(width = strokePx * if (selected) 1.8f else 1f),
-                        )
+                    val sweep = segment.sweep * progress
+                    if (abs(sweep) < 0.01f) return@forEach
+
+                if (strokeStyle != null) {
+                    drawArc(
+                        color = styleOptions.sliceStrokeColor.toComposeColor(),
+                        startAngle = segment.start,
+                        sweepAngle = sweep,
+                        useCenter = false,
+                        topLeft = drawRect.topLeft,
+                        size = drawRect.size,
+                        style = Stroke(width = strokePx * if (selected) 1.8f else 1f),
+                    )
                     } else {
                         drawArc(
-                            color = styleOptions.sliceStrokeColor.toComposeColor(),
-                            startAngle = segment.start,
-                            sweepAngle = segment.sweep,
-                            useCenter = true,
-                            topLeft = drawRect.topLeft,
-                            size = drawRect.size,
-                            style = Stroke(width = strokePx * if (selected) 1.8f else 1f),
-                        )
+                        color = styleOptions.sliceStrokeColor.toComposeColor(),
+                        startAngle = segment.start,
+                        sweepAngle = sweep,
+                        useCenter = true,
+                        topLeft = drawRect.topLeft,
+                        size = drawRect.size,
+                        style = Stroke(width = strokePx * if (selected) 1.8f else 1f),
+                    )
                     }
                 }
             }
