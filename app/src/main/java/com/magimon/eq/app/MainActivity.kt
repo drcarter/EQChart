@@ -6,6 +6,8 @@ import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.magimon.eq.app.ui.android.ViewSamplesMenuActivity
+import com.magimon.eq.app.ui.compose.ComposeSamplesMenuActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,60 +29,24 @@ class MainActivity : AppCompatActivity() {
             bottomMargin = (8 * resources.displayMetrics.density).toInt()
         }
 
-        val heatmapButton = Button(this).apply {
-            text = "Open Heatmap Chart"
+        val viewMenuButton = Button(this).apply {
+            text = "Android View Samples"
             layoutParams = buttonParams
             setOnClickListener {
-                startActivity(Intent(this@MainActivity, HeatmapActivity::class.java))
+                startActivity(Intent(this@MainActivity, ViewSamplesMenuActivity::class.java))
             }
         }
 
-        val bubbleButton = Button(this).apply {
-            text = "Open Bubble Chart"
+        val composeMenuButton = Button(this).apply {
+            text = "Compose Samples"
             layoutParams = buttonParams
             setOnClickListener {
-                startActivity(Intent(this@MainActivity, BubbleActivity::class.java))
+                startActivity(Intent(this@MainActivity, ComposeSamplesMenuActivity::class.java))
             }
         }
 
-        val waveformButton = Button(this).apply {
-            text = "Open PCM Waveform"
-            layoutParams = buttonParams
-            setOnClickListener {
-                startActivity(Intent(this@MainActivity, WaveformFileActivity::class.java))
-            }
-        }
-
-        val radarButton = Button(this).apply {
-            text = "Open Radar Chart"
-            layoutParams = buttonParams
-            setOnClickListener {
-                startActivity(Intent(this@MainActivity, RadarActivity::class.java))
-            }
-        }
-
-        val pieButton = Button(this).apply {
-            text = "Open Pie Chart"
-            layoutParams = buttonParams
-            setOnClickListener {
-                startActivity(Intent(this@MainActivity, PieActivity::class.java))
-            }
-        }
-
-        val donutButton = Button(this).apply {
-            text = "Open Donut Chart"
-            layoutParams = buttonParams
-            setOnClickListener {
-                startActivity(Intent(this@MainActivity, DonutActivity::class.java))
-            }
-        }
-
-        container.addView(heatmapButton)
-        container.addView(bubbleButton)
-        container.addView(waveformButton)
-        container.addView(radarButton)
-        container.addView(pieButton)
-        container.addView(donutButton)
+        container.addView(viewMenuButton)
+        container.addView(composeMenuButton)
 
         setContentView(container)
     }

@@ -5,10 +5,14 @@ It currently provides `Heatmap`, `Bubble`, `PCM Waveform`, `Radar`, `Pie`, and `
 
 ## Project Structure
 
+- `:EQChart-common`
+  - Shared chart models/options/enums used by both View and Compose
 - `:EQChart`
-  - Chart component library module
+  - Android View-based chart components
+- `:EQChart-compose`
+  - Native Compose chart components
 - `:app`
-  - Sample app for trying each chart
+  - Sample app for both View and Compose demos
 
 ## Supported Charts
 
@@ -33,7 +37,14 @@ It currently provides `Heatmap`, `Bubble`, `PCM Waveform`, `Radar`, `Pie`, and `
 
 ```kotlin
 dependencies {
+    // Shared models (optional if already transitively included)
+    implementation(project(":EQChart-common"))
+
+    // View charts
     implementation(project(":EQChart"))
+
+    // Compose charts
+    implementation(project(":EQChart-compose"))
 }
 ```
 
@@ -44,6 +55,37 @@ dependencies {
 ```
 
 After launch, open each demo screen from `MainActivity`.
+
+## Compose Quick Start
+
+```kotlin
+val slices = listOf(
+    PieSlice("Direct", 43.0, Color.parseColor("#2B80FF")),
+    PieSlice("Search", 26.0, Color.parseColor("#FF9F1C")),
+)
+
+PieChart(
+    slices = slices,
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(280.dp),
+    presentationOptions = PieDonutPresentationOptions(
+        showLabels = true,
+        labelPosition = PieLabelPosition.AUTO,
+        enableSelectionExpand = true,
+    ),
+    onSliceClick = { _, slice, _ ->
+        // slice click callback
+    },
+)
+```
+
+Compose module exports:
+- `StockHeatmapChart(...)`
+- `BubbleChart(...)`
+- `PcmWaveformChart(...)` + `rememberPcmWaveformController(...)`
+- `RadarChart(...)`
+- `PieChart(...)`, `DonutChart(...)`
 
 ## Usage by Chart
 
