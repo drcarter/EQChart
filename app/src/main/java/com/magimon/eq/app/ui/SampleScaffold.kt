@@ -10,6 +10,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowInsetsControllerCompat
 
 /**
  * Wraps a sample screen content with a top toolbar.
@@ -25,6 +27,7 @@ fun AppCompatActivity.attachSampleToolbar(
 ): View {
     val density = resources.displayMetrics.density
     val toolbarHeight = (56 * density).toInt()
+    val horizontalPadding = (16 * density).toInt()
 
     val toolbar = Toolbar(this).apply {
         setTitle(title)
@@ -38,7 +41,7 @@ fun AppCompatActivity.attachSampleToolbar(
                 onBackPressedDispatcher.onBackPressed()
             }
         }
-        setPadding(16, 0, 16, 0)
+        setPadding(horizontalPadding, 0, horizontalPadding, 0)
     }
 
     val root = LinearLayout(this).apply {
@@ -49,16 +52,6 @@ fun AppCompatActivity.attachSampleToolbar(
         )
     }
 
-    ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
-        val statusBarsInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-        view.setPadding(
-            view.paddingLeft,
-            statusBarsInsets.top,
-            view.paddingRight,
-            view.paddingBottom,
-        )
-        insets
-    }
     root.addView(
         toolbar,
         LinearLayout.LayoutParams(
@@ -66,6 +59,19 @@ fun AppCompatActivity.attachSampleToolbar(
             toolbarHeight,
         ),
     )
+
+    ViewCompat.setOnApplyWindowInsetsListener(toolbar) { view, insets ->
+        val statusBarTop = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+        view.setPadding(horizontalPadding, statusBarTop, horizontalPadding, 0)
+
+        val layoutParams = view.layoutParams as LinearLayout.LayoutParams
+        val targetHeight = toolbarHeight + statusBarTop
+        if (layoutParams.height != targetHeight) {
+            layoutParams.height = targetHeight
+            view.layoutParams = layoutParams
+        }
+        insets
+    }
 
     root.addView(
         content,
@@ -84,6 +90,11 @@ fun AppCompatActivity.applySampleToolbar(
     content: View,
     showBack: Boolean = true,
 ) {
+    val chromeColor = sampleChromeColor
+    window.statusBarColor = chromeColor
+    WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars =
+        ColorUtils.calculateLuminance(chromeColor) > 0.5
+
     val root = attachSampleToolbar(title, content, showBack)
     setContentView(root)
     ViewCompat.requestApplyInsets(root)
