@@ -8,6 +8,7 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.magimon.eq.app.ui.android.ViewSamplesMenuActivity
 import com.magimon.eq.app.ui.compose.ComposeSamplesMenuActivity
+import com.magimon.eq.app.ui.applySampleToolbar
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,6 +49,10 @@ class MainActivity : AppCompatActivity() {
         container.addView(viewMenuButton)
         container.addView(composeMenuButton)
 
-        setContentView(container)
+        applySampleToolbar(
+            title = "EQChart Samples",
+            content = container,
+            showBack = false,
+        )
     }
 }

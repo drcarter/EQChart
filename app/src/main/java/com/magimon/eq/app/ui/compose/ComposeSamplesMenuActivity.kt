@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.magimon.eq.app.ui.applySampleToolbar
 
 class ComposeSamplesMenuActivity : AppCompatActivity() {
 
@@ -34,7 +35,10 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
         container.addView(menuButton("Pie", buttonParams) { ComposePieActivity::class.java })
         container.addView(menuButton("Donut", buttonParams) { ComposeDonutActivity::class.java })
 
-        setContentView(container)
+        applySampleToolbar(
+            title = "Compose Samples",
+            content = container,
+        )
     }
 
     private fun menuButton(

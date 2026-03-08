@@ -11,6 +11,7 @@ import com.magimon.eq.bubble.BubbleLegendItem
 import com.magimon.eq.bubble.BubbleLayoutMode
 import com.magimon.eq.bubble.BubbleLegendMode
 import com.magimon.eq.bubble.BubblePresentationOptions
+import com.magimon.eq.app.ui.applySampleToolbar
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -105,6 +106,9 @@ class BubbleActivity : AppCompatActivity() {
             }
         }
 
-        setContentView(bubbleView)
+        applySampleToolbar(
+            title = "Bubble Chart",
+            content = bubbleView,
+        )
     }
 }

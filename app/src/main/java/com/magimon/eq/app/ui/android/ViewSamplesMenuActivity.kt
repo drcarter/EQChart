@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.magimon.eq.app.ui.applySampleToolbar
 
 class ViewSamplesMenuActivity : AppCompatActivity() {
 
@@ -46,7 +47,10 @@ class ViewSamplesMenuActivity : AppCompatActivity() {
             menuButton("Donut", buttonParams) { DonutActivity::class.java },
         )
 
-        setContentView(container)
+        applySampleToolbar(
+            title = "Android View Samples",
+            content = container,
+        )
     }
 
     private fun menuButton(

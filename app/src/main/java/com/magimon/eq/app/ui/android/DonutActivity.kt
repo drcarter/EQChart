@@ -9,6 +9,7 @@ import com.magimon.eq.pie.PieDonutPresentationOptions
 import com.magimon.eq.pie.PieDonutStyleOptions
 import com.magimon.eq.pie.PieLabelPosition
 import com.magimon.eq.pie.PieSlice
+import com.magimon.eq.app.ui.applySampleToolbar
 import kotlin.math.roundToInt
 
 /**
@@ -58,6 +59,9 @@ class DonutActivity : AppCompatActivity() {
             }
         }
 
-        setContentView(chartView)
+        applySampleToolbar(
+            title = "Donut Chart",
+            content = chartView,
+        )
     }
 }

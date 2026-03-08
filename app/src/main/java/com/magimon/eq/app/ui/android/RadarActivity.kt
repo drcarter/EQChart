@@ -9,6 +9,7 @@ import com.magimon.eq.radar.RadarChartPresentationOptions
 import com.magimon.eq.radar.RadarChartStyleOptions
 import com.magimon.eq.radar.RadarChartView
 import com.magimon.eq.radar.RadarSeries
+import com.magimon.eq.app.ui.applySampleToolbar
 import kotlin.math.roundToInt
 
 /**
@@ -71,6 +72,9 @@ class RadarActivity : AppCompatActivity() {
             }
         }
 
-        setContentView(radarView)
+        applySampleToolbar(
+            title = "Radar Chart",
+            content = radarView,
+        )
     }
 }

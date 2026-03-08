@@ -45,6 +45,8 @@ private fun ComposePieSampleScreen() {
                 labelPosition = PieLabelPosition.AUTO,
                 enableSelectionExpand = true,
                 selectedSliceExpandDp = 10f,
+                startAngleDeg = -90f,
+                clockwise = true,
             ),
             onSliceClick = { _, slice, _ ->
                 Toast.makeText(context, "${slice.label}: ${slice.value}", Toast.LENGTH_SHORT).show()

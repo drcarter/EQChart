@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.magimon.eq.heatmap.StockHeatmapHelper
 import com.magimon.eq.heatmap.StockHeatmapView
+import com.magimon.eq.app.ui.applySampleToolbar
 
 /**
  * Example activity demonstrating the StockHeatmapView usage
@@ -31,6 +32,9 @@ class HeatmapActivity : AppCompatActivity() {
             addView(heatmapView)
         }
 
-        setContentView(scrollView)
+        applySampleToolbar(
+            title = "Stock Heatmap",
+            content = scrollView,
+        )
     }
 }

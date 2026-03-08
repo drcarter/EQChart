@@ -50,6 +50,8 @@ private fun ComposeDonutSampleScreen() {
                 selectedSliceExpandDp = 10f,
                 centerText = "Total",
                 centerSubText = slices.sumOf { it.value }.roundToInt().toString(),
+                startAngleDeg = -90f,
+                clockwise = true,
             ),
             onSliceClick = { _, slice, _ ->
                 Toast.makeText(context, "${slice.label}: ${slice.value}", Toast.LENGTH_SHORT).show()

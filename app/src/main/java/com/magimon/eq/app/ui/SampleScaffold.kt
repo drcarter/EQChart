@@ -1,20 +1,22 @@
 package com.magimon.eq.app.ui
 
-import android.graphics.Color
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import com.magimon.eq.app.R
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowCompat
+import androidx.core.content.ContextCompat
 
 /**
  * Wraps a sample screen content with a top toolbar.
  */
 private const val TOOLBAR_ELEVATION_DP = 2f
-const val SAMPLE_CHROME_COLOR_HEX = "#0F172A"
+private val Context.sampleChromeColor: Int
+    get() = ContextCompat.getColor(this, R.color.eqchart_chrome)
 
 fun AppCompatActivity.attachSampleToolbar(
     title: String,
@@ -26,8 +28,8 @@ fun AppCompatActivity.attachSampleToolbar(
 
     val toolbar = Toolbar(this).apply {
         setTitle(title)
-        setTitleTextColor(Color.WHITE)
-        setBackgroundColor(Color.parseColor(SAMPLE_CHROME_COLOR_HEX))
+        setTitleTextColor(android.graphics.Color.WHITE)
+        setBackgroundColor(sampleChromeColor)
         elevation = TOOLBAR_ELEVATION_DP * density
 
         if (showBack) {
@@ -82,10 +84,6 @@ fun AppCompatActivity.applySampleToolbar(
     content: View,
     showBack: Boolean = true,
 ) {
-    val chromeColor = Color.parseColor(SAMPLE_CHROME_COLOR_HEX)
-    window.statusBarColor = chromeColor
-    WindowCompat.getInsetsController(window, window.decorView)?.isAppearanceLightStatusBars = false
-
     val root = attachSampleToolbar(title, content, showBack)
     setContentView(root)
     ViewCompat.requestApplyInsets(root)

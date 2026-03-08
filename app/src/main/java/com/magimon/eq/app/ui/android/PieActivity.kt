@@ -9,6 +9,7 @@ import com.magimon.eq.pie.PieDonutPresentationOptions
 import com.magimon.eq.pie.PieDonutStyleOptions
 import com.magimon.eq.pie.PieLabelPosition
 import com.magimon.eq.pie.PieSlice
+import com.magimon.eq.app.ui.applySampleToolbar
 
 /**
  * Pie chart demo screen.
@@ -51,6 +52,9 @@ class PieActivity : AppCompatActivity() {
             }
         }
 
-        setContentView(chartView)
+        applySampleToolbar(
+            title = "Pie Chart",
+            content = chartView,
+        )
     }
 }

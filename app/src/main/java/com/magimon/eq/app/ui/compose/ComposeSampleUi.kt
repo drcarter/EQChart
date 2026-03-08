@@ -22,15 +22,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
-import com.magimon.eq.app.ui.SAMPLE_CHROME_COLOR_HEX
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,14 +37,7 @@ fun ComposeSamplePage(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val activity = LocalContext.current as? Activity
-    val chromeColorInt = android.graphics.Color.parseColor(SAMPLE_CHROME_COLOR_HEX)
-    val chromeColor = Color(chromeColorInt)
-
-    SideEffect {
-        val window = activity?.window ?: return@SideEffect
-        window.statusBarColor = chromeColorInt
-        WindowCompat.getInsetsController(window, window.decorView)?.isAppearanceLightStatusBars = false
-    }
+    val chromeColor = colorResource(id = com.magimon.eq.app.R.color.eqchart_chrome)
 
     Scaffold(
         topBar = {

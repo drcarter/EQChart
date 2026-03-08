@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.magimon.eq.app.R
 import com.magimon.eq.waveform.PcmWaveFormStyleOptions
 import com.magimon.eq.waveform.PcmWaveFormView
+import com.magimon.eq.app.ui.applySampleToolbar
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
 
@@ -136,7 +137,10 @@ class WaveformFileActivity : AppCompatActivity() {
             )
         }
 
-        setContentView(root)
+        applySampleToolbar(
+            title = "PCM Waveform",
+            content = root,
+        )
         decodeSampleAudioAsync(R.raw.sample_tone)
     }
 
