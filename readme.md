@@ -1,55 +1,215 @@
-# EQChart 진행 현황 정리
+# EQChart
 
-기준일: 2026-03-08
+Android 커스텀 차트 라이브러리입니다.  
+현재 `Heatmap`, `Bubble`, `PCM Waveform`, `Radar` 차트를 제공합니다.
 
-## 1) 프로젝트 개요
+## 프로젝트 구성
 
-- Android 멀티 모듈 프로젝트
-- `:EQChart` 라이브러리 모듈: 커스텀 차트 컴포넌트 제공
-- `:app` 샘플 앱 모듈: 각 차트 데모 실행 화면 제공
+- `:EQChart`
+  - 차트 컴포넌트 라이브러리 모듈
+- `:app`
+  - 라이브러리 동작 예제를 확인할 수 있는 샘플 앱
 
-## 2) 현재까지 완료된 기능
+## 지원 차트
 
-### 2-1. Heatmap 차트
+- Heatmap: 섹션 기반 트리맵 스타일 히트맵
+- Bubble: Scatter / Packed 버블 차트
+- PCM Waveform: 실시간 16-bit mono PCM 파형 렌더링
+- Radar: 다중 시리즈 레이더 차트(범례/애니메이션/포인트 클릭)
 
-- `StockHeatmapView` 구현
-- 섹션 기반 API(`setSections`) + 하위호환 API(`setData`) 지원
-- 종목 클릭 리스너 지원
-- 2단계 squarified treemap 레이아웃 적용
-- `sizeRatio` 우선, 없으면 `marketCap` 기반 블록 면적 계산
-- `StockHeatmapHelper`로 샘플 섹션 데이터/색상 매핑/포맷 유틸 제공
+## 개발 환경
 
-### 2-2. Bubble 차트
+- Min SDK: 24
+- Compile / Target SDK: 36
+- Kotlin: 2.2.0
+- AGP: 8.11.1
+- Java / JVM Target: 11
 
-- `BubbleChartView` 구현
-- 레이아웃 모드 지원: `SCATTER`, `PACKED`
-- 축/그리드 옵션(`BubbleAxisOptions`)과 표현 옵션(`BubblePresentationOptions`) 분리
-- 범례 모드 지원(`AUTO`, `EXPLICIT`, `AUTO_WITH_OVERRIDE`)
-- 스케일 오버라이드, 버블 클릭 리스너 지원
-- 데이터 매핑 오버로드(`setData(items, mapper)`) 지원
+## 설치/연동
 
-### 2-3. PCM Waveform
+`app/build.gradle.kts`:
 
-- `PcmWaveFormView` 구현 (16-bit mono PCM 기준)
-- 링 버퍼(`PcmRingBuffer`)로 최근 N ms 윈도우 유지
-- 픽셀 단위 min/max 다운샘플링(`PcmWaveDownSampler`)으로 피크 보존
-- 스타일 옵션(`PcmWaveFormStyleOptions`) 및 샘플레이트/윈도우 길이 제어 API 제공
-- `WaveformFileActivity`에서 `MediaExtractor`/`MediaCodec` 디코딩 + `MediaPlayer` 재생 동기화 데모 구현
+```kotlin
+dependencies {
+    implementation(project(":EQChart"))
+}
+```
 
-## 3) 샘플 앱 구성
+## 샘플 앱 실행
 
-- `MainActivity`: Heatmap / Bubble / Waveform 진입 버튼 제공
-- `HeatmapActivity`: 섹션 히트맵 렌더링 및 아이템 클릭 Toast 데모
-- `BubbleActivity`: Packed 버블 + 제목/범례 + 클릭 Toast 데모
-- `WaveformFileActivity`: `sample_tone.wav` 재생과 실시간 파형 표시 데모
+```bash
+./gradlew :app:installDebug
+```
 
-## 4) 테스트 및 빌드 상태
+실행 후 `MainActivity`에서 각 차트 데모 화면으로 진입할 수 있습니다.
 
-- 실행 명령: `./gradlew test`
-- 실행 일시: 2026-03-08
-- 결과: `BUILD SUCCESSFUL`
-- 확인된 단위 테스트:
-  - `BubbleChartMathTest`
-  - `BubbleLegendResolverTest`
-  - `PcmRingBufferTest`
-  - `PcmWaveDownSamplerTest`
+## 차트별 사용법
+
+### 1) Heatmap
+
+핵심 클래스:
+- `StockHeatmapView`
+- `StockHeatmapSection`
+- `StockHeatmapItem`
+
+기본 사용 예시:
+
+```kotlin
+val heatmapView = StockHeatmapView(this).apply {
+    setSections(
+        listOf(
+            StockHeatmapSection(
+                name = "Technology",
+                color = Color.parseColor("#1E88E5"),
+                stocks = listOf(
+                    StockHeatmapItem("AAPL", "Apple", "Technology", 200.0, 1.2, 3_000_000_000_000.0, 24.0),
+                    StockHeatmapItem("MSFT", "Microsoft", "Technology", 380.0, -0.8, 2_800_000_000_000.0, 22.0),
+                ),
+            ),
+        ),
+    )
+
+    setOnItemClickListener { item ->
+        // item.symbol, item.changePct, item.marketCap 사용
+    }
+}
+
+setContentView(ScrollView(this).apply { addView(heatmapView) })
+```
+
+참고:
+- `setData(List<StockHeatmapItem>)`도 지원(하위호환)
+- `sizeRatio`가 있으면 면적 계산에 우선 사용
+
+### 2) Bubble
+
+핵심 클래스:
+- `BubbleChartView`
+- `BubbleDatum`
+- `BubbleLayoutMode`
+- `BubblePresentationOptions`, `BubbleAxisOptions`
+
+기본 사용 예시:
+
+```kotlin
+val bubbleView = BubbleChartView(this).apply {
+    setLayoutMode(BubbleLayoutMode.PACKED) // 또는 SCATTER
+    setChartBackgroundColor(Color.parseColor("#E6E6E6"))
+
+    setPresentationOptions(
+        BubblePresentationOptions(
+            title = "Loan Distribution",
+            showLegend = true,
+            legendMode = BubbleLegendMode.AUTO_WITH_OVERRIDE,
+        ),
+    )
+
+    setAxisOptions(
+        BubbleAxisOptions(
+            showAxes = false,
+            showGrid = false,
+            showTicks = false,
+        ),
+    )
+
+    setData(
+        listOf(
+            BubbleDatum(0.0, 0.0, 120.0, Color.parseColor("#4A7FB1"), "Food"),
+            BubbleDatum(0.0, 0.0, 90.0, Color.parseColor("#FF9100"), "Retail"),
+        ),
+    )
+
+    setOnBubbleClickListener { datum ->
+        // datum.label, datum.payload 사용
+    }
+}
+
+setContentView(bubbleView)
+```
+
+### 3) PCM Waveform
+
+핵심 클래스:
+- `PcmWaveFormView`
+- `PcmWaveFormStyleOptions`
+
+기본 사용 예시:
+
+```kotlin
+val waveformView = PcmWaveFormView(this).apply {
+    setSampleRateHz(44_100)
+    setWindowDurationMs(2_500)
+    setStyleOptions(
+        PcmWaveFormStyleOptions(
+            backgroundColor = Color.parseColor("#0E1620"),
+            waveColor = Color.parseColor("#62D5FF"),
+            centerLineColor = Color.parseColor("#2D3A46"),
+            strokeWidthDp = 1.4f,
+        ),
+    )
+}
+
+// 실시간 PCM 청크 추가 (16-bit mono)
+waveformView.appendPcm16Mono(shortArrayOf(120, -300, 520, -120))
+```
+
+참고:
+- 입력 데이터는 `ShortArray`(16-bit mono PCM)
+- 내부적으로 최근 N ms 윈도우만 유지
+
+### 4) Radar
+
+핵심 클래스:
+- `RadarChartView`
+- `RadarAxis`
+- `RadarSeries`
+- `RadarChartStyleOptions`, `RadarChartPresentationOptions`
+
+기본 사용 예시:
+
+```kotlin
+val radarView = RadarChartView(this).apply {
+    setAxes(
+        listOf(
+            RadarAxis("sweet"),
+            RadarAxis("price"),
+            RadarAxis("color"),
+            RadarAxis("fresh"),
+            RadarAxis("good"),
+        ),
+    )
+
+    setSeries(
+        listOf(
+            RadarSeries("Apple", Color.parseColor("#B899FF"), listOf(48.0, 80.0, 84.0, 34.0, 40.0)),
+            RadarSeries("Banana", Color.parseColor("#6F8695"), listOf(30.0, 40.0, 90.0, 82.0, 62.0)),
+        ),
+    )
+
+    setValueMax(100.0)
+    setPresentationOptions(
+        RadarChartPresentationOptions(
+            showLegend = true,
+            animateOnDataChange = true,
+            enterAnimationDurationMs = 760L,
+        ),
+    )
+
+    setOnPointClickListener { seriesIndex, axisIndex, value, payload ->
+        // 포인트 클릭 정보 처리
+    }
+}
+
+setContentView(radarView)
+```
+
+주의:
+- 각 `RadarSeries.values` 개수는 축 개수와 동일해야 렌더링됩니다.
+
+## 테스트
+
+```bash
+./gradlew test
+```
+
+단위 테스트는 차트 수학/유틸 로직 중심으로 포함되어 있습니다.
