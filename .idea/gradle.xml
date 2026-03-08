@@ -11,6 +11,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/EQChart" />
+            <option value="$PROJECT_DIR$/EQChart-common" />
+            <option value="$PROJECT_DIR$/EQChart-compose" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>

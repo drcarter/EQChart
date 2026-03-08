@@ -14,7 +14,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:label="EQChart Samples"
             android:theme="@style/Theme.EQChart">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,34 +23,74 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HeatmapActivity"
+            android:name=".ui.android.ViewSamplesMenuActivity"
+            android:exported="true"
+            android:label="Android View Samples"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeSamplesMenuActivity"
+            android:exported="true"
+            android:label="Compose Samples"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.HeatmapActivity"
             android:exported="true"
             android:label="Stock Heatmap"
             android:theme="@style/Theme.EQChart" />
         <activity
-            android:name=".BubbleActivity"
+            android:name=".ui.android.BubbleActivity"
             android:exported="true"
             android:label="Bubble Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
-            android:name=".WaveformFileActivity"
+            android:name=".ui.android.WaveformFileActivity"
             android:exported="true"
             android:label="PCM Waveform"
             android:theme="@style/Theme.EQChart" />
         <activity
-            android:name=".RadarActivity"
+            android:name=".ui.android.RadarActivity"
             android:exported="true"
             android:label="Radar Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
-            android:name=".PieActivity"
+            android:name=".ui.android.PieActivity"
             android:exported="true"
             android:label="Pie Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
-            android:name=".DonutActivity"
+            android:name=".ui.android.DonutActivity"
             android:exported="true"
             android:label="Donut Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeHeatmapActivity"
+            android:exported="true"
+            android:label="Compose Heatmap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeBubbleActivity"
+            android:exported="true"
+            android:label="Compose Bubble"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeWaveformActivity"
+            android:exported="true"
+            android:label="Compose Waveform"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeRadarActivity"
+            android:exported="true"
+            android:label="Compose Radar"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposePieActivity"
+            android:exported="true"
+            android:label="Compose Pie"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeDonutActivity"
+            android:exported="true"
+            android:label="Compose Donut"
             android:theme="@style/Theme.EQChart" />
     </application>
 
