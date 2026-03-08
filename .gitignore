@@ -9,11 +9,16 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+**/build/
+/app/build/
+/EQChart/build/
+/EQChart-common/build/
+/EQChart-compose/build/
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+github.properties
 
 #codex
 .codex
-

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("maven-publish")
 }
 
 android {
@@ -31,6 +32,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    publishing {
+        singleVariant("release") {}
+    }
+
 }
 
 dependencies {
@@ -46,4 +52,15 @@ dependencies {
     implementation(libs.androidx.material3)
 
     debugImplementation(libs.androidx.ui.tooling)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<org.gradle.api.publish.maven.MavenPublication>("release") {
+                from(components["release"])
+                artifactId = "eqchart-compose"
+            }
+        }
+    }
 }
