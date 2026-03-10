@@ -1,6 +1,8 @@
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
+import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification
 import org.gradle.testing.jacoco.tasks.JacocoReport
+import java.math.BigDecimal
 
 val coverageModules = setOf(
     ":EQChart",
@@ -63,10 +65,65 @@ subprojects {
             }
         }
 
+        if (path == ":EQChart-common") {
+            tasks.register<JacocoCoverageVerification>("jacocoDebugUnitTestCoverageVerification") {
+                group = "verification"
+                description = "Verifies JaCoCo instruction coverage for EQChart-common debug unit tests."
+                dependsOn("testDebugUnitTest")
+
+                classDirectories.setFrom(
+                    files(
+                        fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug")) {
+                            exclude(coverageExcludes)
+                        },
+                        fileTree(layout.buildDirectory.dir("intermediates/javac/debug/classes")) {
+                            exclude(coverageExcludes)
+                        },
+                    ),
+                )
+
+                sourceDirectories.setFrom(
+                    files(
+                        "src/main/java",
+                        "src/main/kotlin",
+                    ),
+                )
+
+                executionData.setFrom(
+                    fileTree(layout.buildDirectory) {
+                        include(
+                            "jacoco/testDebugUnitTest.exec",
+                            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
+                        )
+                    },
+                )
+
+                violationRules {
+                    rule {
+                        element = "BUNDLE"
+
+                        limit {
+                            counter = "INSTRUCTION"
+                            value = "COVEREDRATIO"
+                            minimum = BigDecimal("1.0")
+                        }
+                    }
+                }
+            }
+        }
+
         tasks.register("coverageDebug") {
             group = "verification"
             description = "Runs debug unit tests and generates JaCoCo coverage reports."
-            dependsOn("testDebugUnitTest", "jacocoDebugUnitTestReport")
+            dependsOn(
+                buildList {
+                    add("testDebugUnitTest")
+                    add("jacocoDebugUnitTestReport")
+                    if (project.path == ":EQChart-common") {
+                        add("jacocoDebugUnitTestCoverageVerification")
+                    }
+                },
+            )
         }
 
         tasks.withType<Test>().configureEach {
