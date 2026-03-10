@@ -34,4 +34,14 @@ class ComposeChartUtilsTest {
         assertEquals(0f, down.x, 0.0001f)
         assertEquals(10f, down.y, 0.0001f)
     }
+
+    @Test
+    fun toComposeColor_preservesArgbValue() {
+        val color = 0xFF336699.toInt().toComposeColor()
+
+        assertEquals(1f, color.alpha, 0.0001f)
+        assertEquals(0x33 / 255f, color.red, 0.0001f)
+        assertEquals(0x66 / 255f, color.green, 0.0001f)
+        assertEquals(0x99 / 255f, color.blue, 0.0001f)
+    }
 }

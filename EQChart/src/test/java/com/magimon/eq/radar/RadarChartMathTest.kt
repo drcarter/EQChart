@@ -81,4 +81,51 @@ class RadarChartMathTest {
         )
         assertNull(hit)
     }
+
+    @Test
+    fun normalize_returnsZeroForInvalidInputs() {
+        assertEquals(0f, RadarChartMath.normalize(Double.NaN, 100.0), 0.0001f)
+        assertEquals(0f, RadarChartMath.normalize(10.0, 0.0), 0.0001f)
+        assertEquals(0f, RadarChartMath.normalize(10.0, Double.NaN), 0.0001f)
+    }
+
+    @Test
+    fun vertex_returnsCenterWhenAxisCountIsInvalid() {
+        val point = RadarChartMath.vertex(
+            centerX = 12f,
+            centerY = 24f,
+            radius = 50f,
+            axisIndex = 0,
+            axisCount = 0,
+        )
+
+        assertEquals(12f, point.x, 0.0001f)
+        assertEquals(24f, point.y, 0.0001f)
+    }
+
+    @Test
+    fun polygonPoints_returnsEmptyWithoutRenderableAxesOrValues() {
+        assertTrue(
+            RadarChartMath.polygonPoints(
+                values = emptyList(),
+                maxValue = 100.0,
+                centerX = 0f,
+                centerY = 0f,
+                radius = 100f,
+                axisCount = 5,
+                progress = 1f,
+            ).isEmpty(),
+        )
+        assertTrue(
+            RadarChartMath.polygonPoints(
+                values = listOf(1.0, 2.0),
+                maxValue = 100.0,
+                centerX = 0f,
+                centerY = 0f,
+                radius = 100f,
+                axisCount = 0,
+                progress = 1f,
+            ).isEmpty(),
+        )
+    }
 }

@@ -1,6 +1,7 @@
 package com.magimon.eq.pie
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -114,5 +115,37 @@ class PieDonutChartMathTest {
         assertNotNull(second)
         assertEquals(0, first?.index)
         assertEquals(1, second?.index)
+    }
+
+    @Test
+    fun validSlices_keepsOnlyFinitePositiveValues() {
+        val valid = PieDonutChartMath.validSlices(
+            listOf(
+                PieSlice("A", 1.0, 0),
+                PieSlice("B", 0.0, 0),
+                PieSlice("C", -3.0, 0),
+                PieSlice("D", Double.POSITIVE_INFINITY, 0),
+                PieSlice("E", 2.0, 0),
+            ),
+        )
+
+        assertEquals(listOf("A", "E"), valid.map { it.label })
+    }
+
+    @Test
+    fun pointOnCircle_andNormalizeAngle_returnExpectedCoordinates() {
+        val point = PieDonutChartMath.pointOnCircle(10f, 10f, 5f, 90f)
+
+        assertEquals(10f, point.x, 0.0001f)
+        assertEquals(15f, point.y, 0.0001f)
+        assertEquals(315f, PieDonutChartMath.normalizeAngle(-45f), 0.0001f)
+        assertEquals(5f, PieDonutChartMath.normalizeAngle(725f), 0.0001f)
+    }
+
+    @Test
+    fun containsAngle_handlesZeroAndCounterClockwiseSweeps() {
+        assertFalse(PieDonutChartMath.containsAngle(10f, 0f, 0f))
+        assertTrue(PieDonutChartMath.containsAngle(350f, 0f, -20f))
+        assertFalse(PieDonutChartMath.containsAngle(320f, 0f, -20f))
     }
 }

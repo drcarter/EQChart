@@ -40,4 +40,25 @@ class PcmRingBufferTest {
 
         assertArrayEquals(shortArrayOf(3, 4, 5), buffer.snapshot())
     }
+
+    @Test
+    fun clear_resetsSizeAndSnapshot() {
+        val buffer = PcmRingBuffer(4)
+        buffer.append(shortArrayOf(1, 2, 3))
+
+        buffer.clear()
+
+        assertEquals(0, buffer.size())
+        assertArrayEquals(shortArrayOf(), buffer.snapshot())
+    }
+
+    @Test
+    fun append_ignoresInvalidRanges() {
+        val buffer = PcmRingBuffer(4)
+        buffer.append(shortArrayOf(1, 2, 3), fromIndex = 3, toIndex = 2)
+        buffer.append(shortArrayOf(1, 2, 3), fromIndex = -5, toIndex = -1)
+
+        assertEquals(0, buffer.size())
+        assertEquals(4, buffer.capacity())
+    }
 }
