@@ -17,12 +17,12 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * 다중 시리즈 레이더 차트를 렌더링하는 커스텀 View.
+ * Custom view that renders a multi-series radar chart.
  *
- * - 축 라벨([RadarAxis])과 시리즈([RadarSeries])를 받아 다각형 차트를 렌더링한다.
- * - 그리드/축/범례/포인트 스타일은 [RadarChartStyleOptions]로 제어한다.
- * - 애니메이션/표시 정책은 [RadarChartPresentationOptions]로 제어한다.
- * - 포인트 클릭 시 [setOnPointClickListener]를 통해 선택 정보를 전달한다.
+ * - Renders polygon geometry from axis labels ([RadarAxis]) and series ([RadarSeries]).
+ * - Grid/axis/legend/point styles are controlled by [RadarChartStyleOptions].
+ * - Display and animation behavior is controlled by [RadarChartPresentationOptions].
+ * - Point selection is delivered via [setOnPointClickListener].
  */
 class RadarChartView @JvmOverloads constructor(
     context: Context,
@@ -99,11 +99,11 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 축 라벨 목록을 설정한다.
+     * Sets the axis label list.
      *
-     * 빈 라벨은 자동으로 제거된다.
+     * Blank labels are removed automatically.
      *
-     * @param items 차트 축 정의 목록
+     * @param items Axis definitions for the chart
      */
     fun setAxes(items: List<RadarAxis>) {
         axes = items.filter { it.label.isNotBlank() }
@@ -112,11 +112,11 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 시리즈 목록을 설정한다.
+     * Sets the series list.
      *
-     * `values` 개수가 축 개수와 일치하는 시리즈만 렌더링 대상이 된다.
+     * Only series whose `values` size matches the axis count are renderable.
      *
-     * @param items 시리즈 목록
+     * @param items Series list
      */
     fun setSeries(items: List<RadarSeries>) {
         series = items
@@ -125,11 +125,11 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 값 스케일 최대값을 설정한다.
+     * Sets the max value used for normalization.
      *
-     * 잘못된 입력은 기본값(100.0)으로 보정된다.
+     * Invalid input falls back to `100.0`.
      *
-     * @param maxValue 값 정규화 기준 최대값
+     * @param maxValue Normalization max value
      */
     fun setValueMax(maxValue: Double) {
         valueMax = if (maxValue.isFinite() && maxValue > 0.0) maxValue else 100.0
@@ -137,9 +137,9 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 차트 스타일 옵션을 설정한다.
+     * Sets chart style options.
      *
-     * @param options 렌더링 스타일 옵션
+     * @param options Rendering style options
      */
     fun setStyleOptions(options: RadarChartStyleOptions) {
         styleOptions = options
@@ -148,9 +148,9 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 차트 표시/애니메이션 옵션을 설정한다.
+     * Sets chart presentation/animation options.
      *
-     * @param options 표시/애니메이션 옵션
+     * @param options Presentation/animation options
      */
     fun setPresentationOptions(options: RadarChartPresentationOptions) {
         presentationOptions = options
@@ -159,18 +159,18 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 포인트 클릭 리스너를 설정한다.
+     * Sets the point click listener.
      *
-     * @param listener `(seriesIndex, axisIndex, value, payload)` 형태 콜백
+     * @param listener Callback in `(seriesIndex, axisIndex, value, payload)` format
      */
     fun setOnPointClickListener(listener: (seriesIndex: Int, axisIndex: Int, value: Double, payload: Any?) -> Unit) {
         onPointClickListener = listener
     }
 
     /**
-     * 초기 등장 애니메이션을 재생한다.
+     * Plays the enter animation.
      *
-     * 축이 3개 미만이거나 유효 시리즈가 없으면 재생하지 않는다.
+     * Does nothing when there are fewer than 3 axes or no renderable series.
      */
     fun playEnterAnimation() {
         if (axes.size < 3 || renderableSeries().isEmpty()) return
@@ -278,10 +278,10 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 축/시리즈 조합에서 렌더링 가능한 시리즈만 반환한다.
+     * Returns only series that are renderable with the current axis/series setup.
      *
-     * - 값 개수가 축 개수와 다르면 제외
-     * - 모든 값이 비유한값(`NaN`/`Infinity`)이면 제외
+     * - Excludes series whose value count differs from axis count
+     * - Excludes series where all values are non-finite (`NaN`/`Infinity`)
      */
     private fun renderableSeries(): List<RadarSeries> {
         if (axes.isEmpty()) return emptyList()
@@ -319,9 +319,9 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 차트 중심/반지름/범례 영역을 계산한다.
+     * Computes chart center/radius/legend area.
      *
-     * 레이블이 클리핑되지 않도록 [resolveRadiusToFitAxisLabels]를 통해 최종 반지름을 보정한다.
+     * Adjusts final radius via [resolveRadiusToFitAxisLabels] to avoid label clipping.
      */
     private fun computeGeometry(canvas: Canvas, visibleSeries: List<RadarSeries>): Geometry {
         val contentPadding = styleOptions.contentPaddingDp * density
@@ -357,9 +357,9 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 범례를 렌더링하고, 범례의 하단 Y 좌표를 반환한다.
+     * Renders the legend and returns its bottom Y coordinate.
      *
-     * 차트 본문 시작 지점을 계산할 때 사용한다.
+     * Used to compute the start position of the chart body.
      */
     private fun drawLegend(canvas: Canvas, visibleSeries: List<RadarSeries>): Float {
         if (visibleSeries.isEmpty()) {
@@ -398,7 +398,7 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 다각형 그리드와 방사형 축 라인을 렌더링한다.
+     * Renders polygon grid levels and radial axis lines.
      */
     private fun drawGridAndAxes(canvas: Canvas, geometry: Geometry) {
         val axisCount = axes.size
@@ -441,7 +441,7 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 축 라벨을 차트 외곽에 렌더링한다.
+     * Renders axis labels around the chart perimeter.
      */
     private fun drawAxisLabels(canvas: Canvas, geometry: Geometry) {
         val axisCount = axes.size
@@ -464,11 +464,11 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 축 라벨이 잘리지 않는 범위까지 반지름을 줄여 최종 반지름을 반환한다.
+     * Shrinks radius until axis labels fit without clipping and returns the final radius.
      *
-     * @param centerX 차트 중심 X
-     * @param centerY 차트 중심 Y
-     * @param maxRadius 현재 레이아웃에서 허용 가능한 최대 반지름
+     * @param centerX Chart center X
+     * @param centerY Chart center Y
+     * @param maxRadius Maximum allowed radius in the current layout
      */
     private fun resolveRadiusToFitAxisLabels(
         centerX: Float,
@@ -487,7 +487,7 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 반지름에서 모든 축 라벨이 차트 영역 내부에 들어오는지 검사한다.
+     * Checks whether all axis labels stay inside chart bounds for the current radius.
      */
     private fun axisLabelsFitInChartArea(
         centerX: Float,
@@ -535,9 +535,9 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 축 라벨 수평 정렬을 반환한다.
+     * Returns horizontal alignment for an axis label.
      *
-     * 중심점 기준 우측은 LEFT, 좌측은 RIGHT, 거의 수직축은 CENTER를 사용한다.
+     * Uses LEFT on the right side, RIGHT on the left side, and CENTER near vertical axes.
      */
     private fun resolveAxisLabelAlign(dx: Float): Paint.Align {
         return when {
@@ -548,14 +548,14 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 라벨 앵커 좌표를 텍스트 baseline 좌표로 변환한다.
+     * Converts a label anchor Y position to a text baseline Y position.
      */
     private fun resolveAxisLabelBaseline(anchorY: Float): Float {
         return anchorY + (axisLabelPaint.textSize * 0.35f)
     }
 
     /**
-     * 현재 시리즈들을 화면 좌표 포인트 목록으로 변환한다.
+     * Converts current series into screen-space point lists.
      */
     private fun buildSeriesPoints(
         seriesList: List<RadarSeries>,
@@ -578,7 +578,7 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 시리즈 폴리곤(채움/외곽선)과 포인트를 렌더링한다.
+     * Renders series polygons (fill/stroke) and points.
      */
     private fun drawSeries(
         canvas: Canvas,
@@ -617,9 +617,9 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 시리즈의 각 축 포인트를 렌더링한다.
+     * Renders axis points for a single series.
      *
-     * 선택된 포인트는 외곽 링을 추가해 강조한다.
+     * Selected points are emphasized with an extra outer ring.
      */
     private fun drawSeriesPoints(
         canvas: Canvas,
@@ -647,7 +647,7 @@ class RadarChartView @JvmOverloads constructor(
     }
 
     /**
-     * 색상에 alpha를 덮어쓴 값을 반환한다.
+     * Returns a color with overridden alpha.
      */
     private fun applyAlpha(color: Int, alpha: Int): Int {
         return Color.argb(

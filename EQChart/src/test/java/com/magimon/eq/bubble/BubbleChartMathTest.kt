@@ -2,9 +2,25 @@ package com.magimon.eq.bubble
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import java.util.Locale
 
 class BubbleChartMathTest {
+
+    private lateinit var previousLocale: Locale
+
+    @Before
+    fun setUp() {
+        previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+    }
+
+    @After
+    fun tearDown() {
+        Locale.setDefault(previousLocale)
+    }
 
     @Test
     fun resolveRange_usesAutoMinMax() {
@@ -58,5 +74,35 @@ class BubbleChartMathTest {
 
         assertTrue(x in outMin..outMax)
         assertTrue(y in 10f..110f)
+    }
+
+    @Test
+    fun normalize_clampsForOutOfRangeAndInvalidSpan() {
+        val range = BubbleChartMath.NumericRange(0.0, 100.0)
+        val flatRange = BubbleChartMath.NumericRange(5.0, 5.0)
+
+        assertEquals(0.0, BubbleChartMath.normalize(-10.0, range), 0.0001)
+        assertEquals(0.5, BubbleChartMath.normalize(50.0, range), 0.0001)
+        assertEquals(1.0, BubbleChartMath.normalize(120.0, range), 0.0001)
+        assertEquals(0.5, BubbleChartMath.normalize(42.0, flatRange), 0.0001)
+    }
+
+    @Test
+    fun tickValues_returnsMinAndMaxWhenTickCountIsTooSmall() {
+        val range = BubbleChartMath.NumericRange(-2.0, 6.0)
+
+        assertEquals(listOf(-2.0, 6.0), BubbleChartMath.tickValues(range, 1))
+        assertEquals(listOf(-2.0, 6.0), BubbleChartMath.tickValues(range, 0))
+    }
+
+    @Test
+    fun defaultNumberFormat_coversAllThresholdBranches() {
+        assertEquals("1.0B", BubbleChartMath.defaultNumberFormat(1_000_000_000.0))
+        assertEquals("1.5M", BubbleChartMath.defaultNumberFormat(1_500_000.0))
+        assertEquals("2.5K", BubbleChartMath.defaultNumberFormat(2_500.0))
+        assertEquals("100", BubbleChartMath.defaultNumberFormat(100.0))
+        assertEquals("10.5", BubbleChartMath.defaultNumberFormat(10.5))
+        assertEquals("9.50", BubbleChartMath.defaultNumberFormat(9.5))
+        assertEquals("-2.5K", BubbleChartMath.defaultNumberFormat(-2_500.0))
     }
 }

@@ -8,13 +8,13 @@ import kotlin.math.min
 import kotlin.math.sin
 
 /**
- * 레이더 차트 좌표/히트테스트 계산 유틸리티.
+ * Radar chart coordinate and hit-test math utilities.
  *
- * 뷰 렌더링 코드에서 수학 계산을 분리해 테스트 가능성을 높이기 위한 내부 유틸이다.
+ * Internal helper that isolates math from rendering code for better testability.
  */
 internal object RadarChartMath {
     /**
-     * 2차원 좌표.
+     * 2D coordinate.
      */
     data class Vec2(
         val x: Float,
@@ -22,11 +22,11 @@ internal object RadarChartMath {
     )
 
     /**
-     * 터치 히트테스트 결과.
+     * Touch hit-test result.
      *
-     * @property seriesIndex 선택된 시리즈 인덱스
-     * @property axisIndex 선택된 축 인덱스
-     * @property distance 터치 좌표와 포인트 사이 거리(px)
+     * @property seriesIndex Selected series index
+     * @property axisIndex Selected axis index
+     * @property distance Distance between touch coordinate and point (px)
      */
     data class HitResult(
         val seriesIndex: Int,
@@ -35,9 +35,9 @@ internal object RadarChartMath {
     )
 
     /**
-     * 원본 값을 `0..1` 범위로 정규화한다.
+     * Normalizes a raw value to the `0..1` range.
      *
-     * 잘못된 입력(`NaN`, `Infinity`, `max<=0`)은 0으로 처리한다.
+     * Invalid inputs (`NaN`, `Infinity`, `max<=0`) are treated as 0.
      */
     fun normalize(value: Double, maxValue: Double): Float {
         if (!value.isFinite() || !maxValue.isFinite() || maxValue <= 0.0) return 0f
@@ -46,14 +46,14 @@ internal object RadarChartMath {
     }
 
     /**
-     * 지정한 축 인덱스의 극좌표 정점을 계산한다.
+     * Computes the polar-coordinate vertex for a given axis index.
      *
-     * @param centerX 차트 중심 X
-     * @param centerY 차트 중심 Y
-     * @param radius 중심으로부터 반지름(px)
-     * @param axisIndex 대상 축 인덱스
-     * @param axisCount 전체 축 개수
-     * @param startAngleDeg 시작 각도(도)
+     * @param centerX Chart center X
+     * @param centerY Chart center Y
+     * @param radius Radius from center (px)
+     * @param axisIndex Target axis index
+     * @param axisCount Total number of axes
+     * @param startAngleDeg Start angle in degrees
      */
     fun vertex(
         centerX: Float,
@@ -73,16 +73,16 @@ internal object RadarChartMath {
     }
 
     /**
-     * 시리즈 값을 폴리곤 정점 목록으로 변환한다.
+     * Converts series values into polygon vertices.
      *
-     * @param values 축 순서와 동일한 값 목록
-     * @param maxValue 값 정규화 기준 최대값
-     * @param centerX 차트 중심 X
-     * @param centerY 차트 중심 Y
-     * @param radius 차트 최대 반지름(px)
-     * @param axisCount 전체 축 개수
-     * @param progress 등장 애니메이션 진행률(0..1)
-     * @param startAngleDeg 시작 각도(도)
+     * @param values Axis-ordered value list
+     * @param maxValue Normalization max value
+     * @param centerX Chart center X
+     * @param centerY Chart center Y
+     * @param radius Maximum chart radius (px)
+     * @param axisCount Total number of axes
+     * @param progress Enter-animation progress (0..1)
+     * @param startAngleDeg Start angle in degrees
      */
     fun polygonPoints(
         values: List<Double>,
@@ -114,13 +114,13 @@ internal object RadarChartMath {
     }
 
     /**
-     * 터치 좌표에 가장 가까운 포인트를 반환한다.
+     * Returns the nearest point to a touch coordinate.
      *
-     * @param touchX 터치 X
-     * @param touchY 터치 Y
-     * @param pointsBySeries 시리즈별 정점 목록
-     * @param hitRadiusPx 허용 클릭 반경(px)
-     * @return 반경 이내의 최근접 포인트. 없으면 `null`
+     * @param touchX Touch X
+     * @param touchY Touch Y
+     * @param pointsBySeries Point list grouped by series
+     * @param hitRadiusPx Allowed hit radius (px)
+     * @return Nearest point within the radius, or `null` if none
      */
     fun nearestPoint(
         touchX: Float,
