@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `PCM Waveform`, `Radar`, `Pie`, and `Donut` charts.
+It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, and `Donut` charts.
 
 ## Project Structure
 
@@ -18,10 +18,20 @@ It currently provides `Heatmap`, `Bubble`, `PCM Waveform`, `Radar`, `Pie`, and `
 
 - Heatmap: Section-based treemap-style stock heatmap
 - Bubble: Scatter / Packed bubble chart
+- Line: Multi-series Cartesian line chart with grid / legend / point selection
+- Area: Filled line chart variant for trend comparison
+- Bar: Grouped / stacked bar chart with vertical / horizontal orientation
 - PCM Waveform: Real-time 16-bit mono PCM waveform rendering
 - Radar: Multi-series radar chart (legend/animation/point click)
 - Pie: Ratio-based pie chart (legend/labels/click)
 - Donut: Donut chart with center text/labels/click
+
+## Chart Families
+
+- Tiled: Heatmap
+- Axis-based: Bubble, Line, Area, Bar
+- Radial: Radar, Pie, Donut
+- Signal: PCM Waveform
 
 ## Development Environment
 
@@ -144,6 +154,8 @@ PieChart(
 Compose module exports:
 - `StockHeatmapChart(...)`
 - `BubbleChart(...)`
+- `LineChart(...)`, `AreaChart(...)`
+- `BarChart(...)`
 - `PcmWaveformChart(...)` + `rememberPcmWaveformController(...)`
 - `RadarChart(...)`
 - `PieChart(...)`, `DonutChart(...)`
@@ -232,7 +244,132 @@ val bubbleView = BubbleChartView(this).apply {
 setContentView(bubbleView)
 ```
 
-### 3) PCM Waveform
+### 3) Line / Area
+
+Key classes:
+- `LineChartView`, `AreaChartView`
+- `LineSeries`, `LineDatum`
+- `LineChartStyleOptions`, `LineChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val series = listOf(
+    LineSeries(
+        name = "Traffic",
+        color = Color.parseColor("#2B80FF"),
+        points = listOf(
+            LineDatum(0.0, 10.0, "Jan"),
+            LineDatum(1.0, 14.0, "Feb"),
+            LineDatum(2.0, 18.0, "Mar"),
+        ),
+        payload = "Traffic",
+        areaFillColor = Color.parseColor("#2B80FF"),
+    ),
+    LineSeries(
+        name = "Conversion",
+        color = Color.parseColor("#13C3A3"),
+        points = listOf(
+            LineDatum(0.0, 8.0, "Jan"),
+            LineDatum(1.0, 11.0, "Feb"),
+            LineDatum(2.0, 15.0, "Mar"),
+        ),
+        payload = "Conversion",
+    ),
+)
+
+val lineChart = LineChartView(this).apply {
+    setStyleOptions(
+        LineChartStyleOptions(
+            backgroundColor = Color.parseColor("#F7FAFC"),
+            axisColor = Color.parseColor("#8D9AA8"),
+            axisLabelColor = Color.parseColor("#3B4350"),
+            legendTextColor = Color.parseColor("#273447"),
+        ),
+    )
+    setPresentationOptions(
+        LineChartPresentationOptions(
+            showLegend = true,
+            showGrid = true,
+            showAxes = true,
+            showPoints = true,
+        ),
+    )
+    setSeries(series)
+    setOnPointClickListener { _, _, point, payload ->
+        // use point.x, point.y, payload
+    }
+}
+
+val areaChart = AreaChartView(this).apply {
+    setPresentationOptions(
+        LineChartPresentationOptions(
+            showLegend = true,
+            showAreaFill = true,
+        ),
+    )
+    setSeries(series)
+}
+```
+
+Notes:
+- `AreaChartView` is the filled variant that reuses the same `LineSeries` / `LineDatum` model
+- Only finite `(x, y)` points are rendered
+
+### 4) Bar
+
+Key classes:
+- `BarChartView`
+- `BarSeries`, `BarDatum`
+- `BarChartStyleOptions`, `BarChartPresentationOptions`
+- `BarLayoutMode`, `BarOrientation`
+
+Basic example:
+
+```kotlin
+val barChart = BarChartView(this).apply {
+    setPresentationOptions(
+        BarChartPresentationOptions(
+            showLegend = true,
+            showGrid = true,
+            showAxes = true,
+            layoutMode = BarLayoutMode.GROUPED,
+            orientation = BarOrientation.VERTICAL,
+        ),
+    )
+
+    setSeries(
+        listOf(
+            BarSeries(
+                name = "Desktop",
+                color = Color.parseColor("#2B80FF"),
+                points = listOf(
+                    BarDatum("Q1", 12.0, "Desktop-Q1"),
+                    BarDatum("Q2", 16.0, "Desktop-Q2"),
+                ),
+            ),
+            BarSeries(
+                name = "Mobile",
+                color = Color.parseColor("#13C3A3"),
+                points = listOf(
+                    BarDatum("Q1", 9.0, "Mobile-Q1"),
+                    BarDatum("Q2", 14.0, "Mobile-Q2"),
+                ),
+            ),
+        ),
+    )
+
+    setOnBarClickListener { _, categoryIndex, value, payload ->
+        // use categoryIndex, value, payload
+    }
+}
+```
+
+Notes:
+- Categories are resolved from the union of `BarDatum.category` values across all series
+- `layoutMode` supports `GROUPED` and `STACKED`; `orientation` supports `VERTICAL` and `HORIZONTAL`
+
+### 5) PCM Waveform
 
 Key classes:
 - `PcmWaveFormView`
@@ -262,7 +399,7 @@ Notes:
 - Input data type is `ShortArray` (16-bit mono PCM)
 - Internally keeps only a recent N-ms window
 
-### 4) Radar
+### 6) Radar
 
 Key classes:
 - `RadarChartView`
@@ -311,7 +448,7 @@ setContentView(radarView)
 Note:
 - Each `RadarSeries.values` size must match axis count to render.
 
-### 5) Pie / Donut
+### 7) Pie / Donut
 
 Key classes:
 - `PieChartView`, `DonutChartView`
