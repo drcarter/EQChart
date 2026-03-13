@@ -38,6 +38,21 @@
             android:label="Stock Heatmap"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.LineActivity"
+            android:exported="true"
+            android:label="Line Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.AreaActivity"
+            android:exported="true"
+            android:label="Area Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.BarActivity"
+            android:exported="true"
+            android:label="Bar Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.BubbleActivity"
             android:exported="true"
             android:label="Bubble Chart"
@@ -91,6 +106,21 @@
             android:name=".ui.compose.ComposeDonutActivity"
             android:exported="true"
             android:label="Compose Donut"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeLineActivity"
+            android:exported="true"
+            android:label="Compose Line"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeAreaActivity"
+            android:exported="true"
+            android:label="Compose Area"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeBarActivity"
+            android:exported="true"
+            android:label="Compose Bar"
             android:theme="@style/Theme.EQChart" />
     </application>
 

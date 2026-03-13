@@ -35,6 +35,15 @@ class ViewSamplesMenuActivity : AppCompatActivity() {
             menuButton("Bubble", buttonParams) { BubbleActivity::class.java },
         )
         container.addView(
+            menuButton("Line", buttonParams) { LineActivity::class.java },
+        )
+        container.addView(
+            menuButton("Area", buttonParams) { AreaActivity::class.java },
+        )
+        container.addView(
+            menuButton("Bar", buttonParams) { BarActivity::class.java },
+        )
+        container.addView(
             menuButton("PCM Waveform", buttonParams) { WaveformFileActivity::class.java },
         )
         container.addView(

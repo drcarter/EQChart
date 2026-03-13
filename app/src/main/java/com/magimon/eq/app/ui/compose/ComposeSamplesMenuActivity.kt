@@ -30,6 +30,9 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
 
         container.addView(menuButton("Heatmap", buttonParams) { ComposeHeatmapActivity::class.java })
         container.addView(menuButton("Bubble", buttonParams) { ComposeBubbleActivity::class.java })
+        container.addView(menuButton("Line", buttonParams) { ComposeLineActivity::class.java })
+        container.addView(menuButton("Area", buttonParams) { ComposeAreaActivity::class.java })
+        container.addView(menuButton("Bar", buttonParams) { ComposeBarActivity::class.java })
         container.addView(menuButton("PCM Waveform", buttonParams) { ComposeWaveformActivity::class.java })
         container.addView(menuButton("Radar", buttonParams) { ComposeRadarActivity::class.java })
         container.addView(menuButton("Pie", buttonParams) { ComposePieActivity::class.java })
