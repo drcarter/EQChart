@@ -39,9 +39,11 @@ android {
 dependencies {
 
     implementation(project(":EQChart"))
+    implementation(project(":EQChart-compose"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

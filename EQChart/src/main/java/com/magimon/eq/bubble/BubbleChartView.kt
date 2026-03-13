@@ -17,11 +17,11 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * 버블 차트를 렌더링하는 커스텀 View.
+ * Custom view that renders a bubble chart.
  *
- * - `SCATTER`/`PACKED` 레이아웃 모드를 지원한다.
- * - 축/그리드 옵션은 [BubbleAxisOptions]로 제어한다.
- * - 제목/범례 옵션은 [BubblePresentationOptions]로 제어한다.
+ * - Supports `SCATTER` and `PACKED` layout modes.
+ * - Axis/grid behavior is controlled by [BubbleAxisOptions].
+ * - Title/legend behavior is controlled by [BubblePresentationOptions].
  */
 class BubbleChartView @JvmOverloads constructor(
     context: Context,
@@ -119,7 +119,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 축/그리드 표시 옵션을 설정한다.
+     * Sets axis and grid display options.
      */
     fun setAxisOptions(options: BubbleAxisOptions) {
         axisOptions = options
@@ -128,7 +128,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 제목/범례 등 프레젠테이션 옵션을 설정한다.
+     * Sets presentation options such as title and legend.
      */
     fun setPresentationOptions(options: BubblePresentationOptions) {
         presentationOptions = options
@@ -137,9 +137,9 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 범례 명시 항목을 설정한다.
+     * Sets explicit legend items.
      *
-     * [BubblePresentationOptions.legendMode]에 따라 사용 여부가 달라진다.
+     * Whether these items are used depends on [BubblePresentationOptions.legendMode].
      */
     fun setLegendItems(items: List<BubbleLegendItem>) {
         explicitLegendItems = items
@@ -148,7 +148,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 축/크기 스케일 오버라이드를 설정한다.
+     * Sets manual axis/size scale overrides.
      */
     fun setScaleOverride(override: BubbleScaleOverride?) {
         scaleOverride = override
@@ -157,7 +157,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 버블 배치 모드를 설정한다.
+     * Sets the bubble layout mode.
      */
     fun setLayoutMode(mode: BubbleLayoutMode) {
         layoutMode = mode
@@ -166,7 +166,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 차트 배경색을 설정한다.
+     * Sets the chart background color.
      */
     fun setChartBackgroundColor(color: Int) {
         backgroundPaint.color = color
@@ -174,9 +174,9 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 버블 데이터 목록을 설정한다.
+     * Sets the bubble dataset.
      *
-     * 유한값이 아닌 `x/y/size`는 자동으로 제외된다.
+     * Non-finite `x/y/size` values are filtered out automatically.
      */
     fun setData(data: List<BubbleDatum>) {
         rawData.clear()
@@ -187,14 +187,14 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 원본 타입을 [BubbleDatum]으로 매핑해 데이터를 설정한다.
+     * Sets data by mapping an arbitrary source type into [BubbleDatum].
      */
     fun <T> setData(items: List<T>, mapper: (T) -> BubbleDatum) {
         setData(items.map(mapper))
     }
 
     /**
-     * 버블 클릭 리스너를 설정한다.
+     * Sets the bubble click listener.
      */
     fun setOnBubbleClickListener(listener: (BubbleDatum) -> Unit) {
         onBubbleClickListener = listener
@@ -215,7 +215,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 데이터/옵션/뷰 크기를 기준으로 버블 좌표와 플롯 영역을 다시 계산한다.
+     * Recomputes bubble coordinates and plot bounds from current data/options/view size.
      */
     private fun recomputeLayout(width: Int, height: Int) {
         bubbleLayouts.clear()
@@ -315,7 +315,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 제목 텍스트를 좌측 상단에 렌더링한다.
+     * Renders the title at the top-left area.
      */
     private fun drawTitle(canvas: Canvas) {
         val title = presentationOptions.title?.trim().orEmpty()
@@ -327,7 +327,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 범례 항목을 좌측 하단에 렌더링한다.
+     * Renders legend items near the bottom-left area.
      */
     private fun drawLegend(canvas: Canvas) {
         if (!presentationOptions.showLegend || resolvedLegendItems.isEmpty() || plotRect.height() <= 0f) return
@@ -385,7 +385,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 버블 내부 라벨을 대비색으로 렌더링한다.
+     * Renders in-bubble labels with a contrast-aware text color.
      */
     private fun drawBubbleLabel(canvas: Canvas, bubble: BubbleLayout) {
         val lines = bubble.datum.label
@@ -412,7 +412,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 프레젠테이션 옵션 기반으로 Paint 스타일을 반영한다.
+     * Applies paint styles from presentation options.
      */
     private fun applyPresentationStyles() {
         titlePaint.color = presentationOptions.titleColor
@@ -423,7 +423,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 제목 영역 예약 높이를 계산한다.
+     * Computes reserved height for the title area.
      */
     private fun resolveTitleReservedHeight(): Float {
         val title = presentationOptions.title?.trim().orEmpty()
@@ -432,7 +432,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 범례 영역 예약 높이를 계산한다.
+     * Computes reserved height for the legend area.
      */
     private fun resolveLegendReservedHeight(): Float {
         if (!presentationOptions.showLegend || resolvedLegendItems.isEmpty()) return 0f
@@ -449,7 +449,7 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * 범례 모드와 데이터를 바탕으로 최종 범례 항목을 계산한다.
+     * Resolves final legend items from mode and current data.
      */
     private fun resolveLegendItems(): List<BubbleLegendItem> {
         return BubbleLegendResolver.resolve(
@@ -460,9 +460,9 @@ class BubbleChartView @JvmOverloads constructor(
     }
 
     /**
-     * `PACKED` 모드의 버블 배치를 계산한다.
+     * Computes bubble layout for `PACKED` mode.
      *
-     * 초기 나선 배치 후 충돌 해소 반복을 수행하고 플롯 영역에 맞게 스케일링한다.
+     * Starts from a spiral seed, resolves overlaps iteratively, then scales to fit plot bounds.
      */
     private fun buildPackedLayouts(minRadius: Float, maxRadius: Float): List<BubbleLayout> {
         sizeRange = BubbleChartMath.resolveRange(rawData.map { it.size }, null, null)

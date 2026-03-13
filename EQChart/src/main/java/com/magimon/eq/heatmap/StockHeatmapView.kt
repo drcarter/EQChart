@@ -12,11 +12,11 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * 트레이딩뷰 스타일에 가까운 주식 히트맵 뷰.
+ * Stock heatmap view inspired by TradingView-style layouts.
  *
- * - 블록 색상: [StockHeatmapItem.changePct] 기반 매핑
- * - 블록 면적: `sizeRatio` 우선, 없으면 `marketCap` 기반
- * - 그룹 배치: 2단계 스퀘어리파이드 트리맵 레이아웃
+ * - Block color: mapped from [StockHeatmapItem.changePct]
+ * - Block area: prefers `sizeRatio`, otherwise uses `marketCap`
+ * - Group layout: two-stage squarified treemap
  */
 class StockHeatmapView @JvmOverloads constructor(
     context: Context,
@@ -82,16 +82,16 @@ class StockHeatmapView @JvmOverloads constructor(
     private var itemClickListener: ((StockHeatmapItem) -> Unit)? = null
 
     /**
-     * 종목 블록 클릭 리스너를 설정한다.
+     * Sets the click listener for stock blocks.
      */
     fun setOnItemClickListener(listener: (StockHeatmapItem) -> Unit) {
         itemClickListener = listener
     }
 
     /**
-     * 하위 호환 API.
+     * Backward-compatible API.
      *
-     * 평탄한 종목 목록을 받아 `item.sector` 기준으로 자동 그룹핑한다.
+     * Accepts a flat stock list and auto-groups by `item.sector`.
      */
     fun setData(data: List<StockHeatmapItem>) {
         val grouped = data.groupBy { it.sector }
@@ -106,9 +106,9 @@ class StockHeatmapView @JvmOverloads constructor(
     }
 
     /**
-     * 권장 API.
+     * Recommended API.
      *
-     * 섹션 이름/색상/종목 목록을 명시적으로 전달한다.
+     * Passes section name/color/item list explicitly.
      */
     fun setSections(data: List<StockHeatmapSection>) {
         sections.clear()
@@ -138,7 +138,7 @@ class StockHeatmapView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 크기와 섹션 데이터를 기준으로 전체 트리맵 배치를 다시 계산한다.
+     * Recomputes the full treemap layout from current size and section data.
      */
     private fun recomputeLayout(width: Int, height: Int) {
         blocks.clear()
@@ -229,9 +229,9 @@ class StockHeatmapView @JvmOverloads constructor(
     }
 
     /**
-     * 항목의 면적 가중치를 계산한다.
+     * Calculates the area weight for an item.
      *
-     * `sizeRatio`가 유효하면 우선 사용하고, 아니면 `marketCap`을 사용한다.
+     * Uses `sizeRatio` when valid; otherwise falls back to `marketCap`.
      */
     private fun itemWeight(item: StockHeatmapItem): Float {
         val ratio = item.sizeRatio ?: 0.0
@@ -239,14 +239,14 @@ class StockHeatmapView @JvmOverloads constructor(
     }
 
     /**
-     * 사각형 안쪽으로 동일한 여백을 적용한 새 Rect를 반환한다.
+     * Returns a new rect inset by the same margin on all sides.
      */
     private fun insetRect(src: RectF, inset: Float): RectF {
         return RectF(src.left + inset, src.top + inset, src.right - inset, src.bottom - inset)
     }
 
     /**
-     * 기존 색상에 alpha 값을 덮어쓴 색상을 반환한다.
+     * Returns a color with overridden alpha based on an existing color.
      */
     private fun withAlpha(color: Int, alpha: Int): Int {
         return Color.argb(alpha.coerceIn(0, 255), Color.red(color), Color.green(color), Color.blue(color))
@@ -270,7 +270,7 @@ class StockHeatmapView @JvmOverloads constructor(
     )
 
     /**
-     * 스퀘어리파이드 트리맵 알고리즘으로 가중치 목록을 사각형 영역에 배치한다.
+     * Lays out weighted items into a rectangle using the squarified treemap algorithm.
      */
     private fun <T> layoutSquarified(
         items: List<WeightedItem<T>>,
@@ -303,7 +303,7 @@ class StockHeatmapView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 행의 종횡비를 악화시키지 않도록 항목을 순차 배치한다.
+     * Adds items sequentially while keeping row aspect ratio from getting worse.
      */
     private fun <T> squarify(
         remaining: MutableList<WeightedItem<T>>,
@@ -343,7 +343,7 @@ class StockHeatmapView @JvmOverloads constructor(
     }
 
     /**
-     * 현재 행(row)을 실제 사각형으로 확정 배치하고, 남은 Rect를 반환한다.
+     * Finalizes placement for the current row and returns the remaining rect.
      */
     private fun <T> layoutRow(
         row: List<WeightedItem<T>>,
@@ -389,9 +389,9 @@ class StockHeatmapView @JvmOverloads constructor(
     }
 
     /**
-     * 행(row) 항목들의 최악 종횡비를 계산한다.
+     * Computes the worst aspect ratio among items in the row.
      *
-     * 값이 작을수록 정사각형에 가까운 배치다.
+     * Smaller values indicate a layout closer to square blocks.
      */
     private fun worstAspectRatio(
         row: List<WeightedItem<*>>,
@@ -444,7 +444,7 @@ class StockHeatmapView @JvmOverloads constructor(
     }
 
     /**
-     * 블록 크기에 따라 티커/등락률 텍스트를 조건부로 렌더링한다.
+     * Conditionally renders ticker/change text based on block size.
      */
     private fun drawItemText(canvas: Canvas, block: BlockRect) {
         val rect = block.rect
