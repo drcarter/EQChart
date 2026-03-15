@@ -45,9 +45,10 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
 
 - Release version format: `YYYY.MM.DD`
 - Same-day republish format: `YYYY.MM.DD.N` (`N = 1, 2, 3 ...`)
-- Examples:
-  - First release of the day: `2026.03.08`
-  - Second release on the same day: `2026.03.08.1`
+- Version placeholder used in this README: `latest_version`
+- Published versions follow one of these forms:
+  - First release of the day: `YYYY.MM.DD`
+  - Same-day republish: `YYYY.MM.DD.N`
 
 ## Installation
 
@@ -90,12 +91,14 @@ gpr.key=YOUR_GITHUB_TOKEN_WITH_read:packages
 ```kotlin
 dependencies {
     // View charts
-    implementation("com.magimon.eq:eqchart:2026.03.08")
+    implementation("com.magimon.eq:eqchart:latest_version")
 
     // Compose charts
-    implementation("com.magimon.eq:eqchart-compose:2026.03.08")
+    implementation("com.magimon.eq:eqchart-compose:latest_version")
 }
 ```
+
+Replace `latest_version` with the latest published EQChart version.
 
 `eqchart` and `eqchart-compose` transitively include `eqchart-common`,
 so `eqchart-common` usually does not need to be added separately.
