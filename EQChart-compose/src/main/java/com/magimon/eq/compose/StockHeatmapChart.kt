@@ -54,6 +54,15 @@ private data class HeatmapComputed(
     val sectionHeaders: List<HeatmapSectionLayout>,
 )
 
+/**
+ * Stock heatmap composable that renders explicit section groups.
+ *
+ * Sections with blank names or without positive-weight items are ignored before layout.
+ *
+ * @param sections Grouped heatmap data to render
+ * @param modifier Standard Compose modifier for layout and gestures
+ * @param onItemClick Optional callback invoked with the tapped stock item
+ */
 @Composable
 fun StockHeatmapChart(
     sections: List<StockHeatmapSection>,
@@ -142,6 +151,15 @@ fun StockHeatmapChart(
     }
 }
 
+/**
+ * Convenience heatmap composable that groups a flat item list by `sector`.
+ *
+ * Sector colors are resolved through the same helper mapping used by the View-based heatmap.
+ *
+ * @param items Flat stock item list to group and render
+ * @param modifier Standard Compose modifier for layout and gestures
+ * @param onItemClick Optional callback invoked with the tapped stock item
+ */
 @Composable
 fun StockHeatmapChartFromItems(
     items: List<StockHeatmapItem>,

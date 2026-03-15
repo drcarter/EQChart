@@ -64,6 +64,20 @@ private data class RadarComputed(
     val legendItems: List<RadarLegendItemDraw>,
 )
 
+/**
+ * Radar chart composable for multi-series polygon comparison.
+ *
+ * Only series whose value count matches [axes].size are rendered. Point selection is resolved by
+ * distance to the nearest visible vertex within the configured touch radius.
+ *
+ * @param axes Axis metadata used for labels and point ordering
+ * @param series Series data to render
+ * @param modifier Standard Compose modifier for layout and gestures
+ * @param valueMax Maximum value used to normalize each axis
+ * @param styleOptions Colors and stroke widths for grid, axes, polygons, and markers
+ * @param presentationOptions Label, legend, selection, and animation options
+ * @param onPointClick Optional callback invoked as `(seriesIndex, axisIndex, value, payload)` when a point is tapped
+ */
 @Composable
 fun RadarChart(
     axes: List<RadarAxis>,

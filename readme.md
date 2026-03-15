@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, and `Donut` charts.
+It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, and `Sankey` charts.
 
 ## Project Structure
 
@@ -25,12 +25,15 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
 - Radar: Multi-series radar chart (legend/animation/point click)
 - Pie: Ratio-based pie chart (legend/labels/click)
 - Donut: Donut chart with center text/labels/click
+- Gauge: Semi-circular single-value gauge with ranges/ticks/indicator
+- Sankey: Flow diagram with nodes/links, stage inference, and tap highlight
 
 ## Chart Families
 
 - Tiled: Heatmap
 - Axis-based: Bubble, Line, Area, Bar
-- Radial: Radar, Pie, Donut
+- Radial: Radar, Pie, Donut, Gauge
+- Flow: Sankey
 - Signal: PCM Waveform
 
 ## Development Environment
@@ -162,6 +165,8 @@ Compose module exports:
 - `PcmWaveformChart(...)` + `rememberPcmWaveformController(...)`
 - `RadarChart(...)`
 - `PieChart(...)`, `DonutChart(...)`
+- `GaugeChart(...)`
+- `SankeyChart(...)`
 
 ## Usage by Chart
 
@@ -502,6 +507,99 @@ Notes:
 - `PieSlice.value` must be finite and `> 0` to render
 - If valid total is 0, `emptyText` is shown
 - Selection explode effect is controlled by `enableSelectionExpand`, `selectedSliceExpandDp`, and `selectedSliceExpandAnimMs`
+
+### 8) Gauge
+
+Key classes:
+- `GaugeChartView`
+- `GaugeValue`, `GaugeRange`
+- `GaugeChartStyleOptions`, `GaugeChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val gaugeView = GaugeChartView(this).apply {
+    setRanges(
+        listOf(
+            GaugeRange(0.0, 50.0, Color.parseColor("#13C3A3")),
+            GaugeRange(50.0, 80.0, Color.parseColor("#FF9F1C")),
+            GaugeRange(80.0, 100.0, Color.parseColor("#EF476F")),
+        ),
+    )
+    setPresentationOptions(
+        GaugeChartPresentationOptions(
+            showTicks = true,
+            tickCount = 5,
+            showMinMaxLabels = true,
+            showValueText = true,
+            showCenterLabel = true,
+        ),
+    )
+    setValue(
+        GaugeValue(
+            value = 72.0,
+            minValue = 0.0,
+            maxValue = 100.0,
+            label = "CPU usage",
+        ),
+    )
+}
+```
+
+Notes:
+- `GaugeValue.maxValue` must be greater than `minValue`
+- `value` is clamped into the configured range before rendering
+- Invalid ranges (`end <= start`, NaN, infinite) are ignored
+- Compose uses `GaugeChart(...)` with the same shared models/options
+
+### 9) Sankey
+
+Key classes:
+- `SankeyChartView`
+- `SankeyNode`, `SankeyLink`
+- `SankeyChartStyleOptions`, `SankeyChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val nodes = listOf(
+    SankeyNode("direct", "Direct", Color.parseColor("#2B80FF")),
+    SankeyNode("search", "Search", Color.parseColor("#13C3A3")),
+    SankeyNode("landing", "Landing", Color.parseColor("#6F8695")),
+    SankeyNode("trial", "Trial", Color.parseColor("#8A79FF")),
+    SankeyNode("paid", "Paid", Color.parseColor("#2A9D8F")),
+)
+
+val links = listOf(
+    SankeyLink("direct", "landing", 28.0),
+    SankeyLink("search", "landing", 34.0),
+    SankeyLink("landing", "trial", 30.0),
+    SankeyLink("trial", "paid", 16.0),
+)
+
+val sankeyView = SankeyChartView(this).apply {
+    setPresentationOptions(
+        SankeyChartPresentationOptions(
+            showNodeLabels = true,
+            showLinkValues = true,
+        ),
+    )
+    setNodes(nodes)
+    setLinks(links)
+    setOnNodeClickListener { nodeIndex, node, payload ->
+        // use node.id, node.label, payload
+    }
+    setOnLinkClickListener { linkIndex, link, payload ->
+        // use link.sourceId, link.targetId, link.value, payload
+    }
+}
+```
+
+Notes:
+- `SankeyLink.value` must be finite and `> 0`
+- `SankeyNode.stage` is optional; if omitted, stage is inferred from links
+- Cycles or backward stage assignments fall back to `emptyText`
+- Compose uses `SankeyChart(...)` with the same shared models/options
 
 ## Test
 

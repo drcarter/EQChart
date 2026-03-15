@@ -16,6 +16,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.magimon.eq.waveform.PcmWaveFormStyleOptions
 
+/**
+ * Mutable waveform buffer controller for [PcmWaveformChart].
+ *
+ * The controller keeps only the most recent PCM mono samples that fit inside the configured time
+ * window. Sample rate and window duration are clamped to safe bounds before capacity changes are
+ * applied.
+ */
 class PcmWaveformController internal constructor(
     sampleRateHz: Int,
     windowDurationMs: Int,
@@ -27,6 +34,11 @@ class PcmWaveformController internal constructor(
     internal var version by mutableLongStateOf(0L)
         private set
 
+    /**
+     * Updates the visible sample window in milliseconds.
+     *
+     * Values are clamped into `200..60000`.
+     */
     fun setWindowDurationMs(durationMs: Int) {
         val target = durationMs.coerceIn(200, 60_000)
         if (target == windowDurationMsState) return
@@ -38,6 +50,11 @@ class PcmWaveformController internal constructor(
         version += 1
     }
 
+    /**
+     * Updates the PCM sample rate used to size the internal ring buffer.
+     *
+     * Values are clamped into `8000..192000`.
+     */
     fun setSampleRateHz(hz: Int) {
         val target = hz.coerceIn(8_000, 192_000)
         if (target == sampleRateHzState) return
@@ -49,16 +66,25 @@ class PcmWaveformController internal constructor(
         version += 1
     }
 
+    /**
+     * Clears all buffered PCM samples.
+     */
     fun clear() {
         ringBuffer.clear()
         version += 1
     }
 
+    /**
+     * Replaces the buffered waveform with a full 16-bit mono PCM snapshot.
+     */
     fun setPcm16Mono(samples: ShortArray) {
         ringBuffer.setAll(samples)
         version += 1
     }
 
+    /**
+     * Appends a 16-bit mono PCM chunk to the current waveform window.
+     */
     fun appendPcm16Mono(samples: ShortArray) {
         if (samples.isEmpty()) return
         ringBuffer.append(samples)
@@ -73,6 +99,12 @@ class PcmWaveformController internal constructor(
     }
 }
 
+/**
+ * Remembers a stable [PcmWaveformController] across recompositions.
+ *
+ * Subsequent changes to [sampleRateHz] or [windowDurationMs] update the remembered controller
+ * instead of creating a new instance.
+ */
 @Composable
 fun rememberPcmWaveformController(
     sampleRateHz: Int = 44_100,
@@ -95,6 +127,16 @@ fun rememberPcmWaveformController(
     return controller
 }
 
+/**
+ * Compose waveform renderer for 16-bit mono PCM data.
+ *
+ * The chart draws the most recent samples exposed by [controller] using min/max downsampling per
+ * horizontal pixel, so long buffers remain inexpensive to display.
+ *
+ * @param controller Source of the current waveform window
+ * @param modifier Standard Compose modifier for layout
+ * @param styleOptions Rendering colors, padding, and amplitude styling
+ */
 @Composable
 fun PcmWaveformChart(
     controller: PcmWaveformController,

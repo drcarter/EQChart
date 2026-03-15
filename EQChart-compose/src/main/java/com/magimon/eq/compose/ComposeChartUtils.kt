@@ -7,19 +7,31 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * Converts an Android ARGB color int into a Compose [Color].
+ */
 internal fun Int.toComposeColor(): Color = Color(this)
 
+/**
+ * Resolves a Cartesian offset on a circle from degrees and radius.
+ */
 internal fun degreeToOffset(angleDeg: Float, radius: Float): Offset {
     val rad = angleDeg * (PI.toFloat() / 180f)
     return Offset(cos(rad) * radius, sin(rad) * radius)
 }
 
+/**
+ * Normalizes an angle into the `0..360` domain.
+ */
 internal fun normalizeAngle(angle: Float): Float {
     var value = angle % 360f
     if (value < 0f) value += 360f
     return value
 }
 
+/**
+ * Returns whether [angleDeg] falls inside the directed sweep described by [startDeg] and [sweepDeg].
+ */
 internal fun isAngleInSweep(angleDeg: Float, startDeg: Float, sweepDeg: Float): Boolean {
     if (sweepDeg == 0f) return false
     val angle = normalizeAngle(angleDeg)
@@ -33,6 +45,9 @@ internal fun isAngleInSweep(angleDeg: Float, startDeg: Float, sweepDeg: Float): 
     }
 }
 
+/**
+ * Creates a configured anti-aliased [Paint] instance for Compose canvas text rendering.
+ */
 internal fun newTextPaint(
     color: Int,
     textSizePx: Float,
