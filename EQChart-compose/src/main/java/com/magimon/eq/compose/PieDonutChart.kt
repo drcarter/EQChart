@@ -45,6 +45,15 @@ private data class PieSegment(
     val mid: Float,
 )
 
+/**
+ * Pie chart composable with slice selection callbacks.
+ *
+ * @param slices Pie slices to render
+ * @param modifier Standard Compose modifier for layout and gestures
+ * @param styleOptions Colors and spacing used while drawing the chart
+ * @param presentationOptions Label, legend, and animation options
+ * @param onSliceClick Optional callback invoked as `(sliceIndex, slice, payload)` when a slice is tapped
+ */
 @Composable
 fun PieChart(
     slices: List<PieSlice>,
@@ -63,6 +72,16 @@ fun PieChart(
     )
 }
 
+/**
+ * Donut chart composable with optional center content and slice selection.
+ *
+ * @param slices Pie slices to render
+ * @param modifier Standard Compose modifier for layout and gestures
+ * @param styleOptions Colors and spacing used while drawing the chart
+ * @param presentationOptions Label, legend, center-text, and animation options
+ * @param innerRadiusRatio Ratio of the inner cutout relative to the outer radius
+ * @param onSliceClick Optional callback invoked as `(sliceIndex, slice, payload)` when a slice is tapped
+ */
 @Composable
 fun DonutChart(
     slices: List<PieSlice>,

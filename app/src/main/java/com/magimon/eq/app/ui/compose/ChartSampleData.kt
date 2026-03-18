@@ -6,11 +6,15 @@ import com.magimon.eq.heatmap.StockHeatmapHelper
 import com.magimon.eq.heatmap.StockHeatmapSection
 import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarSeries
+import com.magimon.eq.gauge.GaugeRange
+import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
 import com.magimon.eq.pie.PieSlice
 import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarSeries
+import com.magimon.eq.sankey.SankeyLink
+import com.magimon.eq.sankey.SankeyNode
 import kotlin.random.Random
 import kotlin.math.PI
 import kotlin.math.sin
@@ -62,6 +66,48 @@ object ChartSampleData {
             PieSlice("Marketing", 22.0, Color.parseColor("#3A86FF"), "Marketing"),
             PieSlice("Sales", 27.0, Color.parseColor("#FFBE0B"), "Sales"),
             PieSlice("Ops", 13.0, Color.parseColor("#FB5607"), "Ops"),
+        )
+    }
+
+    fun gaugeValue(): GaugeValue {
+        return GaugeValue(
+            value = 72.0,
+            minValue = 0.0,
+            maxValue = 100.0,
+            label = "CPU usage",
+            payload = "CPU usage",
+        )
+    }
+
+    fun gaugeRanges(): List<GaugeRange> {
+        return listOf(
+            GaugeRange(0.0, 50.0, Color.parseColor("#13C3A3"), "Healthy"),
+            GaugeRange(50.0, 80.0, Color.parseColor("#FF9F1C"), "Warning"),
+            GaugeRange(80.0, 100.0, Color.parseColor("#EF476F"), "Critical"),
+        )
+    }
+
+    fun sankeyNodes(): List<SankeyNode> {
+        return listOf(
+            SankeyNode("direct", "Direct", Color.parseColor("#2B80FF")),
+            SankeyNode("search", "Search", Color.parseColor("#13C3A3")),
+            SankeyNode("landing", "Landing", Color.parseColor("#6F8695")),
+            SankeyNode("pricing", "Pricing", Color.parseColor("#FF9F1C")),
+            SankeyNode("trial", "Trial", Color.parseColor("#8A79FF")),
+            SankeyNode("paid", "Paid", Color.parseColor("#2A9D8F")),
+            SankeyNode("churn", "Churn", Color.parseColor("#EF476F")),
+        )
+    }
+
+    fun sankeyLinks(): List<SankeyLink> {
+        return listOf(
+            SankeyLink("direct", "landing", 28.0),
+            SankeyLink("search", "landing", 34.0),
+            SankeyLink("search", "pricing", 12.0),
+            SankeyLink("landing", "trial", 30.0),
+            SankeyLink("pricing", "trial", 18.0),
+            SankeyLink("trial", "paid", 16.0),
+            SankeyLink("trial", "churn", 32.0),
         )
     }
 

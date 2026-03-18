@@ -66,6 +66,20 @@ private data class BubbleChartComputed(
     val legendItems: List<BubbleLegendItem>,
 )
 
+/**
+ * Bubble chart composable that supports scatter and packed layouts.
+ *
+ * Invalid data points whose `x`, `y`, or `size` are not finite are filtered before layout.
+ *
+ * @param data Bubble dataset to render
+ * @param modifier Standard Compose modifier for layout and gesture handling
+ * @param axisOptions Axis, tick, and grid configuration used in scatter mode
+ * @param presentationOptions Title, legend, and text styling options
+ * @param scaleOverride Optional manual min/max overrides for x, y, and size normalization
+ * @param layoutMode Layout strategy for the bubbles
+ * @param legendItems Explicit legend items used when the presentation requests them
+ * @param onBubbleClick Optional callback invoked with the selected datum
+ */
 @Composable
 fun BubbleChart(
     data: List<BubbleDatum>,

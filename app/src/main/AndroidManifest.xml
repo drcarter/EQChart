@@ -78,6 +78,16 @@
             android:label="Donut Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.GaugeActivity"
+            android:exported="true"
+            android:label="Gauge Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.SankeyActivity"
+            android:exported="true"
+            android:label="Sankey Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.compose.ComposeHeatmapActivity"
             android:exported="true"
             android:label="Compose Heatmap"
@@ -106,6 +116,16 @@
             android:name=".ui.compose.ComposeDonutActivity"
             android:exported="true"
             android:label="Compose Donut"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeGaugeActivity"
+            android:exported="true"
+            android:label="Compose Gauge"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeSankeyActivity"
+            android:exported="true"
+            android:label="Compose Sankey"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeLineActivity"

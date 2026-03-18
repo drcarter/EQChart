@@ -55,6 +55,12 @@ class ViewSamplesMenuActivity : AppCompatActivity() {
         container.addView(
             menuButton("Donut", buttonParams) { DonutActivity::class.java },
         )
+        container.addView(
+            menuButton("Gauge", buttonParams) { GaugeActivity::class.java },
+        )
+        container.addView(
+            menuButton("Sankey", buttonParams) { SankeyActivity::class.java },
+        )
 
         applySampleToolbar(
             title = "Android View Samples",
