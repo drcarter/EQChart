@@ -43,12 +43,21 @@ class GaugeContractsTest {
 
     @Test
     fun gaugeRange_preservesProperties() {
+        val defaultRange = GaugeRange(
+            startValue = 0.0,
+            endValue = 50.0,
+            color = 0xFF13C3A3.toInt(),
+        )
         val range = GaugeRange(
             startValue = 50.0,
             endValue = 80.0,
             color = 0xFFFF9F1C.toInt(),
             label = "Warning",
         )
+
+        assertEquals(0.0, defaultRange.startValue, 0.0)
+        assertEquals(50.0, defaultRange.endValue, 0.0)
+        assertNull(defaultRange.label)
 
         assertEquals(50.0, range.startValue, 0.0)
         assertEquals(80.0, range.endValue, 0.0)

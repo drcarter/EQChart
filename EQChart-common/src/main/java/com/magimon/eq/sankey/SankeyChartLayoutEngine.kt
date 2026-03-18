@@ -248,12 +248,6 @@ object SankeyChartLayoutEngine {
             }
         }
 
-        compactLinks.forEach { link ->
-            if (compactNodes[link.targetIndex].stage <= compactNodes[link.sourceIndex].stage) {
-                return invalid("backward link")
-            }
-        }
-
         val incomingTotals = DoubleArray(compactNodes.size)
         val outgoingTotals = DoubleArray(compactNodes.size)
         compactLinks.forEach { link ->
@@ -265,7 +259,7 @@ object SankeyChartLayoutEngine {
         }
 
         val stageGroups = compactNodes.indices.groupBy { compactNodes[it].stage }.toSortedMap()
-        val stageCount = (stageGroups.keys.maxOrNull() ?: 0) + 1
+        val stageCount = stageGroups.lastKey() + 1
 
         val availableHeight = config.heightPx - (config.contentPaddingPx * 2f)
         val availableWidth = config.widthPx - (config.contentPaddingPx * 2f)
@@ -273,12 +267,19 @@ object SankeyChartLayoutEngine {
             return invalid("insufficient size")
         }
 
-        val valueScale = stageGroups.values.map { indices ->
+        var valueScale = Float.POSITIVE_INFINITY
+        stageGroups.values.forEach { indices ->
             val totalValue = indices.sumOf { compactNodes[it].totalValue }
             val gaps = config.nodeGapPx * max(0, indices.size - 1)
             val usable = availableHeight - gaps
-            if (totalValue <= 0.0 || usable <= 0f) 0f else (usable / totalValue).toFloat()
-        }.minOrNull()?.takeIf { it > 0f } ?: return invalid("invalid scale")
+            val stageScale = if (usable <= 0f) 0f else (usable / totalValue).toFloat()
+            if (stageScale < valueScale) {
+                valueScale = stageScale
+            }
+        }
+        if (valueScale <= 0f) {
+            return invalid("invalid scale")
+        }
 
         val stageHeights = mutableMapOf<Int, FloatArray>()
         stageGroups.forEach { (stage, indices) ->
@@ -291,9 +292,8 @@ object SankeyChartLayoutEngine {
             )
         }
 
-        val maxColumnGap = if (stageCount <= 1) 0f else {
+        val maxColumnGap =
             ((availableWidth - (config.nodeWidthPx * stageCount)) / (stageCount - 1)).coerceAtLeast(0f)
-        }
         val actualColumnGap = min(config.columnGapPx, maxColumnGap)
         val usedWidth = (config.nodeWidthPx * stageCount) + (actualColumnGap * max(0, stageCount - 1))
         val startLeft = config.contentPaddingPx + ((availableWidth - usedWidth) * 0.5f).coerceAtLeast(0f)
@@ -491,14 +491,17 @@ object SankeyChartLayoutEngine {
             cursor = node.bottom + nodeGapPx
         }
 
-        val overflow = (ordered.lastOrNull()?.let { compactNodes[it.first].bottom } ?: contentPaddingPx) - (contentPaddingPx + availableHeightPx)
+        val overflow = compactNodes[ordered.last().first].bottom - (contentPaddingPx + availableHeightPx)
         if (overflow > 0f) {
             ordered.forEach { (nodeIndex, _) ->
                 compactNodes[nodeIndex].top -= overflow
                 compactNodes[nodeIndex].bottom -= overflow
             }
         }
-        val minTop = ordered.minOfOrNull { compactNodes[it.first].top } ?: contentPaddingPx
+        var minTop = compactNodes[ordered.first().first].top
+        ordered.drop(1).forEach { (nodeIndex, _) ->
+            minTop = min(minTop, compactNodes[nodeIndex].top)
+        }
         if (minTop < contentPaddingPx) {
             val delta = contentPaddingPx - minTop
             ordered.forEach { (nodeIndex, _) ->

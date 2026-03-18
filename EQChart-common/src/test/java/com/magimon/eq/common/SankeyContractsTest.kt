@@ -1,9 +1,12 @@
 package com.magimon.eq.common
 
 import com.magimon.eq.sankey.SankeyChartPresentationOptions
+import com.magimon.eq.sankey.SankeyChartLayoutResult
 import com.magimon.eq.sankey.SankeyChartStyleOptions
 import com.magimon.eq.sankey.SankeyLink
+import com.magimon.eq.sankey.SankeyLinkLayout
 import com.magimon.eq.sankey.SankeyNode
+import com.magimon.eq.sankey.SankeyNodeLayout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
@@ -117,5 +120,76 @@ class SankeyContractsTest {
         assertEquals(6, custom.selectedStrokeColor)
         assertEquals(3f, custom.selectedStrokeWidthDp, 0.0f)
         assertEquals(18f, custom.contentPaddingDp, 0.0f)
+    }
+
+    @Test
+    fun sankeyLayoutModels_exposeAllProperties() {
+        val node = SankeyNode("node", "Node", 0xFF123456.toInt())
+        val link = SankeyLink("node", "target", 12.0)
+        val nodeLayout = SankeyNodeLayout(
+            originalIndex = 3,
+            node = node,
+            stage = 1,
+            left = 10f,
+            top = 20f,
+            right = 30f,
+            bottom = 70f,
+            totalValue = 44.0,
+        )
+        val linkLayout = SankeyLinkLayout(
+            originalIndex = 4,
+            link = link,
+            sourceNodeOriginalIndex = 1,
+            targetNodeOriginalIndex = 2,
+            sourceLeft = 10f,
+            sourceRight = 18f,
+            targetLeft = 60f,
+            targetRight = 68f,
+            sourceTop = 22f,
+            sourceBottom = 30f,
+            targetTop = 24f,
+            targetBottom = 32f,
+            thickness = 8f,
+            color = 0xFFAA5500.toInt(),
+        )
+        val layoutResult = SankeyChartLayoutResult(
+            nodeLayouts = listOf(nodeLayout),
+            linkLayouts = listOf(linkLayout),
+            stageCount = 2,
+            isRenderable = true,
+        )
+
+        assertEquals(3, nodeLayout.originalIndex)
+        assertSame(node, nodeLayout.node)
+        assertEquals(1, nodeLayout.stage)
+        assertEquals(10f, nodeLayout.left, 0.0f)
+        assertEquals(20f, nodeLayout.top, 0.0f)
+        assertEquals(30f, nodeLayout.right, 0.0f)
+        assertEquals(70f, nodeLayout.bottom, 0.0f)
+        assertEquals(44.0, nodeLayout.totalValue, 0.0)
+        assertEquals(45f, nodeLayout.centerY, 0.0f)
+
+        assertEquals(4, linkLayout.originalIndex)
+        assertSame(link, linkLayout.link)
+        assertEquals(1, linkLayout.sourceNodeOriginalIndex)
+        assertEquals(2, linkLayout.targetNodeOriginalIndex)
+        assertEquals(10f, linkLayout.sourceLeft, 0.0f)
+        assertEquals(18f, linkLayout.sourceRight, 0.0f)
+        assertEquals(60f, linkLayout.targetLeft, 0.0f)
+        assertEquals(68f, linkLayout.targetRight, 0.0f)
+        assertEquals(22f, linkLayout.sourceTop, 0.0f)
+        assertEquals(30f, linkLayout.sourceBottom, 0.0f)
+        assertEquals(24f, linkLayout.targetTop, 0.0f)
+        assertEquals(32f, linkLayout.targetBottom, 0.0f)
+        assertEquals(8f, linkLayout.thickness, 0.0f)
+        assertEquals(0xFFAA5500.toInt(), linkLayout.color)
+        assertEquals(26f, linkLayout.sourceCenterY, 0.0f)
+        assertEquals(28f, linkLayout.targetCenterY, 0.0f)
+
+        assertEquals(1, layoutResult.nodeLayouts.size)
+        assertEquals(1, layoutResult.linkLayouts.size)
+        assertEquals(2, layoutResult.stageCount)
+        assertTrue(layoutResult.isRenderable)
+        assertNull(layoutResult.emptyReason)
     }
 }
