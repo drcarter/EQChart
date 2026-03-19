@@ -105,6 +105,9 @@ class PcmWaveformController internal constructor(
  *
  * Subsequent changes to [sampleRateHz] or [windowDurationMs] update the remembered controller
  * instead of creating a new instance.
+ *
+ * @param sampleRateHz Target PCM sample rate used to size the retained window
+ * @param windowDurationMs Visible waveform window duration in milliseconds
  */
 @Composable
 fun rememberPcmWaveformController(
@@ -256,6 +259,9 @@ private class ComposePcmRingBuffer(capacity: Int) {
     }
 }
 
+/**
+ * Downsamples PCM samples into interleaved min/max pairs per rendered horizontal pixel.
+ */
 internal fun minMaxPerPixel(samples: ShortArray, pixelWidth: Int): FloatArray {
     if (samples.isEmpty() || pixelWidth <= 0) return FloatArray(0)
 

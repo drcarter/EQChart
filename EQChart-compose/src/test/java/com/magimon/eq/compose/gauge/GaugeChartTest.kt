@@ -1,6 +1,10 @@
 package com.magimon.eq.compose.gauge
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.Density
 import com.magimon.eq.gauge.GaugeRange
+import com.magimon.eq.gauge.GaugeChartPresentationOptions
+import com.magimon.eq.gauge.GaugeChartStyleOptions
 import com.magimon.eq.gauge.GaugeValue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -63,5 +67,34 @@ class GaugeChartTest {
         assertEquals("72", formatComposeGaugeNumber(72.0))
         assertEquals("72.5", formatComposeGaugeNumber(72.5))
         assertTrue(composeGaugeAngle(0.5f, 180f, 180f) > 180f)
+    }
+
+    @Test
+    fun resolveComposeGaugeValue_returnsNullForNonFiniteInput() {
+        assertNull(resolveComposeGaugeValue(null))
+        assertNull(resolveComposeGaugeValue(GaugeValue(Double.NaN, 0.0, 100.0)))
+    }
+
+    @Test
+    fun geometryAndPointHelpers_returnUsablePositions() {
+        val geometry = resolveComposeGaugeGeometry(
+            width = 320f,
+            height = 220f,
+            density = Density(1f, 1f),
+            styleOptions = GaugeChartStyleOptions(),
+            presentationOptions = GaugeChartPresentationOptions(showMinMaxLabels = true),
+        )
+        val point = composeGaugePoint(Offset(100f, 100f), 50f, composeGaugeAngle(0.5f, 180f, 180f))
+
+        assertTrue(geometry.radius > 0f)
+        assertTrue(geometry.arcRect.width > 0f)
+        assertTrue(point.x != 100f || point.y != 100f)
+    }
+
+    @Test
+    fun resolveComposeGaugeRanges_returnsEmptyForInvalidDomain() {
+        assertTrue(resolveComposeGaugeRanges(emptyList(), 10.0, 10.0).isEmpty())
+        assertEquals(180f, composeGaugeAngle(-1f, 180f, 180f), 0f)
+        assertEquals(360f, composeGaugeAngle(2f, 180f, 180f), 0f)
     }
 }

@@ -57,7 +57,7 @@ internal data class LineChartLayout(
 
 private fun dpToPx(value: Float, density: Float): Float = value * density
 
-private fun resolveAxisRange(minValue: Double, maxValue: Double): Pair<Double, Double> {
+internal fun resolveAxisRange(minValue: Double, maxValue: Double): Pair<Double, Double> {
     val span = maxValue - minValue
     return if (!span.isFinite() || abs(span) <= 1e-12) {
         (minValue - 1.0) to (maxValue + 1.0)
@@ -66,7 +66,7 @@ private fun resolveAxisRange(minValue: Double, maxValue: Double): Pair<Double, D
     }
 }
 
-private fun buildTicks(minValue: Double, maxValue: Double, count: Int): List<Double> {
+internal fun buildTicks(minValue: Double, maxValue: Double, count: Int): List<Double> {
     val safe = max(2, count)
     if (safe == 2) return listOf(minValue, maxValue)
     return List(safe) { index ->
@@ -74,19 +74,22 @@ private fun buildTicks(minValue: Double, maxValue: Double, count: Int): List<Dou
     }
 }
 
-private fun baselineValue(min: Double, max: Double): Double = if (min <= 0.0 && max >= 0.0) 0.0 else min
+internal fun baselineValue(min: Double, max: Double): Double = if (min <= 0.0 && max >= 0.0) 0.0 else min
 
-private fun mapX(value: Double, minX: Double, maxX: Double, chartRect: Rect): Float {
+internal fun mapX(value: Double, minX: Double, maxX: Double, chartRect: Rect): Float {
     val ratio = if (maxX == minX) 0.5f else ((value - minX) / (maxX - minX)).toFloat()
     return chartRect.left + ratio * chartRect.width
 }
 
-private fun mapY(value: Double, minY: Double, maxY: Double, chartRect: Rect): Float {
+internal fun mapY(value: Double, minY: Double, maxY: Double, chartRect: Rect): Float {
     val ratio = if (maxY == minY) 0.5f else ((value - minY) / (maxY - minY)).toFloat()
     return chartRect.bottom - ratio * chartRect.height
 }
 
-private fun buildAnimatedLinePath(points: List<RenderLinePoint>, progress: Float, outPath: Path) {
+/**
+ * Builds a path containing only the currently visible animated segment progress.
+ */
+internal fun buildAnimatedLinePath(points: List<RenderLinePoint>, progress: Float, outPath: Path) {
     outPath.reset()
     if (points.isEmpty()) return
 
@@ -109,7 +112,7 @@ private fun buildAnimatedLinePath(points: List<RenderLinePoint>, progress: Float
     }
 }
 
-private fun visiblePointCount(pointCount: Int, progress: Float): Int {
+internal fun visiblePointCount(pointCount: Int, progress: Float): Int {
     if (pointCount <= 0) return 0
     if (progress >= 1f) return pointCount
     return ((pointCount - 1).coerceAtLeast(1) * progress).toInt() + 1
@@ -197,7 +200,7 @@ internal fun computeLineChart(
     )
 }
 
-private fun withAlpha(color: Int, alpha: Int): Int {
+internal fun withAlpha(color: Int, alpha: Int): Int {
     val alphaValue = alpha.coerceIn(0, 255)
     return (alphaValue shl 24) or (color and 0x00FFFFFF)
 }
@@ -205,10 +208,15 @@ private fun withAlpha(color: Int, alpha: Int): Int {
 /**
  * Canvas-based line chart composable.
  *
- * @param series Input line series grouped by color and legend label.
- * @param styleOptions Visual style values (colors, dimensions, typography).
- * @param presentationOptions Display and animation behavior.
- * @param onPointClick Invoked when a point is clicked.
+ * Invalid points are filtered before range calculation, and each remaining series is rendered in
+ * ascending x-order. [onPointClick] is only dispatched when the nearest point falls inside the
+ * configured touch radius.
+ *
+ * @param series Input line series grouped by color and legend label
+ * @param modifier Standard Compose modifier for layout and gesture handling
+ * @param styleOptions Visual style values (colors, dimensions, typography)
+ * @param presentationOptions Display and animation behavior
+ * @param onPointClick Invoked as `(seriesIndex, pointIndex, point, payload)` when a point is hit
  */
 @Composable
 fun LineChart(
@@ -485,7 +493,7 @@ fun LineChart(
 }
 
 /**
- * Area chart variant that reuses [LineChart] with fill enabled.
+ * Area chart variant that reuses [LineChart] with fill forced on.
  */
 @Composable
 fun AreaChart(

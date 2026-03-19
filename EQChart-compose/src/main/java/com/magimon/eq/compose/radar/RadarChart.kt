@@ -401,6 +401,9 @@ internal fun computeRadarChart(
     )
 }
 
+/**
+ * Lays out wrapped legend rows for the currently renderable radar series.
+ */
 internal fun computeRadarLegendLayout(
     width: Float,
     series: List<RadarSeries>,
@@ -455,12 +458,12 @@ internal fun computeRadarLegendLayout(
     }
 }
 
-private fun radarNormalize(value: Double, maxValue: Double): Float {
+internal fun radarNormalize(value: Double, maxValue: Double): Float {
     if (!value.isFinite() || !maxValue.isFinite() || maxValue <= 0.0) return 0f
     return (value / maxValue).coerceIn(0.0, 1.0).toFloat()
 }
 
-private fun radarVertex(
+internal fun radarVertex(
     centerX: Float,
     centerY: Float,
     radius: Float,
@@ -477,7 +480,7 @@ private fun radarVertex(
     )
 }
 
-private fun radarPolygonPoints(
+internal fun radarPolygonPoints(
     values: List<Double>,
     maxValue: Double,
     centerX: Float,
@@ -532,7 +535,7 @@ internal fun radarNearestPoint(
     return best
 }
 
-private fun radarApplyAlpha(color: Int, alpha: Int): Int {
+internal fun radarApplyAlpha(color: Int, alpha: Int): Int {
     return Color.argb(
         alpha.coerceIn(0, 255),
         Color.red(color),

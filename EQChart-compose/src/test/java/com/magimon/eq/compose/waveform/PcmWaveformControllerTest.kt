@@ -85,4 +85,38 @@ class PcmWaveformControllerTest {
 
         assertArrayEquals(shortArrayOf(1, 2, 3, 4, 5), controller.snapshot())
     }
+
+    @Test
+    fun minMaxPerPixel_handlesEmptyAndAggregatedRanges() {
+        assertTrue(minMaxPerPixel(shortArrayOf(), 4).isEmpty())
+
+        val minMax = minMaxPerPixel(shortArrayOf(Short.MIN_VALUE, 0, Short.MAX_VALUE, 0), 2)
+
+        assertEquals(4, minMax.size)
+        assertTrue(minMax[0] <= -1f)
+        assertTrue(minMax[3] >= 0f)
+    }
+
+    @Test
+    fun minMaxPerPixel_handlesSinglePixelAggregation() {
+        val minMax = minMaxPerPixel(shortArrayOf(-10, 0, 10), 1)
+
+        assertEquals(2, minMax.size)
+        assertTrue(minMax[0] <= 0f)
+        assertTrue(minMax[1] >= 0f)
+    }
+
+    @Test
+    fun setters_clampRequestedSampleRateAndWindowDuration() {
+        val controller = PcmWaveformController(
+            sampleRateHz = 44_100,
+            windowDurationMs = 2_000,
+        )
+
+        controller.setSampleRateHz(1)
+        controller.setWindowDurationMs(100_000)
+        controller.setPcm16Mono(ShortArray(500_000) { it.toShort() })
+
+        assertEquals(480_000, controller.snapshot().size)
+    }
 }

@@ -349,7 +349,7 @@ internal fun heatmapItemWeight(item: StockHeatmapItem): Float {
     }
 }
 
-private fun <T> heatmapLayoutSquarified(
+internal fun <T> heatmapLayoutSquarified(
     items: List<HeatmapWeightedItem<T>>,
     bounds: RectF,
 ): List<HeatmapLayoutBlock<T>> {
@@ -462,7 +462,7 @@ private fun <T> heatmapLayoutRow(
     }
 }
 
-private fun heatmapWorstAspectRatio(
+internal fun heatmapWorstAspectRatio(
     row: List<HeatmapWeightedItem<*>>,
     w: Float,
 ): Float {
@@ -484,11 +484,11 @@ private fun heatmapWorstAspectRatio(
     return if (worst == 0f) Float.MAX_VALUE else worst
 }
 
-private fun heatmapWithAlpha(color: Int, alpha: Int): Int {
+internal fun heatmapWithAlpha(color: Int, alpha: Int): Int {
     return Color.argb(alpha.coerceIn(0, 255), Color.red(color), Color.green(color), Color.blue(color))
 }
 
-private fun heatmapMapSectorToColor(sector: String): Int {
+internal fun heatmapMapSectorToColor(sector: String): Int {
     val palette = listOf(
         Color.parseColor("#1E88E5"),
         Color.parseColor("#00897B"),
@@ -502,7 +502,7 @@ private fun heatmapMapSectorToColor(sector: String): Int {
     return palette[abs(sector.hashCode()) % palette.size]
 }
 
-private fun heatmapMapChangeToColor(changePct: Double): Int {
+internal fun heatmapMapChangeToColor(changePct: Double): Int {
     val maxAbs = 6.0
     val clamped = max(-maxAbs, min(maxAbs, changePct))
     val ratio = (clamped / maxAbs).toFloat()
@@ -518,7 +518,7 @@ private fun heatmapMapChangeToColor(changePct: Double): Int {
     }
 }
 
-private fun heatmapInterpolateColor(from: Int, to: Int, t: Float): Int {
+internal fun heatmapInterpolateColor(from: Int, to: Int, t: Float): Int {
     val clamped = t.coerceIn(0f, 1f)
     val a = (Color.alpha(from) + (Color.alpha(to) - Color.alpha(from)) * clamped).toInt()
     val r = (Color.red(from) + (Color.red(to) - Color.red(from)) * clamped).toInt()
@@ -527,4 +527,4 @@ private fun heatmapInterpolateColor(from: Int, to: Int, t: Float): Int {
     return Color.argb(a, r, g, b)
 }
 
-private fun heatmapFormatChange(changePct: Double): String = String.format("%+.2f%%", changePct)
+internal fun heatmapFormatChange(changePct: Double): String = String.format("%+.2f%%", changePct)

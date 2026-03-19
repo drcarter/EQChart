@@ -256,6 +256,9 @@ fun GaugeChart(
     }
 }
 
+/**
+ * Validates the gauge domain and clamps the incoming value into that domain.
+ */
 internal fun resolveComposeGaugeValue(value: GaugeValue?): ComposeResolvedGaugeValue? {
     value ?: return null
     if (!value.value.isFinite() || !value.minValue.isFinite() || !value.maxValue.isFinite()) return null
@@ -272,6 +275,9 @@ internal fun resolveComposeGaugeValue(value: GaugeValue?): ComposeResolvedGaugeV
     )
 }
 
+/**
+ * Normalizes threshold ranges into `0f..1f` ratios over the active gauge domain.
+ */
 internal fun resolveComposeGaugeRanges(
     ranges: List<GaugeRange>,
     minValue: Double,
@@ -292,6 +298,9 @@ internal fun resolveComposeGaugeRanges(
     }
 }
 
+/**
+ * Computes gauge arc geometry and text baselines from the available canvas size.
+ */
 internal fun resolveComposeGaugeGeometry(
     width: Float,
     height: Float,
