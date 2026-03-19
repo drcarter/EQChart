@@ -1,7 +1,16 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.integration
 
 import android.graphics.Paint
 import androidx.compose.ui.unit.Density
+import com.magimon.eq.compose.bubble.computeBubbleChart
+import com.magimon.eq.compose.gauge.resolveComposeGaugeGeometry
+import com.magimon.eq.compose.heatmap.computeHeatmapLayout
+import com.magimon.eq.compose.line.computeLineChart
+import com.magimon.eq.compose.pie.buildPieSegments
+import com.magimon.eq.compose.pie.resolvePieLegendReservedHeight
+import com.magimon.eq.compose.radar.computeRadarChart
+import com.magimon.eq.compose.radar.radarNearestPoint
+import com.magimon.eq.compose.waveform.minMaxPerPixel
 import com.magimon.eq.bar.BarChartPresentationOptions
 import com.magimon.eq.bar.BarChartStyleOptions
 import com.magimon.eq.bar.BarDatum
@@ -41,7 +50,7 @@ class ComposePrivateLayoutTest {
     @Test
     fun computeBarLayout_buildsExpectedBarsAndTicks() {
         val computed = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.BarChartKt",
+            ownerClassName = "com.magimon.eq.compose.bar.BarChartKt",
             methodName = "computeBarLayout",
             320f,
             220f,
@@ -87,7 +96,7 @@ class ComposePrivateLayoutTest {
     @Test
     fun computeLineChart_sanitizesInvalidPointsAndBuildsTicks() {
         val computed = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.LineChartKt",
+            ownerClassName = "com.magimon.eq.compose.line.LineChartKt",
             methodName = "computeLineChart",
             360f,
             240f,
@@ -122,31 +131,27 @@ class ComposePrivateLayoutTest {
 
     @Test
     fun buildPieSegments_andLegendReserve_handleInvalidAndWrappingData() {
-        val segments = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.PieDonutChartKt",
-            methodName = "buildPieSegments",
-            listOf(
+        val segments = buildPieSegments(
+            slices = listOf(
                 PieSlice("A", 40.0, 0xFF1E88E5.toInt()),
                 PieSlice("B", 60.0, 0xFF43A047.toInt()),
                 PieSlice("bad", 0.0, 0xFF000000.toInt()),
             ),
-            270f,
-            false,
-        ) as List<*>
+            startAngle = 270f,
+            clockwise = false,
+        )
 
         assertEquals(2, segments.size)
-        assertTrue((segments.first() ?: error("Expected first segment")).readField<Float>("sweep") < 0f)
+        assertTrue(segments.first().sweep < 0f)
 
-        val reserve = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.PieDonutChartKt",
-            methodName = "resolvePieLegendReservedHeight",
-            180f,
-            segments,
-            PieDonutStyleOptions(),
-            PieDonutPresentationOptions(showLegend = true),
-            Density(1f, 1f),
-            Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 12f },
-        ) as Float
+        val reserve = resolvePieLegendReservedHeight(
+            availableWidth = 180f,
+            segments = segments,
+            styleOptions = PieDonutStyleOptions(),
+            presentationOptions = PieDonutPresentationOptions(showLegend = true),
+            density = Density(1f, 1f),
+            legendTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 12f },
+        )
 
         assertTrue(reserve > 0f)
     }
@@ -154,7 +159,7 @@ class ComposePrivateLayoutTest {
     @Test
     fun computeRadarChart_andNearestPoint_buildPointsAndHits() {
         val computed = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.RadarChartKt",
+            ownerClassName = "com.magimon.eq.compose.radar.RadarChartKt",
             methodName = "computeRadarChart",
             360f,
             300f,
@@ -175,7 +180,7 @@ class ComposePrivateLayoutTest {
         val firstPoint = pointsBySeries.first().first()
 
         val hit = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.RadarChartKt",
+            ownerClassName = "com.magimon.eq.compose.radar.RadarChartKt",
             methodName = "radarNearestPoint",
             firstPoint.readField<Float>("x"),
             firstPoint.readField<Float>("y"),
@@ -192,7 +197,7 @@ class ComposePrivateLayoutTest {
     @Test
     fun computeHeatmapLayout_createsBlocksForSections_andFormatsColors() {
         val computed = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.StockHeatmapChartKt",
+            ownerClassName = "com.magimon.eq.compose.heatmap.StockHeatmapChartKt",
             methodName = "computeHeatmapLayout",
             listOf(
                 StockHeatmapSection(
@@ -217,12 +222,12 @@ class ComposePrivateLayoutTest {
         val blocks = computed.readField<List<*>>("blocks")
         val headers = computed.readField<List<*>>("sectionHeaders")
         val formatted = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.StockHeatmapChartKt",
+            ownerClassName = "com.magimon.eq.compose.heatmap.StockHeatmapChartKt",
             methodName = "heatmapFormatChange",
             -1.25,
         ) as String
         val sectorColor = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.StockHeatmapChartKt",
+            ownerClassName = "com.magimon.eq.compose.heatmap.StockHeatmapChartKt",
             methodName = "heatmapMapSectorToColor",
             "Tech",
         ) as Int
@@ -242,7 +247,7 @@ class ComposePrivateLayoutTest {
         )
 
         val scatter = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.BubbleChartKt",
+            ownerClassName = "com.magimon.eq.compose.bubble.BubbleChartKt",
             methodName = "computeBubbleChart",
             360f,
             260f,
@@ -256,7 +261,7 @@ class ComposePrivateLayoutTest {
             1f,
         ) ?: error("Expected scatter chart")
         val packed = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.BubbleChartKt",
+            ownerClassName = "com.magimon.eq.compose.bubble.BubbleChartKt",
             methodName = "computeBubbleChart",
             360f,
             260f,
@@ -277,12 +282,7 @@ class ComposePrivateLayoutTest {
 
     @Test
     fun waveformMinMaxPerPixel_andGaugeGeometry_coverEdgeCalculations() {
-        val minMax = invokePrivateTopLevel(
-            ownerClassName = "com.magimon.eq.compose.PcmWaveformChartKt",
-            methodName = "minMaxPerPixel",
-            shortArrayOf(Short.MIN_VALUE, 0, Short.MAX_VALUE, 0),
-            2,
-        ) as FloatArray
+        val minMax = minMaxPerPixel(shortArrayOf(Short.MIN_VALUE, 0, Short.MAX_VALUE, 0), 2)
         val geometry = resolveComposeGaugeGeometry(
             width = 320f,
             height = 220f,

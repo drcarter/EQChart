@@ -29,9 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.magimon.eq.app.R
 import com.magimon.eq.app.ui.theme.EQChartTheme
-import com.magimon.eq.compose.PcmWaveformChart
-import com.magimon.eq.compose.PcmWaveformController
-import com.magimon.eq.compose.rememberPcmWaveformController
+import com.magimon.eq.compose.waveform.PcmWaveformChart
+import com.magimon.eq.compose.waveform.PcmWaveformController
+import com.magimon.eq.compose.waveform.rememberPcmWaveformController
 import com.magimon.eq.waveform.PcmWaveFormStyleOptions
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors

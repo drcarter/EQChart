@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.waveform
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +14,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.waveform.PcmWaveFormStyleOptions
 
 /**
@@ -255,7 +256,7 @@ private class ComposePcmRingBuffer(capacity: Int) {
     }
 }
 
-private fun minMaxPerPixel(samples: ShortArray, pixelWidth: Int): FloatArray {
+internal fun minMaxPerPixel(samples: ShortArray, pixelWidth: Int): FloatArray {
     if (samples.isEmpty() || pixelWidth <= 0) return FloatArray(0)
 
     val normalizer = 1f / Short.MAX_VALUE.toFloat()

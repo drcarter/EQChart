@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.sankey
 
 import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
@@ -22,8 +22,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.magimon.eq.sankey.SankeyChartLayoutConfig
-import com.magimon.eq.sankey.SankeyChartLayoutEngine
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.sankey.SankeyChartLayoutResult
 import com.magimon.eq.sankey.SankeyChartPresentationOptions
 import com.magimon.eq.sankey.SankeyChartStyleOptions
@@ -72,19 +72,14 @@ fun SankeyChart(
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }
         val layout = remember(nodes, links, widthPx, heightPx, styleOptions, presentationOptions) {
-            SankeyChartLayoutEngine.compute(
+            computeSankeyLayout(
                 nodes = nodes,
                 links = links,
-                config = SankeyChartLayoutConfig(
-                    widthPx = widthPx,
-                    heightPx = heightPx,
-                    contentPaddingPx = with(density) { styleOptions.contentPaddingDp.dp.toPx() },
-                    nodeWidthPx = with(density) { styleOptions.nodeWidthDp.dp.toPx() },
-                    nodeMinHeightPx = with(density) { styleOptions.nodeMinHeightDp.dp.toPx() },
-                    nodeGapPx = with(density) { presentationOptions.nodeGapDp.dp.toPx() },
-                    columnGapPx = with(density) { presentationOptions.columnGapDp.dp.toPx() },
-                ),
+                widthPx = widthPx,
+                heightPx = heightPx,
+                density = density,
                 styleOptions = styleOptions,
+                presentationOptions = presentationOptions,
             )
         }
 
@@ -105,19 +100,26 @@ fun SankeyChart(
                 .fillMaxSize()
                 .pointerInput(layout) {
                     detectTapGestures { tap ->
-                        val nodeHit = SankeyChartLayoutEngine.hitTestNode(layout, tap.x, tap.y)
-                        if (nodeHit != null) {
-                            selectedNodeIndex = nodeHit
+                        val selection = resolveSankeyTapSelection(
+                            layout = layout,
+                            tap = tap,
+                            linkHitTolerancePx = with(density) { 8.dp.toPx() },
+                        )
+                        if (selection.selectedNodeIndex != null) {
+                            selectedNodeIndex = selection.selectedNodeIndex
                             selectedLinkIndex = null
-                            nodes.getOrNull(nodeHit)?.let { onNodeClick?.invoke(nodeHit, it, it.payload) }
+                            nodes.getOrNull(selection.selectedNodeIndex)?.let {
+                                onNodeClick?.invoke(selection.selectedNodeIndex, it, it.payload)
+                            }
                             return@detectTapGestures
                         }
 
-                        val linkHit = SankeyChartLayoutEngine.hitTestLink(layout, tap.x, tap.y, with(density) { 8.dp.toPx() })
-                        if (linkHit != null) {
-                            selectedLinkIndex = linkHit
+                        if (selection.selectedLinkIndex != null) {
+                            selectedLinkIndex = selection.selectedLinkIndex
                             selectedNodeIndex = null
-                            links.getOrNull(linkHit)?.let { onLinkClick?.invoke(linkHit, it, it.payload) }
+                            links.getOrNull(selection.selectedLinkIndex)?.let {
+                                onLinkClick?.invoke(selection.selectedLinkIndex, it, it.payload)
+                            }
                             return@detectTapGestures
                         }
 
@@ -184,7 +186,7 @@ fun SankeyChart(
                 layout.linkLayouts.forEach { link ->
                     if (link.thickness < with(density) { styleOptions.linkValueTextSizeSp.sp.toPx() }) return@forEach
                     paint.color = withAlpha(styleOptions.linkValueTextColor, sankeyLinkValueAlpha(link, selectedNodeIndex, selectedLinkIndex, layout, renderProgress.value))
-                    val text = link.link.label?.takeIf { it.isNotBlank() } ?: sankeyFormatValue(link.link.value)
+                    val text = sankeyLinkLabel(link)
                     val x = (link.sourceRight + link.targetLeft) * 0.5f
                     val y = ((link.sourceCenterY + link.targetCenterY) * 0.5f) - ((paint.descent() + paint.ascent()) * 0.5f)
                     drawContext.canvas.nativeCanvas.drawText(text, x, y, paint)
@@ -240,105 +242,4 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSankeyNode(
             style = Stroke(width = (if (highlighted) styleOptions.selectedStrokeWidthDp else styleOptions.nodeStrokeWidthDp) * densityPx),
         )
     }
-}
-
-private fun sankeyLinkColor(
-    link: SankeyLinkLayout,
-    layout: SankeyChartLayoutResult,
-    presentationOptions: SankeyChartPresentationOptions,
-    selectedNodeIndex: Int?,
-    selectedLinkIndex: Int?,
-    renderProgress: Float,
-): androidx.compose.ui.graphics.Color {
-    val hasSelection = selectedNodeIndex != null || selectedLinkIndex != null
-    val alpha = when {
-        sankeyLinkHighlighted(link.originalIndex, layout, selectedNodeIndex, selectedLinkIndex) -> 0.92f * renderProgress
-        hasSelection -> 0.16f * renderProgress
-        else -> presentationOptions.linkAlpha.coerceIn(0f, 1f) * renderProgress
-    }
-    return withAlpha(link.color, alpha).toComposeColor()
-}
-
-private fun sankeyNodeFillAlpha(
-    node: SankeyNodeLayout,
-    layout: SankeyChartLayoutResult,
-    selectedNodeIndex: Int?,
-    selectedLinkIndex: Int?,
-    renderProgress: Float,
-): Float {
-    val hasSelection = selectedNodeIndex != null || selectedLinkIndex != null
-    return when {
-        sankeyNodeHighlighted(node.originalIndex, layout, selectedNodeIndex, selectedLinkIndex) -> renderProgress
-        hasSelection -> 0.36f * renderProgress
-        else -> renderProgress
-    }
-}
-
-private fun sankeyNodeLabelAlpha(
-    node: SankeyNodeLayout,
-    layout: SankeyChartLayoutResult,
-    selectedNodeIndex: Int?,
-    selectedLinkIndex: Int?,
-    renderProgress: Float,
-): Float {
-    val hasSelection = selectedNodeIndex != null || selectedLinkIndex != null
-    return when {
-        sankeyNodeHighlighted(node.originalIndex, layout, selectedNodeIndex, selectedLinkIndex) -> renderProgress
-        hasSelection -> 0.4f * renderProgress
-        else -> renderProgress
-    }
-}
-
-private fun sankeyLinkValueAlpha(
-    link: SankeyLinkLayout,
-    selectedNodeIndex: Int?,
-    selectedLinkIndex: Int?,
-    layout: SankeyChartLayoutResult,
-    renderProgress: Float,
-): Float {
-    val hasSelection = selectedNodeIndex != null || selectedLinkIndex != null
-    return when {
-        sankeyLinkHighlighted(link.originalIndex, layout, selectedNodeIndex, selectedLinkIndex) -> renderProgress
-        hasSelection -> 0.24f * renderProgress
-        else -> 0.72f * renderProgress
-    }
-}
-
-private fun sankeyNodeHighlighted(
-    nodeOriginalIndex: Int,
-    layout: SankeyChartLayoutResult,
-    selectedNodeIndex: Int?,
-    selectedLinkIndex: Int?,
-): Boolean {
-    val node = selectedNodeIndex
-    if (node != null) return nodeOriginalIndex == node
-
-    val linkIndex = selectedLinkIndex ?: return false
-    val link = layout.linkLayouts.firstOrNull { it.originalIndex == linkIndex } ?: return false
-    return link.sourceNodeOriginalIndex == nodeOriginalIndex || link.targetNodeOriginalIndex == nodeOriginalIndex
-}
-
-private fun sankeyLinkHighlighted(
-    linkOriginalIndex: Int,
-    layout: SankeyChartLayoutResult,
-    selectedNodeIndex: Int?,
-    selectedLinkIndex: Int?,
-): Boolean {
-    val node = selectedNodeIndex
-    if (node != null) {
-        return layout.linkLayouts.any {
-            it.originalIndex == linkOriginalIndex &&
-                (it.sourceNodeOriginalIndex == node || it.targetNodeOriginalIndex == node)
-        }
-    }
-    return selectedLinkIndex == linkOriginalIndex
-}
-
-private fun withAlpha(color: Int, alphaFraction: Float): Int {
-    val alpha = (android.graphics.Color.alpha(color) * alphaFraction.coerceIn(0f, 1f)).roundToInt().coerceIn(0, 255)
-    return android.graphics.Color.argb(alpha, android.graphics.Color.red(color), android.graphics.Color.green(color), android.graphics.Color.blue(color))
-}
-
-private fun sankeyFormatValue(value: Double): String {
-    return if (value % 1.0 == 0.0) value.roundToInt().toString() else String.format("%.1f", value)
 }

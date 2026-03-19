@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.internal
 
 import android.graphics.Paint
 import androidx.compose.ui.geometry.Offset

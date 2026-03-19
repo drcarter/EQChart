@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.bar
 
 import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
@@ -26,12 +26,14 @@ import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarLayoutMode
 import com.magimon.eq.bar.BarOrientation
 import com.magimon.eq.bar.BarSeries
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 
-private data class RenderBar(
+internal data class RenderBar(
     val left: Float,
     val top: Float,
     val right: Float,
@@ -42,7 +44,7 @@ private data class RenderBar(
     val payload: Any?,
 )
 
-private data class ComputedBarChart(
+internal data class ComputedBarChart(
     val chartRect: Rect,
     val categories: List<String>,
     val minValue: Double,
@@ -297,7 +299,13 @@ private fun buildBars(
     return bars
 }
 
-private fun computeBarLayout(
+/**
+ * Computes bar positions, axis bounds, ticks, and legend reserve in pixels.
+ *
+ * This layout is intentionally separate from drawing so grouped/stacked behavior can be unit
+ * tested without a Compose runtime.
+ */
+internal fun computeBarLayout(
     widthPx: Float,
     heightPx: Float,
     series: List<BarSeries>,

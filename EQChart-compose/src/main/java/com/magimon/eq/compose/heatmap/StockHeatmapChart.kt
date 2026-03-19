@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.heatmap
 
 import android.graphics.Color
 import android.graphics.Paint
@@ -16,40 +16,42 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.sp
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.heatmap.StockHeatmapItem
 import com.magimon.eq.heatmap.StockHeatmapSection
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-private data class HeatmapBlockRect(
+internal data class HeatmapBlockRect(
     val item: StockHeatmapItem,
     val rect: RectF,
 )
 
-private data class HeatmapSectionGroup(
+internal data class HeatmapSectionGroup(
     val name: String,
     val color: Int,
     val totalWeight: Float,
     val items: List<StockHeatmapItem>,
 )
 
-private data class HeatmapSectionLayout(
+internal data class HeatmapSectionLayout(
     val group: HeatmapSectionGroup,
     val headerRect: RectF,
 )
 
-private data class HeatmapWeightedItem<T>(
+internal data class HeatmapWeightedItem<T>(
     val item: T,
     val weight: Float,
 )
 
-private data class HeatmapLayoutBlock<T>(
+internal data class HeatmapLayoutBlock<T>(
     val item: T,
     val rect: RectF,
 )
 
-private data class HeatmapComputed(
+internal data class HeatmapComputed(
     val blocks: List<HeatmapBlockRect>,
     val sectionHeaders: List<HeatmapSectionLayout>,
 )
@@ -228,7 +230,10 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawHeatmapBlockTex
     }
 }
 
-private fun computeHeatmapLayout(
+/**
+ * Resolves all section/header/item rectangles for the heatmap from grouped stock data.
+ */
+internal fun computeHeatmapLayout(
     sections: List<StockHeatmapSection>,
     width: Float,
     height: Float,
@@ -331,11 +336,11 @@ private fun computeHeatmapLayout(
     return HeatmapComputed(blocks = blocks, sectionHeaders = sectionLayouts)
 }
 
-private fun heatmapInsetRect(src: RectF, inset: Float): RectF {
+internal fun heatmapInsetRect(src: RectF, inset: Float): RectF {
     return RectF(src.left + inset, src.top + inset, src.right - inset, src.bottom - inset)
 }
 
-private fun heatmapItemWeight(item: StockHeatmapItem): Float {
+internal fun heatmapItemWeight(item: StockHeatmapItem): Float {
     val ratio = item.sizeRatio ?: 0.0
     return if (ratio > 0.0) {
         ratio.toFloat()

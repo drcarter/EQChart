@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.integration
 
 private val primitiveToWrapper = mapOf(
     Boolean::class.javaPrimitiveType to Boolean::class.java,

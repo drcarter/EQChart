@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.line
 
 import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.line.LineChartPresentationOptions
 import com.magimon.eq.line.LineChartStyleOptions
 import com.magimon.eq.line.LineDatum
@@ -30,7 +32,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 
-private data class RenderLinePoint(
+internal data class RenderLinePoint(
     val x: Float,
     val y: Float,
     val valueX: Double,
@@ -40,7 +42,7 @@ private data class RenderLinePoint(
     val source: LineDatum,
 )
 
-private data class LineChartLayout(
+internal data class LineChartLayout(
     val chartRect: Rect,
     val xMin: Double,
     val xMax: Double,
@@ -113,7 +115,10 @@ private fun visiblePointCount(pointCount: Int, progress: Float): Int {
     return ((pointCount - 1).coerceAtLeast(1) * progress).toInt() + 1
 }
 
-private fun computeLineChart(
+/**
+ * Computes mapped line points, axis ranges, ticks, and baseline position in pixels.
+ */
+internal fun computeLineChart(
     widthPx: Float,
     heightPx: Float,
     series: List<LineSeries>,

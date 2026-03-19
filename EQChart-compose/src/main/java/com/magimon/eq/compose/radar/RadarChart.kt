@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.radar
 
 import android.graphics.Color
 import android.graphics.Paint
@@ -21,6 +21,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarChartPresentationOptions
 import com.magimon.eq.radar.RadarChartStyleOptions
@@ -33,18 +35,18 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 
-private data class RadarVec2(
+internal data class RadarVec2(
     val x: Float,
     val y: Float,
 )
 
-private data class RadarHitResult(
+internal data class RadarHitResult(
     val seriesIndex: Int,
     val axisIndex: Int,
     val distance: Float,
 )
 
-private data class RadarLegendItemDraw(
+internal data class RadarLegendItemDraw(
     val color: Int,
     val label: String,
     val markerLeft: Float,
@@ -53,7 +55,7 @@ private data class RadarLegendItemDraw(
     val baselineY: Float,
 )
 
-private data class RadarComputed(
+internal data class RadarComputed(
     val axes: List<RadarAxis>,
     val series: List<RadarSeries>,
     val chartRect: Rect,
@@ -306,7 +308,10 @@ fun RadarChart(
     }
 }
 
-private fun computeRadarChart(
+/**
+ * Computes radar polygon geometry, axis label anchors, and legend placement in pixels.
+ */
+internal fun computeRadarChart(
     width: Float,
     height: Float,
     axes: List<RadarAxis>,
@@ -396,7 +401,7 @@ private fun computeRadarChart(
     )
 }
 
-private fun computeRadarLegendLayout(
+internal fun computeRadarLegendLayout(
     width: Float,
     series: List<RadarSeries>,
     styleOptions: RadarChartStyleOptions,
@@ -499,7 +504,10 @@ private fun radarPolygonPoints(
     }
 }
 
-private fun radarNearestPoint(
+/**
+ * Finds the nearest rendered radar point inside the supplied hit radius.
+ */
+internal fun radarNearestPoint(
     touchX: Float,
     touchY: Float,
     pointsBySeries: List<List<RadarVec2>>,

@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.waveform
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals

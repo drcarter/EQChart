@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.integration
 
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.size
@@ -7,6 +7,19 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
+import com.magimon.eq.compose.bar.BarChart
+import com.magimon.eq.compose.bubble.BubbleChart
+import com.magimon.eq.compose.gauge.GaugeChart
+import com.magimon.eq.compose.heatmap.StockHeatmapChart
+import com.magimon.eq.compose.heatmap.StockHeatmapChartFromItems
+import com.magimon.eq.compose.line.AreaChart
+import com.magimon.eq.compose.line.LineChart
+import com.magimon.eq.compose.pie.DonutChart
+import com.magimon.eq.compose.pie.PieChart
+import com.magimon.eq.compose.radar.RadarChart
+import com.magimon.eq.compose.sankey.SankeyChart
+import com.magimon.eq.compose.waveform.PcmWaveformChart
+import com.magimon.eq.compose.waveform.PcmWaveformController
 import com.magimon.eq.bar.BarChartPresentationOptions
 import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarSeries

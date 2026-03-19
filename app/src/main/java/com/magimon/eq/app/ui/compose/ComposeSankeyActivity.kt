@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.magimon.eq.app.ui.theme.EQChartTheme
-import com.magimon.eq.compose.SankeyChart
+import com.magimon.eq.compose.sankey.SankeyChart
 import com.magimon.eq.sankey.SankeyChartPresentationOptions
 import com.magimon.eq.sankey.SankeyChartStyleOptions
 

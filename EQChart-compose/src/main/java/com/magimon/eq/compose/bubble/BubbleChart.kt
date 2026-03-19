@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.bubble
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
@@ -26,6 +26,8 @@ import com.magimon.eq.bubble.BubbleLegendItem
 import com.magimon.eq.bubble.BubbleLegendMode
 import com.magimon.eq.bubble.BubblePresentationOptions
 import com.magimon.eq.bubble.BubbleScaleOverride
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import java.util.LinkedHashMap
 import java.util.Locale
 import kotlin.math.PI
@@ -39,14 +41,14 @@ import kotlin.math.sqrt
 
 private const val BUBBLE_GOLDEN_ANGLE = 2.3999633f
 
-private data class BubbleLayout(
+internal data class BubbleLayout(
     val datum: BubbleDatum,
     val centerX: Float,
     val centerY: Float,
     val radius: Float,
 )
 
-private data class BubbleNumericRange(
+internal data class BubbleNumericRange(
     val min: Double,
     val max: Double,
 ) {
@@ -54,7 +56,7 @@ private data class BubbleNumericRange(
         get() = max - min
 }
 
-private data class BubbleChartComputed(
+internal data class BubbleChartComputed(
     val plotRect: Rect,
     val titleY: Float,
     val title: String,
@@ -287,7 +289,10 @@ fun BubbleChart(
     }
 }
 
-private fun computeBubbleChart(
+/**
+ * Produces the bubble layout state for both scatter and packed rendering modes.
+ */
+internal fun computeBubbleChart(
     width: Float,
     height: Float,
     data: List<BubbleDatum>,

@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.internal
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
