@@ -1,6 +1,7 @@
 package com.magimon.eq.pie
 
 import android.graphics.Color
+import android.os.Looper
 import com.magimon.eq.testutil.layoutAndDraw
 import com.magimon.eq.testutil.readPrivate
 import com.magimon.eq.testutil.touchUp
@@ -11,6 +12,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
+import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 class PieDonutChartViewTest {
@@ -97,5 +100,79 @@ class PieDonutChartViewTest {
 
         val segments = view.readPrivate<List<*>>("segments")
         assertTrue(segments.isEmpty())
+    }
+
+    @Test
+    fun donutChart_runsSelectionAnimation_andSettlesOnTappedSlice() {
+        val context = RuntimeEnvironment.getApplication()
+        val view = DonutChartView(context)
+
+        view.setPresentationOptions(
+            PieDonutPresentationOptions(
+                animateOnDataChange = false,
+                enableSelectionExpand = true,
+                selectedSliceExpandAnimMs = 24L,
+                showLabels = true,
+                showLegend = true,
+                labelPosition = PieLabelPosition.OUTSIDE,
+                centerText = "Total",
+                centerSubText = "2026",
+            ),
+        )
+        view.setData(
+            listOf(
+                PieSlice(label = "A", value = 70.0, color = Color.BLUE),
+                PieSlice(label = "B", value = 30.0, color = Color.GREEN),
+            ),
+        )
+
+        layoutAndDraw(view, width = 420, height = 320)
+
+        val centerX = view.readPrivate<Float>("centerX")
+        val centerY = view.readPrivate<Float>("centerY")
+        val outerRadius = view.readPrivate<Float>("outerRadius")
+        touchUp(view, centerX + outerRadius * 0.6f, centerY)
+        shadowOf(Looper.getMainLooper()).idleFor(50, TimeUnit.MILLISECONDS)
+
+        assertEquals(0, view.readPrivate<Int?>("selectedSliceIndex"))
+        assertNull(view.readPrivate<Any?>("selectionAnimator"))
+        assertTrue(view.readPrivate<Float>("innerRadius") > 0f)
+    }
+
+    @Test
+    fun pieChart_mapperFiltersInvalidSlices_andMissClearsSelection() {
+        val context = RuntimeEnvironment.getApplication()
+        val view = PieChartView(context)
+
+        data class SliceInput(val label: String, val value: Double, val color: Int)
+
+        view.setPresentationOptions(
+            PieDonutPresentationOptions(
+                animateOnDataChange = false,
+                enableSelectionExpand = true,
+                selectedSliceExpandAnimMs = 0L,
+            ),
+        )
+        view.setData(
+            listOf(
+                SliceInput("A", 25.0, Color.RED),
+                SliceInput("B", 0.0, Color.GRAY),
+                SliceInput("C", 75.0, Color.BLUE),
+            ),
+        ) { item ->
+            PieSlice(label = item.label, value = item.value, color = item.color)
+        }
+
+        layoutAndDraw(view, width = 400, height = 300)
+
+        val centerX = view.readPrivate<Float>("centerX")
+        val centerY = view.readPrivate<Float>("centerY")
+        val outerRadius = view.readPrivate<Float>("outerRadius")
+        touchUp(view, centerX + outerRadius * 0.5f, centerY)
+        assertEquals(0, view.readPrivate<Int?>("selectedSliceIndex"))
+
+        touchUp(view, 1f, 1f)
+        assertNull(view.readPrivate<Int?>("selectedSliceIndex"))
+        assertEquals(2, view.readPrivate<List<*>>("segments").size)
     }
 }
