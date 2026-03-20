@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, and `Sankey` charts.
+It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, and `Cycle` charts.
 
 ## Project Structure
 
@@ -27,13 +27,14 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
 - Donut: Donut chart with center text/labels/click
 - Gauge: Semi-circular single-value gauge with ranges/ticks/indicator
 - Sankey: Flow diagram with nodes/links, stage inference, and tap highlight
+- Cycle: Circular flow diagram with nodes on a ring and directional inner links
 
 ## Chart Families
 
 - Tiled: Heatmap
 - Axis-based: Bubble, Line, Area, Bar
 - Radial: Radar, Pie, Donut, Gauge
-- Flow: Sankey
+- Flow: Sankey, Cycle
 - Signal: PCM Waveform
 
 ## Development Environment
@@ -167,6 +168,7 @@ Compose module exports:
 - `PieChart(...)`, `DonutChart(...)`
 - `GaugeChart(...)`
 - `SankeyChart(...)`
+- `CycleChart(...)`
 
 ## Usage by Chart
 
@@ -600,6 +602,68 @@ Notes:
 - `SankeyNode.stage` is optional; if omitted, stage is inferred from links
 - Cycles or backward stage assignments fall back to `emptyText`
 - Compose uses `SankeyChart(...)` with the same shared models/options
+
+### 10) Cycle
+
+Key classes:
+- `CycleChartView`
+- `CycleNode`, `CycleLink`
+- `CycleChartStyleOptions`, `CycleChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val nodes = listOf(
+    CycleNode("plan", "Plan", Color.parseColor("#2B80FF")),
+    CycleNode("build", "Build", Color.parseColor("#13C3A3")),
+    CycleNode("launch", "Launch", Color.parseColor("#FF9F1C")),
+    CycleNode("measure", "Measure", Color.parseColor("#8A79FF")),
+    CycleNode("learn", "Learn", Color.parseColor("#EF476F")),
+)
+
+val links = listOf(
+    CycleLink("plan", "build", 18.0, label = "18"),
+    CycleLink("build", "launch", 14.0, label = "14"),
+    CycleLink("launch", "measure", 11.0, label = "11"),
+    CycleLink("measure", "learn", 16.0, label = "16"),
+    CycleLink("learn", "plan", 20.0, label = "20"),
+    CycleLink("measure", "plan", 7.0, label = "7"),
+)
+
+val cycleView = CycleChartView(this).apply {
+    setStyleOptions(
+        CycleChartStyleOptions(
+            backgroundColor = Color.parseColor("#F7FAFC"),
+            nodeStrokeColor = Color.WHITE,
+            selectedStrokeColor = Color.parseColor("#0F172A"),
+        ),
+    )
+    setPresentationOptions(
+        CycleChartPresentationOptions(
+            showNodeLabels = true,
+            showLinkLabels = true,
+            animateOnDataChange = true,
+        ),
+    )
+    setNodes(nodes)
+    setLinks(links)
+    setOnNodeClickListener { _, node, _ ->
+        // use node.label / node.payload
+    }
+    setOnLinkClickListener { _, link, _ ->
+        // use link.sourceId / link.targetId / link.value
+    }
+}
+
+setContentView(cycleView)
+```
+
+Notes:
+- Nodes are arranged around the ring in input order
+- `CycleLink.value` must be finite and `> 0`
+- Self-links are ignored in the current MVP implementation
+- `CycleChartPresentationOptions.startAngleDeg` and `clockwise` control ring ordering
+- Compose uses `CycleChart(...)` with the same shared models/options
 
 ## Test
 
