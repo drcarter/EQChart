@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, and `Cycle` charts.
+It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
 
 ## Project Structure
 
@@ -28,13 +28,14 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
 - Gauge: Semi-circular single-value gauge with ranges/ticks/indicator
 - Sankey: Flow diagram with nodes/links, stage inference, and tap highlight
 - Cycle: Circular flow diagram with nodes on a ring and directional inner links
+- Step Flow: Ordered infographic steps with a hub, curved spine, and right-side pill cards
 
 ## Chart Families
 
 - Tiled: Heatmap
 - Axis-based: Bubble, Line, Area, Bar
 - Radial: Radar, Pie, Donut, Gauge
-- Flow: Sankey, Cycle
+- Flow: Sankey, Cycle, Step Flow
 - Signal: PCM Waveform
 
 ## Development Environment
@@ -169,6 +170,7 @@ Compose module exports:
 - `GaugeChart(...)`
 - `SankeyChart(...)`
 - `CycleChart(...)`
+- `StepFlowChart(...)`
 
 ## Usage by Chart
 
@@ -664,6 +666,59 @@ Notes:
 - Self-links are ignored in the current MVP implementation
 - `CycleChartPresentationOptions.startAngleDeg` and `clockwise` control ring ordering
 - Compose uses `CycleChart(...)` with the same shared models/options
+
+### 11) Step Flow
+
+Key classes:
+- `StepFlowChartView`
+- `StepFlowHubContent`, `StepFlowStep`
+- `StepFlowChartStyleOptions`, `StepFlowChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val hubContent = StepFlowHubContent(
+    eyebrow = "INFOGRAPHIC",
+    title = "STEPS",
+    description = "Show the process clearly",
+)
+
+val steps = listOf(
+    StepFlowStep("discover", "STEP 01", "Discover", "Collect inputs", Color.parseColor("#D946EF"), "!"),
+    StepFlowStep("design", "STEP 02", "Design", "Shape the plan", Color.parseColor("#8B5CF6"), "#"),
+    StepFlowStep("build", "STEP 03", "Build", "Implement the work", Color.parseColor("#60A5FA"), "*"),
+    StepFlowStep("launch", "STEP 04", "Launch", "Release to users", Color.parseColor("#FBBF24"), "$"),
+    StepFlowStep("measure", "STEP 05", "Measure", "Track outcomes", Color.parseColor("#A3E635"), "+"),
+)
+
+val stepFlowView = StepFlowChartView(this).apply {
+    setStyleOptions(
+        StepFlowChartStyleOptions(
+            backgroundColor = Color.parseColor("#2B2B2B"),
+        ),
+    )
+    setPresentationOptions(
+        StepFlowChartPresentationOptions(
+            showStepDescriptions = true,
+            showHubDescription = true,
+        ),
+    )
+    setHubContent(hubContent)
+    setSteps(steps)
+    setOnStepClickListener { _, step, _ ->
+        // use step.title / step.payload
+    }
+}
+
+setContentView(stepFlowView)
+```
+
+Notes:
+- Steps are rendered in input order from top to bottom along the curved spine
+- `StepFlowHubContent` is optional; the chart can render steps without the hub block
+- The shared layout engine computes hub, ring, spine, badge, card, and icon-slot geometry for both UI stacks
+- Compose uses `StepFlowChart(hubContent = ..., steps = ...)` with the same shared models/options
+- This chart is diagram-oriented and does not use axis or free-form graph links
 
 ## Test
 

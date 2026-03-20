@@ -93,6 +93,11 @@
             android:label="Cycle Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.StepFlowActivity"
+            android:exported="true"
+            android:label="Step Flow Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.compose.ComposeHeatmapActivity"
             android:exported="true"
             android:label="Compose Heatmap"
@@ -136,6 +141,11 @@
             android:name=".ui.compose.ComposeCycleActivity"
             android:exported="true"
             android:label="Compose Cycle"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeStepFlowActivity"
+            android:exported="true"
+            android:label="Compose Step Flow"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeLineActivity"
