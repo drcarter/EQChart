@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.magimon.eq.app.ui.theme.EQChartTheme
-import com.magimon.eq.compose.RadarChart
+import com.magimon.eq.compose.radar.RadarChart
 import com.magimon.eq.radar.RadarChartPresentationOptions
 import com.magimon.eq.radar.RadarChartStyleOptions
 import kotlin.math.roundToInt

@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.magimon.eq.app.ui.theme.EQChartTheme
-import com.magimon.eq.compose.StockHeatmapChart
+import com.magimon.eq.compose.heatmap.StockHeatmapChart
 import com.magimon.eq.heatmap.StockHeatmapHelper
 
 class ComposeHeatmapActivity : ComponentActivity() {

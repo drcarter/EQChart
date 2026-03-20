@@ -61,6 +61,9 @@ class ViewSamplesMenuActivity : AppCompatActivity() {
         container.addView(
             menuButton("Sankey", buttonParams) { SankeyActivity::class.java },
         )
+        container.addView(
+            menuButton("Cycle", buttonParams) { CycleActivity::class.java },
+        )
 
         applySampleToolbar(
             title = "Android View Samples",

@@ -1,5 +1,6 @@
 package com.magimon.eq.sankey
 
+import android.os.Looper
 import com.magimon.eq.testutil.layoutAndDraw
 import com.magimon.eq.testutil.readPrivate
 import com.magimon.eq.testutil.touchUp
@@ -11,6 +12,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
+import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 class SankeyChartViewTest {
@@ -78,5 +81,46 @@ class SankeyChartViewTest {
         val layout = view.readPrivate<SankeyChartLayoutResult>("layoutResult")
         assertFalse(layout.isRenderable)
         assertTrue(layout.nodeLayouts.isEmpty())
+    }
+
+    @Test
+    fun sankeyChart_animatesRenderableGraph_andClearsSelectionOnMiss() {
+        val context = RuntimeEnvironment.getApplication()
+        val view = SankeyChartView(context)
+
+        view.setPresentationOptions(
+            SankeyChartPresentationOptions(
+                animateOnDataChange = true,
+                animationDurationMs = 16L,
+                showNodeLabels = true,
+                showLinkValues = true,
+            ),
+        )
+        view.setNodes(
+            listOf(
+                SankeyNode("a", "A", 0xFF2B80FF.toInt()),
+                SankeyNode("b", "B", 0xFF13C3A3.toInt()),
+                SankeyNode("c", "C", 0xFFFF7043.toInt()),
+            ),
+        )
+        view.setLinks(
+            listOf(
+                SankeyLink("a", "b", 12.0, label = "12"),
+                SankeyLink("b", "c", 7.0, label = "7"),
+            ),
+        )
+
+        layoutAndDraw(view, width = 440, height = 320)
+        shadowOf(Looper.getMainLooper()).idleFor(50, TimeUnit.MILLISECONDS)
+
+        val layout = view.readPrivate<SankeyChartLayoutResult>("layoutResult")
+        val node = layout.nodeLayouts.first()
+        touchUp(view, node.left + 4f, node.top + 4f)
+        assertEquals(node.originalIndex, view.readPrivate<Int?>("selectedNodeIndex"))
+
+        touchUp(view, 2f, 2f)
+        assertEquals(1f, view.readPrivate<Float>("renderProgress"), 0.0001f)
+        assertEquals(null, view.readPrivate<Int?>("selectedNodeIndex"))
+        assertEquals(null, view.readPrivate<Int?>("selectedLinkIndex"))
     }
 }

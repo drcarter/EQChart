@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.magimon.eq.app.ui.theme.EQChartTheme
-import com.magimon.eq.compose.AreaChart
+import com.magimon.eq.compose.line.AreaChart
 import com.magimon.eq.line.LineChartPresentationOptions
 import com.magimon.eq.line.LineChartStyleOptions
 
