@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.magimon.eq.app.ui.theme.EQChartTheme
-import com.magimon.eq.compose.PieChart
+import com.magimon.eq.compose.pie.PieChart
 import com.magimon.eq.pie.PieDonutPresentationOptions
 import com.magimon.eq.pie.PieDonutStyleOptions
 import com.magimon.eq.pie.PieLabelPosition

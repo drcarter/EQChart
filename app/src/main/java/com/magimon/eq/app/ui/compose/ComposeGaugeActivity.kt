@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.magimon.eq.app.ui.theme.EQChartTheme
-import com.magimon.eq.compose.GaugeChart
+import com.magimon.eq.compose.gauge.GaugeChart
 import com.magimon.eq.gauge.GaugeChartPresentationOptions
 import com.magimon.eq.gauge.GaugeChartStyleOptions
 

@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.waveform
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +14,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.waveform.PcmWaveFormStyleOptions
 
 /**
@@ -104,6 +105,9 @@ class PcmWaveformController internal constructor(
  *
  * Subsequent changes to [sampleRateHz] or [windowDurationMs] update the remembered controller
  * instead of creating a new instance.
+ *
+ * @param sampleRateHz Target PCM sample rate used to size the retained window
+ * @param windowDurationMs Visible waveform window duration in milliseconds
  */
 @Composable
 fun rememberPcmWaveformController(
@@ -255,7 +259,10 @@ private class ComposePcmRingBuffer(capacity: Int) {
     }
 }
 
-private fun minMaxPerPixel(samples: ShortArray, pixelWidth: Int): FloatArray {
+/**
+ * Downsamples PCM samples into interleaved min/max pairs per rendered horizontal pixel.
+ */
+internal fun minMaxPerPixel(samples: ShortArray, pixelWidth: Int): FloatArray {
     if (samples.isEmpty() || pixelWidth <= 0) return FloatArray(0)
 
     val normalizer = 1f / Short.MAX_VALUE.toFloat()

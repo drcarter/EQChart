@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.bar
 
 import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
@@ -26,12 +26,14 @@ import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarLayoutMode
 import com.magimon.eq.bar.BarOrientation
 import com.magimon.eq.bar.BarSeries
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 
-private data class RenderBar(
+internal data class RenderBar(
     val left: Float,
     val top: Float,
     val right: Float,
@@ -42,7 +44,7 @@ private data class RenderBar(
     val payload: Any?,
 )
 
-private data class ComputedBarChart(
+internal data class ComputedBarChart(
     val chartRect: Rect,
     val categories: List<String>,
     val minValue: Double,
@@ -70,19 +72,19 @@ internal fun resolveBarValueRange(values: Collection<Double>): Pair<Double, Doub
     }
 }
 
-private fun baselineValue(min: Double, max: Double): Double = if (min <= 0.0 && max >= 0.0) 0.0 else min
+internal fun baselineValue(min: Double, max: Double): Double = if (min <= 0.0 && max >= 0.0) 0.0 else min
 
-private fun valueToY(chartRect: Rect, value: Double, min: Double, max: Double): Float {
+internal fun valueToY(chartRect: Rect, value: Double, min: Double, max: Double): Float {
     val ratio = if (max == min) 0.5f else ((value - min) / (max - min)).toFloat()
     return chartRect.bottom - ratio * chartRect.height
 }
 
-private fun valueToX(chartRect: Rect, value: Double, min: Double, max: Double): Float {
+internal fun valueToX(chartRect: Rect, value: Double, min: Double, max: Double): Float {
     val ratio = if (max == min) 0.5f else ((value - min) / (max - min)).toFloat()
     return chartRect.left + ratio * chartRect.width
 }
 
-private fun axisTicks(min: Double, max: Double, count: Int): List<Double> {
+internal fun axisTicks(min: Double, max: Double, count: Int): List<Double> {
     val safe = max(2, count)
     if (safe == 2) return listOf(min, max)
     return List(safe) { index ->
@@ -104,7 +106,36 @@ private fun payloadFor(series: List<BarSeries>, seriesIndex: Int, category: Stri
         ?.payload
 }
 
-private fun resolveLegendReserveHeight(
+/**
+ * Computes how many legend rows are required for the supplied measured item widths.
+ */
+internal fun resolveLegendRowCount(
+    widthPx: Float,
+    contentPadding: Float,
+    itemWidths: List<Float>,
+    itemSpacing: Float,
+    density: Float,
+): Int {
+    if (itemWidths.isEmpty()) return 0
+
+    val startX = contentPadding + 4f * density
+    val maxX = widthPx - contentPadding
+    var rows = 1
+    var x = startX
+    itemWidths.forEach { itemWidth ->
+        if (x > startX && x + itemWidth > maxX) {
+            rows += 1
+            x = startX
+        }
+        x += itemWidth + itemSpacing
+    }
+    return rows
+}
+
+/**
+ * Computes the vertical reserve required for the legend block based on wrapping and typography.
+ */
+internal fun resolveLegendReserveHeight(
     widthPx: Float,
     contentPadding: Float,
     series: List<BarSeries>,
@@ -124,26 +155,23 @@ private fun resolveLegendReserveHeight(
     val markerTextGap = dpToPx(style.legendMarkerTextGapDp, density)
     val itemSpacing = dpToPx(style.legendItemSpacingDp, density)
     val rowSpacing = dpToPx(style.legendRowSpacingDp, density)
-    val startX = contentPadding + 4f * density
-    val maxX = widthPx - contentPadding
     val textHeight = legendPaint.fontMetrics.bottom - legendPaint.fontMetrics.top
     val rowHeight = max(markerSize, textHeight)
-
-    var rows = 1
-    var x = startX
-    series.forEach { item ->
-        val itemWidth = markerSize + markerTextGap + legendPaint.measureText(item.name)
-        if (x > startX && x + itemWidth > maxX) {
-            rows += 1
-            x = startX
-        }
-        x += itemWidth + itemSpacing
-    }
+    val rows = resolveLegendRowCount(
+        widthPx = widthPx,
+        contentPadding = contentPadding,
+        itemWidths = series.map { item -> markerSize + markerTextGap + legendPaint.measureText(item.name) },
+        itemSpacing = itemSpacing,
+        density = density,
+    )
 
     return 8f * density + rows * rowHeight + (rows - 1) * rowSpacing + 4f * density
 }
 
-private fun buildBars(
+/**
+ * Builds render-ready bar rectangles for the current orientation and layout mode.
+ */
+internal fun buildBars(
     series: List<BarSeries>,
     categories: List<String>,
     style: BarChartStyleOptions,
@@ -297,7 +325,13 @@ private fun buildBars(
     return bars
 }
 
-private fun computeBarLayout(
+/**
+ * Computes bar positions, axis bounds, ticks, and legend reserve in pixels.
+ *
+ * This layout is intentionally separate from drawing so grouped/stacked behavior can be unit
+ * tested without a Compose runtime.
+ */
+internal fun computeBarLayout(
     widthPx: Float,
     heightPx: Float,
     series: List<BarSeries>,
@@ -373,6 +407,15 @@ private fun computeBarLayout(
 
 /**
  * Canvas-based bar/column chart composable.
+ *
+ * The chart supports grouped and stacked layouts in both vertical and horizontal orientations.
+ * Category labels are derived from the union of non-blank category names across all [series].
+ *
+ * @param series Bar series to render
+ * @param modifier Standard Compose modifier for layout and gesture handling
+ * @param styleOptions Colors, spacing, radii, and typography used while drawing
+ * @param presentationOptions Axis, legend, orientation, and animation behavior
+ * @param onBarClick Optional callback invoked as `(seriesIndex, categoryIndex, value, payload)`
  */
 @Composable
 fun BarChart(

@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.bubble
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
@@ -26,6 +26,8 @@ import com.magimon.eq.bubble.BubbleLegendItem
 import com.magimon.eq.bubble.BubbleLegendMode
 import com.magimon.eq.bubble.BubblePresentationOptions
 import com.magimon.eq.bubble.BubbleScaleOverride
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import java.util.LinkedHashMap
 import java.util.Locale
 import kotlin.math.PI
@@ -37,16 +39,16 @@ import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-private const val BUBBLE_GOLDEN_ANGLE = 2.3999633f
+internal const val BUBBLE_GOLDEN_ANGLE = 2.3999633f
 
-private data class BubbleLayout(
+internal data class BubbleLayout(
     val datum: BubbleDatum,
     val centerX: Float,
     val centerY: Float,
     val radius: Float,
 )
 
-private data class BubbleNumericRange(
+internal data class BubbleNumericRange(
     val min: Double,
     val max: Double,
 ) {
@@ -54,7 +56,7 @@ private data class BubbleNumericRange(
         get() = max - min
 }
 
-private data class BubbleChartComputed(
+internal data class BubbleChartComputed(
     val plotRect: Rect,
     val titleY: Float,
     val title: String,
@@ -287,7 +289,13 @@ fun BubbleChart(
     }
 }
 
-private fun computeBubbleChart(
+/**
+ * Produces the bubble layout state for both scatter and packed rendering modes.
+ *
+ * This helper normalizes invalid input away before any geometry work, so unit tests can assert
+ * title, legend, axis, and packed/scatter layout policy without depending on a `Canvas`.
+ */
+internal fun computeBubbleChart(
     width: Float,
     height: Float,
     data: List<BubbleDatum>,
@@ -409,7 +417,10 @@ private data class BubbleTuple(
     val yRange: BubbleNumericRange,
 )
 
-private fun buildPackedBubbleLayouts(
+/**
+ * Computes a packed-bubble cluster using an iterative overlap relaxation pass.
+ */
+internal fun buildPackedBubbleLayouts(
     data: List<BubbleDatum>,
     plotRect: Rect,
     sizeRange: BubbleNumericRange,
@@ -516,7 +527,10 @@ private fun buildPackedBubbleLayouts(
     }
 }
 
-private fun resolveBubbleLegend(
+/**
+ * Resolves the effective legend entries for the requested [BubbleLegendMode].
+ */
+internal fun resolveBubbleLegend(
     data: List<BubbleDatum>,
     mode: BubbleLegendMode,
     explicitItems: List<BubbleLegendItem>,
@@ -528,7 +542,7 @@ private fun resolveBubbleLegend(
     }
 }
 
-private fun bubbleAutoLegendItems(data: List<BubbleDatum>): List<BubbleLegendItem> {
+internal fun bubbleAutoLegendItems(data: List<BubbleDatum>): List<BubbleLegendItem> {
     val entries = LinkedHashMap<String, Int>()
     data.forEach { datum ->
         val label = datum.legendGroup?.takeIf { it.isNotBlank() }
@@ -540,7 +554,10 @@ private fun bubbleAutoLegendItems(data: List<BubbleDatum>): List<BubbleLegendIte
     return entries.map { BubbleLegendItem(label = it.key, color = it.value) }
 }
 
-private fun bubbleResolveRange(
+/**
+ * Resolves a stable numeric range, swapping overrides when needed and expanding degenerate input.
+ */
+internal fun bubbleResolveRange(
     values: List<Double>,
     overrideMin: Double?,
     overrideMax: Double?,
@@ -567,22 +584,22 @@ private fun bubbleResolveRange(
     return BubbleNumericRange(minValue, maxValue)
 }
 
-private fun bubbleNormalize(value: Double, range: BubbleNumericRange): Double {
+internal fun bubbleNormalize(value: Double, range: BubbleNumericRange): Double {
     if (range.span <= 0.0) return 0.5
     return ((value - range.min) / range.span).coerceIn(0.0, 1.0)
 }
 
-private fun bubbleMapX(value: Double, range: BubbleNumericRange, plotRect: Rect): Float {
+internal fun bubbleMapX(value: Double, range: BubbleNumericRange, plotRect: Rect): Float {
     val t = bubbleNormalize(value, range).toFloat()
     return plotRect.left + (plotRect.width * t)
 }
 
-private fun bubbleMapY(value: Double, range: BubbleNumericRange, plotRect: Rect): Float {
+internal fun bubbleMapY(value: Double, range: BubbleNumericRange, plotRect: Rect): Float {
     val t = bubbleNormalize(value, range).toFloat()
     return plotRect.bottom - (plotRect.height * t)
 }
 
-private fun bubbleMapRadius(
+internal fun bubbleMapRadius(
     sizeValue: Double,
     sizeRange: BubbleNumericRange,
     minRadius: Float,
@@ -593,7 +610,7 @@ private fun bubbleMapRadius(
     return minRadius + (maxRadius - minRadius) * eased
 }
 
-private fun bubbleTickValues(range: BubbleNumericRange, tickCount: Int): List<Double> {
+internal fun bubbleTickValues(range: BubbleNumericRange, tickCount: Int): List<Double> {
     if (tickCount <= 1) return listOf(range.min, range.max)
     val step = range.span / (tickCount - 1)
     return (0 until tickCount).map { index ->

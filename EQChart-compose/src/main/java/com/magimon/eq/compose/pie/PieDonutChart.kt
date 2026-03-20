@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.pie
 
 import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
@@ -25,25 +25,15 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.magimon.eq.compose.internal.degreeToOffset
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.pie.PieDonutPresentationOptions
 import com.magimon.eq.pie.PieDonutStyleOptions
-import com.magimon.eq.pie.PieLabelPosition
 import com.magimon.eq.pie.PieSlice
 import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.hypot
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
-
-private data class PieSegment(
-    val index: Int,
-    val slice: PieSlice,
-    val ratio: Float,
-    val start: Float,
-    val sweep: Float,
-    val mid: Float,
-)
 
 /**
  * Pie chart composable with slice selection callbacks.
@@ -146,28 +136,17 @@ private fun PieDonutChartInternal(
                     color = styleOptions.legendTextColor,
                     textSizePx = with(density) { styleOptions.legendTextSizeSp.sp.toPx() },
                 )
-                val legendReserved = resolvePieLegendReservedHeight(
+                val geometry = computePieChartGeometry(
                     availableWidth = size.width.toFloat(),
+                    availableHeight = size.height.toFloat(),
                     segments = segments,
                     styleOptions = styleOptions,
                     presentationOptions = presentationOptions,
                     density = density,
                     legendTextPaint = legendPaint,
+                    donutInnerRatio = donutInnerRatio,
                 )
-                val chartBottom = (size.height.toFloat() - legendReserved).coerceAtLeast(0f)
-                val center = Offset(size.width.toFloat() * 0.5f, chartBottom * 0.5f)
-                val contentPadding = with(density) { styleOptions.contentPaddingDp.dp.toPx() }
-                val radius = (min(size.width.toFloat(), chartBottom) * 0.5f - contentPadding).coerceAtLeast(0f)
-                val inner = radius * donutInnerRatio.coerceIn(0f, 0.92f)
-                val dx = tap.x - center.x
-                val dy = tap.y - center.y
-                val dist = hypot(dx, dy)
-                if (dist < inner || dist > radius) {
-                    selectedIndex = null
-                    return@detectTapGestures
-                }
-                val angle = normalizeAngle(Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat())
-                val hit = segments.firstOrNull { isAngleInSweep(angle, it.start, it.sweep) }
+                val hit = hitTestPieSegment(tap, geometry, segments)
                 selectedIndex = hit?.index
                 if (hit != null) {
                     onSliceClick?.invoke(hit.index, hit.slice, hit.slice.payload)
@@ -200,19 +179,20 @@ private fun PieDonutChartInternal(
                 textSizePx = with(density) { styleOptions.legendTextSizeSp.sp.toPx() },
                 align = Paint.Align.LEFT,
             )
-            val legendReserved = resolvePieLegendReservedHeight(
+            val geometry = computePieChartGeometry(
                 availableWidth = size.width,
+                availableHeight = size.height,
                 segments = segments,
                 styleOptions = styleOptions,
                 presentationOptions = presentationOptions,
                 density = density,
                 legendTextPaint = legendTextPaint,
+                donutInnerRatio = donutInnerRatio,
             )
-            val chartBottom = (size.height - legendReserved).coerceAtLeast(0f)
-            val chartPadding = with(density) { styleOptions.contentPaddingDp.dp.toPx() }
-            val center = Offset(size.width * 0.5f, chartBottom * 0.5f)
-            val radius = (min(size.width, chartBottom) * 0.5f - chartPadding).coerceAtLeast(0f)
-            val inner = radius * donutInnerRatio.coerceIn(0f, 0.92f)
+            val chartBottom = geometry.chartBottom
+            val center = geometry.center
+            val radius = geometry.radius
+            val inner = geometry.innerRadius
             val strokeWidth = if (inner > 0f) radius - inner else 0f
             val strokeStyle = if (inner > 0f) Stroke(width = strokeWidth.coerceAtLeast(1f)) else null
             val progress = drawProgress.value.coerceIn(0f, 1f)
@@ -334,13 +314,13 @@ private fun PieDonutChartInternal(
 
                     val midRadius = if (inner > 0f) (inner + radius) * 0.5f else radius * 0.6f
                     val point = drawCenter + degreeToOffset(segment.mid, midRadius)
-                    val availableArc = Math.toRadians(sweepAbs.toDouble()).toFloat() * midRadius.coerceAtLeast(1f)
                     val textWidth = labelPaint.measureText(label)
-                    val inside = when (presentationOptions.labelPosition) {
-                        PieLabelPosition.INSIDE -> true
-                        PieLabelPosition.OUTSIDE -> false
-                        PieLabelPosition.AUTO -> sweepAbs >= 20f && textWidth <= availableArc * 0.95f
-                    }
+                    val inside = shouldPlacePieLabelInside(
+                        segment = segment,
+                        labelPosition = presentationOptions.labelPosition,
+                        midRadius = midRadius,
+                        textWidth = textWidth,
+                    )
 
                     if (inside) {
                         drawContext.canvas.nativeCanvas.drawText(
@@ -352,7 +332,7 @@ private fun PieDonutChartInternal(
                     } else {
                         val anchor = drawCenter + degreeToOffset(segment.mid, radius)
                         val elbow = drawCenter + degreeToOffset(segment.mid, radius + with(density) { 12.dp.toPx() })
-                        val rightSide = normalizeAngle(segment.mid) <= 90f || normalizeAngle(segment.mid) >= 270f
+                        val rightSide = isPieLabelOnRightSide(segment.mid)
                         val endX = if (rightSide) elbow.x + with(density) { 8.dp.toPx() } else elbow.x - with(density) { 8.dp.toPx() }
                         drawContext.canvas.nativeCanvas.drawLine(anchor.x, anchor.y, elbow.x, elbow.y, linePaint)
                         drawContext.canvas.nativeCanvas.drawLine(elbow.x, elbow.y, endX, elbow.y, linePaint)
@@ -411,43 +391,6 @@ private fun PieDonutChartInternal(
     }
 }
 
-private fun buildPieSegments(
-    slices: List<PieSlice>,
-    startAngle: Float,
-    clockwise: Boolean,
-): List<PieSegment> {
-    val valid = slices.filter { it.value.isFinite() && it.value > 0.0 }
-    if (valid.isEmpty()) return emptyList()
-    val total = valid.sumOf { it.value }
-    if (!total.isFinite() || total <= 0.0) return emptyList()
-
-    val sign = if (clockwise) 1f else -1f
-    var cursor = startAngle
-    var consumed = 0f
-
-    return valid.mapIndexed { index, slice ->
-        val ratio = (slice.value / total).toFloat().coerceAtLeast(0f)
-        val sweepAbs = if (index == valid.lastIndex) {
-            (360f - consumed).coerceAtLeast(0f)
-        } else {
-            (ratio * 360f).coerceAtLeast(0f)
-        }
-        consumed += sweepAbs
-        val sweep = sweepAbs * sign
-        val mid = cursor + (sweep * 0.5f)
-        PieSegment(
-            index = index,
-            slice = slice,
-            ratio = ratio,
-            start = cursor,
-            sweep = sweep,
-            mid = mid,
-        ).also {
-            cursor += sweep
-        }
-    }
-}
-
 private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawPieLegend(
     segments: List<PieSegment>,
     styleOptions: PieDonutStyleOptions,
@@ -493,42 +436,4 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawPieLegend(
         )
         cursorX += itemWidth + itemGap
     }
-}
-
-private fun resolvePieLegendReservedHeight(
-    availableWidth: Float,
-    segments: List<PieSegment>,
-    styleOptions: PieDonutStyleOptions,
-    presentationOptions: PieDonutPresentationOptions,
-    density: Density,
-    legendTextPaint: Paint,
-): Float {
-    if (!presentationOptions.showLegend || segments.isEmpty()) return 0f
-
-    val markerSize = with(density) { styleOptions.legendMarkerSizeDp.dp.toPx() }
-    val markerTextGap = with(density) { styleOptions.legendMarkerTextGapDp.dp.toPx() }
-    val itemGap = with(density) { styleOptions.legendItemSpacingDp.dp.toPx() }
-    val rowGap = with(density) { styleOptions.legendRowSpacingDp.dp.toPx() }
-    val rowHeight = max(markerSize, legendTextPaint.fontSpacing)
-
-    val startX = with(density) { styleOptions.contentPaddingDp.dp.toPx() + presentationOptions.legendLeftMarginDp.dp.toPx() }
-    val maxX = availableWidth - with(density) { styleOptions.contentPaddingDp.dp.toPx() }
-
-    var cursorX = startX
-    var rowCount = 1
-    segments.forEach { segment ->
-        val text = segment.slice.label.ifBlank { "Slice" }
-        val textWidth = legendTextPaint.measureText(text)
-        val itemWidth = markerSize + markerTextGap + textWidth
-        if (cursorX + itemWidth > maxX && cursorX > startX) {
-            rowCount += 1
-            cursorX = startX
-        }
-        cursorX += itemWidth + itemGap
-    }
-
-    return with(density) { presentationOptions.legendTopMarginDp.dp.toPx() } +
-        (rowCount * rowHeight) +
-        ((rowCount - 1).coerceAtLeast(0) * rowGap) +
-        with(density) { presentationOptions.legendBottomMarginDp.dp.toPx() }
 }

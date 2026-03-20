@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.heatmap
 
 import android.graphics.Color
 import android.graphics.Paint
@@ -16,40 +16,42 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.sp
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.heatmap.StockHeatmapItem
 import com.magimon.eq.heatmap.StockHeatmapSection
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-private data class HeatmapBlockRect(
+internal data class HeatmapBlockRect(
     val item: StockHeatmapItem,
     val rect: RectF,
 )
 
-private data class HeatmapSectionGroup(
+internal data class HeatmapSectionGroup(
     val name: String,
     val color: Int,
     val totalWeight: Float,
     val items: List<StockHeatmapItem>,
 )
 
-private data class HeatmapSectionLayout(
+internal data class HeatmapSectionLayout(
     val group: HeatmapSectionGroup,
     val headerRect: RectF,
 )
 
-private data class HeatmapWeightedItem<T>(
+internal data class HeatmapWeightedItem<T>(
     val item: T,
     val weight: Float,
 )
 
-private data class HeatmapLayoutBlock<T>(
+internal data class HeatmapLayoutBlock<T>(
     val item: T,
     val rect: RectF,
 )
 
-private data class HeatmapComputed(
+internal data class HeatmapComputed(
     val blocks: List<HeatmapBlockRect>,
     val sectionHeaders: List<HeatmapSectionLayout>,
 )
@@ -228,7 +230,10 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawHeatmapBlockTex
     }
 }
 
-private fun computeHeatmapLayout(
+/**
+ * Resolves all section/header/item rectangles for the heatmap from grouped stock data.
+ */
+internal fun computeHeatmapLayout(
     sections: List<StockHeatmapSection>,
     width: Float,
     height: Float,
@@ -331,11 +336,11 @@ private fun computeHeatmapLayout(
     return HeatmapComputed(blocks = blocks, sectionHeaders = sectionLayouts)
 }
 
-private fun heatmapInsetRect(src: RectF, inset: Float): RectF {
+internal fun heatmapInsetRect(src: RectF, inset: Float): RectF {
     return RectF(src.left + inset, src.top + inset, src.right - inset, src.bottom - inset)
 }
 
-private fun heatmapItemWeight(item: StockHeatmapItem): Float {
+internal fun heatmapItemWeight(item: StockHeatmapItem): Float {
     val ratio = item.sizeRatio ?: 0.0
     return if (ratio > 0.0) {
         ratio.toFloat()
@@ -344,7 +349,7 @@ private fun heatmapItemWeight(item: StockHeatmapItem): Float {
     }
 }
 
-private fun <T> heatmapLayoutSquarified(
+internal fun <T> heatmapLayoutSquarified(
     items: List<HeatmapWeightedItem<T>>,
     bounds: RectF,
 ): List<HeatmapLayoutBlock<T>> {
@@ -457,7 +462,7 @@ private fun <T> heatmapLayoutRow(
     }
 }
 
-private fun heatmapWorstAspectRatio(
+internal fun heatmapWorstAspectRatio(
     row: List<HeatmapWeightedItem<*>>,
     w: Float,
 ): Float {
@@ -479,11 +484,11 @@ private fun heatmapWorstAspectRatio(
     return if (worst == 0f) Float.MAX_VALUE else worst
 }
 
-private fun heatmapWithAlpha(color: Int, alpha: Int): Int {
+internal fun heatmapWithAlpha(color: Int, alpha: Int): Int {
     return Color.argb(alpha.coerceIn(0, 255), Color.red(color), Color.green(color), Color.blue(color))
 }
 
-private fun heatmapMapSectorToColor(sector: String): Int {
+internal fun heatmapMapSectorToColor(sector: String): Int {
     val palette = listOf(
         Color.parseColor("#1E88E5"),
         Color.parseColor("#00897B"),
@@ -497,7 +502,7 @@ private fun heatmapMapSectorToColor(sector: String): Int {
     return palette[abs(sector.hashCode()) % palette.size]
 }
 
-private fun heatmapMapChangeToColor(changePct: Double): Int {
+internal fun heatmapMapChangeToColor(changePct: Double): Int {
     val maxAbs = 6.0
     val clamped = max(-maxAbs, min(maxAbs, changePct))
     val ratio = (clamped / maxAbs).toFloat()
@@ -513,7 +518,7 @@ private fun heatmapMapChangeToColor(changePct: Double): Int {
     }
 }
 
-private fun heatmapInterpolateColor(from: Int, to: Int, t: Float): Int {
+internal fun heatmapInterpolateColor(from: Int, to: Int, t: Float): Int {
     val clamped = t.coerceIn(0f, 1f)
     val a = (Color.alpha(from) + (Color.alpha(to) - Color.alpha(from)) * clamped).toInt()
     val r = (Color.red(from) + (Color.red(to) - Color.red(from)) * clamped).toInt()
@@ -522,4 +527,4 @@ private fun heatmapInterpolateColor(from: Int, to: Int, t: Float): Int {
     return Color.argb(a, r, g, b)
 }
 
-private fun heatmapFormatChange(changePct: Double): String = String.format("%+.2f%%", changePct)
+internal fun heatmapFormatChange(changePct: Double): String = String.format("%+.2f%%", changePct)

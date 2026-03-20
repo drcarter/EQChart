@@ -1,4 +1,4 @@
-package com.magimon.eq.compose
+package com.magimon.eq.compose.gauge
 
 import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
@@ -17,6 +17,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.magimon.eq.compose.internal.degreeToOffset
+import com.magimon.eq.compose.internal.newTextPaint
+import com.magimon.eq.compose.internal.toComposeColor
 import com.magimon.eq.gauge.GaugeChartPresentationOptions
 import com.magimon.eq.gauge.GaugeChartStyleOptions
 import com.magimon.eq.gauge.GaugeRange
@@ -253,6 +256,9 @@ fun GaugeChart(
     }
 }
 
+/**
+ * Validates the gauge domain and clamps the incoming value into that domain.
+ */
 internal fun resolveComposeGaugeValue(value: GaugeValue?): ComposeResolvedGaugeValue? {
     value ?: return null
     if (!value.value.isFinite() || !value.minValue.isFinite() || !value.maxValue.isFinite()) return null
@@ -269,6 +275,9 @@ internal fun resolveComposeGaugeValue(value: GaugeValue?): ComposeResolvedGaugeV
     )
 }
 
+/**
+ * Normalizes threshold ranges into `0f..1f` ratios over the active gauge domain.
+ */
 internal fun resolveComposeGaugeRanges(
     ranges: List<GaugeRange>,
     minValue: Double,
@@ -289,6 +298,9 @@ internal fun resolveComposeGaugeRanges(
     }
 }
 
+/**
+ * Computes gauge arc geometry and text baselines from the available canvas size.
+ */
 internal fun resolveComposeGaugeGeometry(
     width: Float,
     height: Float,

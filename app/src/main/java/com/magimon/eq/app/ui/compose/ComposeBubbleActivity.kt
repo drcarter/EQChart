@@ -14,7 +14,7 @@ import com.magimon.eq.bubble.BubbleLegendItem
 import com.magimon.eq.bubble.BubbleLegendMode
 import com.magimon.eq.bubble.BubbleLayoutMode
 import com.magimon.eq.bubble.BubblePresentationOptions
-import com.magimon.eq.compose.BubbleChart
+import com.magimon.eq.compose.bubble.BubbleChart
 
 class ComposeBubbleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

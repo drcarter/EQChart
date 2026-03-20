@@ -60,7 +60,11 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
 
+    testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
 
 afterEvaluate {
