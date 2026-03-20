@@ -6,6 +6,8 @@ import com.magimon.eq.heatmap.StockHeatmapHelper
 import com.magimon.eq.heatmap.StockHeatmapSection
 import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarSeries
+import com.magimon.eq.cycle.CycleLink
+import com.magimon.eq.cycle.CycleNode
 import com.magimon.eq.gauge.GaugeRange
 import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.line.LineDatum
@@ -108,6 +110,27 @@ object ChartSampleData {
             SankeyLink("pricing", "trial", 18.0),
             SankeyLink("trial", "paid", 16.0),
             SankeyLink("trial", "churn", 32.0),
+        )
+    }
+
+    fun cycleNodes(): List<CycleNode> {
+        return listOf(
+            CycleNode("plan", "Plan", Color.parseColor("#2B80FF"), "Plan"),
+            CycleNode("build", "Build", Color.parseColor("#13C3A3"), "Build"),
+            CycleNode("launch", "Launch", Color.parseColor("#FF9F1C"), "Launch"),
+            CycleNode("measure", "Measure", Color.parseColor("#8A79FF"), "Measure"),
+            CycleNode("learn", "Learn", Color.parseColor("#EF476F"), "Learn"),
+        )
+    }
+
+    fun cycleLinks(): List<CycleLink> {
+        return listOf(
+            CycleLink("plan", "build", 18.0, label = "18", payload = "plan-build"),
+            CycleLink("build", "launch", 14.0, label = "14", payload = "build-launch"),
+            CycleLink("launch", "measure", 11.0, label = "11", payload = "launch-measure"),
+            CycleLink("measure", "learn", 16.0, label = "16", payload = "measure-learn"),
+            CycleLink("learn", "plan", 20.0, label = "20", payload = "learn-plan"),
+            CycleLink("measure", "plan", 7.0, label = "7", payload = "measure-plan"),
         )
     }
 

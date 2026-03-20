@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, and `Sankey` charts.
+It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, and `Cycle` charts.
 
 ## Project Structure
 
@@ -27,6 +27,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
 - Donut: Donut chart with center text/labels/click
 - Gauge: Semi-circular single-value gauge with ranges/ticks/indicator
 - Sankey: Flow diagram with nodes/links, stage inference, and tap highlight
+- Cycle: Circular flow diagram with nodes on a ring and directional inner links
 
 ## Chart Families
 
@@ -34,6 +35,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
 - Axis-based: Bubble, Line, Area, Bar
 - Radial: Radar, Pie, Donut, Gauge
 - Flow: Sankey
+- Flow: Sankey, Cycle
 - Signal: PCM Waveform
 
 ## Development Environment
@@ -167,6 +169,7 @@ Compose module exports:
 - `PieChart(...)`, `DonutChart(...)`
 - `GaugeChart(...)`
 - `SankeyChart(...)`
+- `CycleChart(...)`
 
 ## Usage by Chart
 

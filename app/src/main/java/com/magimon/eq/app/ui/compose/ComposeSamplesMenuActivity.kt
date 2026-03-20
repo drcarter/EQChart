@@ -39,6 +39,7 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
         container.addView(menuButton("Donut", buttonParams) { ComposeDonutActivity::class.java })
         container.addView(menuButton("Gauge", buttonParams) { ComposeGaugeActivity::class.java })
         container.addView(menuButton("Sankey", buttonParams) { ComposeSankeyActivity::class.java })
+        container.addView(menuButton("Cycle", buttonParams) { ComposeCycleActivity::class.java })
 
         applySampleToolbar(
             title = "Compose Samples",
