@@ -74,14 +74,23 @@ fun resolveHistogramChartLayout(
         )
     }
 
-    val minBinStart = layoutBins.minOfOrNull { it.start } ?: 0.0
-    val maxBinEnd = layoutBins.maxOfOrNull { it.end } ?: 1.0
+    var minBinStart = layoutBins.first().start
+    var maxBinEnd = layoutBins.first().end
+    var minObservedValue = layoutBins.first().value
+    var maxObservedValue = layoutBins.first().value
+    for (index in 1 until layoutBins.size) {
+        val bin = layoutBins[index]
+        if (bin.start < minBinStart) minBinStart = bin.start
+        if (bin.end > maxBinEnd) maxBinEnd = bin.end
+        if (bin.value < minObservedValue) minObservedValue = bin.value
+        if (bin.value > maxObservedValue) maxObservedValue = bin.value
+    }
 
-    val rawMin = min(layoutBins.minOfOrNull { it.value } ?: -1.0, 0.0)
-    val rawMax = max(layoutBins.maxOfOrNull { it.value } ?: 1.0, 0.0)
+    val rawMin = min(minObservedValue, 0.0)
+    val rawMax = max(maxObservedValue, 0.0)
     val resolvedMin: Double
     val resolvedMax: Double
-    if (!rawMin.isFinite() || !rawMax.isFinite() || abs(rawMax - rawMin) <= 1e-12) {
+    if (abs(rawMax - rawMin) <= 1e-12) {
         resolvedMin = rawMin - 1.0
         resolvedMax = rawMax + 1.0
     } else {
