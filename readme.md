@@ -155,6 +155,8 @@ Build, start the local preview server, and open the browser in one step:
 ./gradlew referenceDocsPreview
 ```
 
+If `docs/reference/index.html` is missing, the preview script builds the reference docs before starting the server.
+
 Generated site:
 
 - `docs/reference/index.html`
