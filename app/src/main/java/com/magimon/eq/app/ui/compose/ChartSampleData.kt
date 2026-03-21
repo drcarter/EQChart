@@ -10,6 +10,7 @@ import com.magimon.eq.cycle.CycleLink
 import com.magimon.eq.cycle.CycleNode
 import com.magimon.eq.gauge.GaugeRange
 import com.magimon.eq.gauge.GaugeValue
+import com.magimon.eq.histogram.HistogramBin
 import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
 import com.magimon.eq.pie.PieSlice
@@ -283,6 +284,16 @@ object ChartSampleData {
                     BarDatum(label, (3.0 + index * 2.5 + Random(index + 99).nextDouble(0.0, 1.2)))
                 },
             ),
+        )
+    }
+
+    fun histogramBins(): List<HistogramBin> {
+        return listOf(
+            HistogramBin(0.0, 10.0, 4.0, payload = "0-10"),
+            HistogramBin(10.0, 20.0, 9.0, payload = "10-20"),
+            HistogramBin(20.0, 30.0, 13.0, payload = "20-30"),
+            HistogramBin(30.0, 40.0, 8.0, payload = "30-40"),
+            HistogramBin(40.0, 50.0, 3.0, payload = "40-50"),
         )
     }
 

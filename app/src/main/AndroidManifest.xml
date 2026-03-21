@@ -53,6 +53,11 @@
             android:label="Bar Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.HistogramActivity"
+            android:exported="true"
+            android:label="Histogram Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.WaterfallActivity"
             android:exported="true"
             android:label="Waterfall Chart"
@@ -166,6 +171,11 @@
             android:name=".ui.compose.ComposeBarActivity"
             android:exported="true"
             android:label="Compose Bar"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeHistogramActivity"
+            android:exported="true"
+            android:label="Compose Histogram"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeWaterfallActivity"

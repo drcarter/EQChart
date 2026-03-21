@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Waterfall`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
+It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
 
 ## Project Structure
 
@@ -23,6 +23,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Waterfall`, `
 - Line: Multi-series Cartesian line chart with grid / legend / point selection
 - Area: Filled line chart variant for trend comparison
 - Bar: Grouped / stacked bar chart with vertical / horizontal orientation
+- Histogram: Ordered bucket chart for count / frequency distribution
 - Waterfall: Ordered cumulative delta chart with subtotal / total bars and connectors
 - PCM Waveform: Real-time 16-bit mono PCM waveform rendering
 - Radar: Multi-series radar chart (legend/animation/point click)
@@ -36,7 +37,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Waterfall`, `
 ## Chart Families
 
 - Tiled: Heatmap
-- Axis-based: Bubble, Line, Area, Bar, Waterfall
+- Axis-based: Bubble, Line, Area, Bar, Histogram, Waterfall
 - Radial: Radar, Pie, Donut, Gauge
 - Flow: Sankey, Cycle, Step Flow
 - Signal: PCM Waveform
@@ -204,6 +205,7 @@ Compose module exports:
 - `BubbleChart(...)`
 - `LineChart(...)`, `AreaChart(...)`
 - `BarChart(...)`
+- `HistogramChart(...)`
 - `WaterfallChart(...)`
 - `PcmWaveformChart(...)` + `rememberPcmWaveformController(...)`
 - `RadarChart(...)`
