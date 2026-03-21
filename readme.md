@@ -127,6 +127,34 @@ dependencies {
 ./gradlew publish -PpublishDate=2026.03.08 -PpublishIncrement=1
 ```
 
+## Reference Docs
+
+Build aggregated Dokka HTML reference docs for the published library modules:
+
+```bash
+./gradlew referenceDocs
+```
+
+Build, start the local preview server, and open the browser in one step:
+
+```bash
+./gradlew referenceDocsPreview
+```
+
+Generated site:
+
+- `docs/reference/index.html`
+
+Per-module Dokka tasks are also available:
+
+- `./gradlew :EQChart-common:dokkaHtml`
+- `./gradlew :EQChart:dokkaHtml`
+- `./gradlew :EQChart-compose:dokkaHtml`
+
+Compatibility aliases are also kept for familiar Dokka task names:
+
+- `./gradlew dokkaHtmlMultiModule`
+
 ## Run Sample App
 
 ```bash
