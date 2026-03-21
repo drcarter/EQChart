@@ -63,6 +63,11 @@
             android:label="Waterfall Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.FunnelActivity"
+            android:exported="true"
+            android:label="Funnel Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.BubbleActivity"
             android:exported="true"
             android:label="Bubble Chart"
@@ -181,6 +186,11 @@
             android:name=".ui.compose.ComposeWaterfallActivity"
             android:exported="true"
             android:label="Compose Waterfall"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeFunnelActivity"
+            android:exported="true"
+            android:label="Compose Funnel"
             android:theme="@style/Theme.EQChart" />
     </application>
 
