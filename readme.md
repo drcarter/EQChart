@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `Funnel`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
+It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
 
 ## Project Structure
 
@@ -26,6 +26,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `
 - Histogram: Ordered bucket chart for count / frequency distribution
 - Waterfall: Ordered cumulative delta chart with subtotal / total bars and connectors
 - Funnel: Vertical conversion funnel chart with tapered stages and click callbacks
+- Sunburst: Hierarchical radial chart for nested part-to-whole breakdowns
 - PCM Waveform: Real-time 16-bit mono PCM waveform rendering
 - Radar: Multi-series radar chart (legend/animation/point click)
 - Pie: Ratio-based pie chart (legend/labels/click)
@@ -40,6 +41,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `
 - Tiled: Heatmap
 - Axis-based: Bubble, Line, Area, Bar, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
+- Hierarchical radial: Sunburst
 - Flow: Sankey, Cycle, Step Flow
 - Signal: PCM Waveform
 
@@ -211,6 +213,7 @@ Compose module exports:
 - `HistogramChart(...)`
 - `WaterfallChart(...)`
 - `FunnelChart(...)`
+- `SunburstChart(...)`
 - `PcmWaveformChart(...)` + `rememberPcmWaveformController(...)`
 - `RadarChart(...)`
 - `PieChart(...)`, `DonutChart(...)`
@@ -766,6 +769,47 @@ Notes:
 - The shared layout engine computes hub, ring, spine, badge, card, and icon-slot geometry for both UI stacks
 - Compose uses `StepFlowChart(hubContent = ..., steps = ...)` with the same shared models/options
 - This chart is diagram-oriented and does not use axis or free-form graph links
+
+### 12) Sunburst
+
+Key classes:
+- `SunburstChartView`
+- `SunburstNode`
+- `SunburstChartStyleOptions`, `SunburstChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val sunburstView = SunburstChartView(this).apply {
+    setStyleOptions(SunburstChartStyleOptions())
+    setPresentationOptions(SunburstChartPresentationOptions())
+    setNodes(
+        listOf(
+            SunburstNode(
+                label = "Company",
+                value = 1000.0,
+                color = Color.parseColor("#0F172A"),
+                children = listOf(
+                    SunburstNode("Growth", 420.0, Color.parseColor("#2563EB")),
+                    SunburstNode("Product", 360.0, Color.parseColor("#14B8A6")),
+                    SunburstNode("Ops", 220.0, Color.parseColor("#F97316")),
+                ),
+            ),
+        ),
+    )
+    setOnNodeClickListener { _, node, _ ->
+        // use node.label / node.value / node.payload
+    }
+}
+
+setContentView(sunburstView)
+```
+
+Notes:
+- Sunburst renders nested nodes as radial rings from the root outward
+- Leaves require `SunburstNode.value` to be finite and `> 0`
+- Parents can either provide their own value or derive it from valid children; rendering uses child sums when descendants exist
+- Compose uses `SunburstChart(nodes = ..., ...)` with the same shared models/options
 
 ## Test
 

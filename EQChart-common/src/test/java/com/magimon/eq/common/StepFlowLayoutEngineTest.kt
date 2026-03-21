@@ -527,6 +527,40 @@ class StepFlowLayoutEngineTest {
     }
 
     @Test
+    fun `compute detects top edge card overflow`() {
+        val result = StepFlowChartLayoutEngine.compute(
+            hubContent = hubContent,
+            steps = steps.take(4),
+            config = validConfig().copy(
+                topBottomInsetPx = 0f,
+                cardHeightPx = 80f,
+            ),
+            styleOptions = styleOptions,
+            presentationOptions = presentationOptions,
+        )
+
+        assertFalse(result.isRenderable)
+        assertEquals("card vertical overflow", result.emptyReason)
+    }
+
+    @Test
+    fun `compute detects simultaneous top and bottom card overflow`() {
+        val result = StepFlowChartLayoutEngine.compute(
+            hubContent = hubContent,
+            steps = steps.take(1),
+            config = validConfig().copy(
+                topBottomInsetPx = 0f,
+                cardHeightPx = 560f,
+            ),
+            styleOptions = styleOptions,
+            presentationOptions = presentationOptions,
+        )
+
+        assertFalse(result.isRenderable)
+        assertEquals("card vertical overflow", result.emptyReason)
+    }
+
+    @Test
     fun `hit testing and helpers cover non renderable and private branches`() {
         val emptyLayout = StepFlowChartLayoutResult(
             hubLayout = null,

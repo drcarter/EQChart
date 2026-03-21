@@ -4,6 +4,15 @@ import kotlin.math.max
 
 /**
  * Render-ready funnel stage description resolved from input stages.
+ *
+ * @property index Zero-based stage index after sanitization.
+ * @property label Stage label copied from the source [FunnelStage].
+ * @property value Stage value copied from the source [FunnelStage].
+ * @property topWidthRatio Normalized width ratio of the stage top edge.
+ * @property bottomWidthRatio Normalized width ratio of the stage bottom edge.
+ * @property color Resolved fill color used by renderers.
+ * @property payload Optional payload propagated from the source stage.
+ * @see FunnelStage
  */
 data class FunnelLayoutStage(
     val index: Int,
@@ -17,6 +26,11 @@ data class FunnelLayoutStage(
 
 /**
  * Shared normalized layout result for funnel charts.
+ *
+ * @property stages Sanitized render stages in draw order.
+ * @property maxValue Maximum stage value used to normalize widths.
+ * @see FunnelLayoutStage
+ * @see FunnelStage
  */
 data class FunnelChartLayout(
     val stages: List<FunnelLayoutStage>,
@@ -25,6 +39,15 @@ data class FunnelChartLayout(
 
 /**
  * Resolves sanitized stages, relative widths, and display colors for funnel charts.
+ *
+ * Blank labels and non-positive or non-finite values are filtered out before layout is produced.
+ *
+ * @param stages Source stages to sanitize and normalize.
+ * @param style Shared style options that affect width floors and fallback colors.
+ * @return A renderer-agnostic [FunnelChartLayout] for View and Compose implementations.
+ * @see FunnelStage
+ * @see FunnelChartStyleOptions
+ * @see FunnelChartPresentationOptions
  */
 fun resolveFunnelChartLayout(
     stages: List<FunnelStage>,

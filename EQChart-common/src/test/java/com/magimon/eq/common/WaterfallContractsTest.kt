@@ -237,4 +237,18 @@ class WaterfallContractsTest {
         assertEquals(33, layout.entries[2].color)
         assertEquals(44, layout.entries[3].color)
     }
+
+    @Test
+    fun waterfallBaseline_usesMinValueWhenEntireRangeIsNegative() {
+        val layout = resolveWaterfallChartLayout(
+            entries = listOf(
+                WaterfallEntry("Loss A", -10.0),
+                WaterfallEntry("Loss B", -5.0),
+            ),
+        )
+
+        assertEquals(-15.0, layout.minValue, 0.0)
+        assertEquals(0.0, layout.baselineValue, 0.0)
+        assertEquals(-10.0, resolveWaterfallBaseline(-10.0, -1.0), 0.0)
+    }
 }

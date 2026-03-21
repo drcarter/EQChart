@@ -72,6 +72,9 @@ class HistogramChartView @JvmOverloads constructor(
 
     /**
      * Replaces all histogram bins.
+     *
+     * @param items Ordered [HistogramBin] values to render.
+     * @see HistogramBin
      */
     fun setBins(items: List<HistogramBin>) {
         sourceBins.clear()
@@ -82,6 +85,10 @@ class HistogramChartView @JvmOverloads constructor(
 
     /**
      * Replaces bins by mapping arbitrary objects.
+     *
+     * @param items Source items to map into [HistogramBin] values.
+     * @param mapper Converts each source item into a [HistogramBin].
+     * @see HistogramBin
      */
     fun <T> setBins(items: List<T>, mapper: (T) -> HistogramBin) {
         setBins(items.map(mapper))
@@ -89,6 +96,9 @@ class HistogramChartView @JvmOverloads constructor(
 
     /**
      * Sets render style options.
+     *
+     * @param options Updated styling values.
+     * @see HistogramChartStyleOptions
      */
     fun setStyleOptions(options: HistogramChartStyleOptions) {
         styleOptions = options
@@ -98,6 +108,9 @@ class HistogramChartView @JvmOverloads constructor(
 
     /**
      * Sets presentation behavior.
+     *
+     * @param options Updated presentation values.
+     * @see HistogramChartPresentationOptions
      */
     fun setPresentationOptions(options: HistogramChartPresentationOptions) {
         presentationOptions = options
@@ -109,6 +122,9 @@ class HistogramChartView @JvmOverloads constructor(
      * Sets bin click callback.
      *
      * Callback format: `(index, bin, value)`.
+     *
+     * @param listener Listener invoked when a rendered histogram bin is tapped.
+     * @see HistogramBin
      */
     fun setOnBinClickListener(listener: (Int, HistogramBin, Double) -> Unit) {
         onBinClickListener = listener
