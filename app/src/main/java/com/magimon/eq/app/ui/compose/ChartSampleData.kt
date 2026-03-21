@@ -17,6 +17,8 @@ import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarSeries
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
+import com.magimon.eq.stepflow.StepFlowHubContent
+import com.magimon.eq.stepflow.StepFlowStep
 import kotlin.random.Random
 import kotlin.math.PI
 import kotlin.math.sin
@@ -131,6 +133,65 @@ object ChartSampleData {
             CycleLink("measure", "learn", 16.0, label = "16", payload = "measure-learn"),
             CycleLink("learn", "plan", 20.0, label = "20", payload = "learn-plan"),
             CycleLink("measure", "plan", 7.0, label = "7", payload = "measure-plan"),
+        )
+    }
+
+    fun stepFlowHubContent(): StepFlowHubContent {
+        return StepFlowHubContent(
+            eyebrow = "INFOGRAPHIC",
+            title = "STEPS",
+            description = "Move from discovery to growth with one readable flow.",
+            payload = "step-flow-hub",
+        )
+    }
+
+    fun stepFlowSteps(): List<StepFlowStep> {
+        return listOf(
+            StepFlowStep(
+                id = "discover",
+                badgeLabel = "STEP 01",
+                title = "Discover",
+                description = "Gather context and shape the problem.",
+                accentColor = Color.parseColor("#9B5DE5"),
+                iconText = "!",
+                payload = "discover",
+            ),
+            StepFlowStep(
+                id = "design",
+                badgeLabel = "STEP 02",
+                title = "Design",
+                description = "Translate insight into a concrete direction.",
+                accentColor = Color.parseColor("#7B61FF"),
+                iconText = "\u2699",
+                payload = "design",
+            ),
+            StepFlowStep(
+                id = "target",
+                badgeLabel = "STEP 03",
+                title = "Target",
+                description = "Choose the right audience and intent.",
+                accentColor = Color.parseColor("#60A5FA"),
+                iconText = "\u25CE",
+                payload = "target",
+            ),
+            StepFlowStep(
+                id = "budget",
+                badgeLabel = "STEP 04",
+                title = "Budget",
+                description = "Align resources and commit to execution.",
+                accentColor = Color.parseColor("#FBBF24"),
+                iconText = "$",
+                payload = "budget",
+            ),
+            StepFlowStep(
+                id = "grow",
+                badgeLabel = "STEP 05",
+                title = "Grow",
+                description = "Measure outcomes and expand what works.",
+                accentColor = Color.parseColor("#A3E635"),
+                iconText = "\u2197",
+                payload = "grow",
+            ),
         )
     }
 

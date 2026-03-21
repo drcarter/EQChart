@@ -1,63 +1,39 @@
 package com.magimon.eq.app.ui.compose
 
-import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.view.Gravity
-import android.widget.Button
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.magimon.eq.app.R
+import com.magimon.eq.app.ui.ChartMenuEntry
 import com.magimon.eq.app.ui.applySampleToolbar
+import com.magimon.eq.app.ui.createChartMenuGrid
 
 class ComposeSamplesMenuActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            val padding = (24 * resources.displayMetrics.density).toInt()
-            setPadding(padding, padding, padding, padding)
-        }
-
-        val buttonParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-        ).apply {
-            topMargin = (8 * resources.displayMetrics.density).toInt()
-            bottomMargin = (8 * resources.displayMetrics.density).toInt()
-        }
-
-        container.addView(menuButton("Heatmap", buttonParams) { ComposeHeatmapActivity::class.java })
-        container.addView(menuButton("Bubble", buttonParams) { ComposeBubbleActivity::class.java })
-        container.addView(menuButton("Line", buttonParams) { ComposeLineActivity::class.java })
-        container.addView(menuButton("Area", buttonParams) { ComposeAreaActivity::class.java })
-        container.addView(menuButton("Bar", buttonParams) { ComposeBarActivity::class.java })
-        container.addView(menuButton("PCM Waveform", buttonParams) { ComposeWaveformActivity::class.java })
-        container.addView(menuButton("Radar", buttonParams) { ComposeRadarActivity::class.java })
-        container.addView(menuButton("Pie", buttonParams) { ComposePieActivity::class.java })
-        container.addView(menuButton("Donut", buttonParams) { ComposeDonutActivity::class.java })
-        container.addView(menuButton("Gauge", buttonParams) { ComposeGaugeActivity::class.java })
-        container.addView(menuButton("Sankey", buttonParams) { ComposeSankeyActivity::class.java })
-        container.addView(menuButton("Cycle", buttonParams) { ComposeCycleActivity::class.java })
+        val container = createChartMenuGrid(
+            entries = listOf(
+                ChartMenuEntry("Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#0EA5E9"), ComposeHeatmapActivity::class.java),
+                ChartMenuEntry("Bubble", R.drawable.ic_chart_bubble, Color.parseColor("#EC4899"), ComposeBubbleActivity::class.java),
+                ChartMenuEntry("Line", R.drawable.ic_chart_line, Color.parseColor("#2563EB"), ComposeLineActivity::class.java),
+                ChartMenuEntry("Area", R.drawable.ic_chart_area, Color.parseColor("#14B8A6"), ComposeAreaActivity::class.java),
+                ChartMenuEntry("Bar", R.drawable.ic_chart_bar, Color.parseColor("#F97316"), ComposeBarActivity::class.java),
+                ChartMenuEntry("PCM Waveform", R.drawable.ic_chart_waveform, Color.parseColor("#8B5CF6"), ComposeWaveformActivity::class.java),
+                ChartMenuEntry("Radar", R.drawable.ic_chart_radar, Color.parseColor("#7C3AED"), ComposeRadarActivity::class.java),
+                ChartMenuEntry("Pie", R.drawable.ic_chart_pie, Color.parseColor("#EF4444"), ComposePieActivity::class.java),
+                ChartMenuEntry("Donut", R.drawable.ic_chart_donut, Color.parseColor("#F59E0B"), ComposeDonutActivity::class.java),
+                ChartMenuEntry("Gauge", R.drawable.ic_chart_gauge, Color.parseColor("#10B981"), ComposeGaugeActivity::class.java),
+                ChartMenuEntry("Sankey", R.drawable.ic_chart_sankey, Color.parseColor("#06B6D4"), ComposeSankeyActivity::class.java),
+                ChartMenuEntry("Cycle", R.drawable.ic_chart_cycle, Color.parseColor("#6366F1"), ComposeCycleActivity::class.java),
+                ChartMenuEntry("Step Flow", R.drawable.ic_chart_step_flow, Color.parseColor("#84CC16"), ComposeStepFlowActivity::class.java),
+            ),
+        )
 
         applySampleToolbar(
             title = "Compose Samples",
             content = container,
         )
-    }
-
-    private fun menuButton(
-        title: String,
-        params: LinearLayout.LayoutParams,
-        destination: () -> Class<*>,
-    ): Button {
-        return Button(this).apply {
-            text = title
-            layoutParams = params
-            setOnClickListener {
-                startActivity(Intent(this@ComposeSamplesMenuActivity, destination()))
-            }
-        }
     }
 }
