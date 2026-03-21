@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.magimon.eq.compose.bar.BarChart
 import com.magimon.eq.compose.bubble.BubbleChart
 import com.magimon.eq.compose.bubble.computeBubbleChart
+import com.magimon.eq.compose.funnel.FunnelChart
 import com.magimon.eq.compose.gauge.GaugeChart
 import com.magimon.eq.compose.heatmap.StockHeatmapChart
 import com.magimon.eq.compose.histogram.HistogramChart
@@ -57,6 +58,7 @@ import com.magimon.eq.radar.RadarSeries
 import com.magimon.eq.sankey.SankeyChartPresentationOptions
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
+import com.magimon.eq.funnel.FunnelStage
 import com.magimon.eq.waterfall.WaterfallChartPresentationOptions
 import com.magimon.eq.waterfall.WaterfallEntry
 import com.magimon.eq.waterfall.WaterfallEntryKind
@@ -393,6 +395,56 @@ class ComposeChartsBehaviorTest {
 
         assertEquals("Revenue", clickedLabel)
         assertEquals(120.0, clickedTotal ?: Double.NaN, 0.0)
+    }
+
+    @Test
+    fun funnelChart_dispatchesClickForComputedStage() {
+        val stages = listOf(
+            FunnelStage("Visit", 120.0, payload = "visit"),
+            FunnelStage("Qualified", 80.0, payload = "qualified"),
+            FunnelStage("Won", 40.0, payload = "won"),
+        )
+        val computed = invokePrivateTopLevel(
+            "com.magimon.eq.compose.funnel.FunnelChartKt",
+            "computeFunnelLayout",
+            320f,
+            280f,
+            stages,
+            com.magimon.eq.funnel.FunnelChartStyleOptions(),
+            com.magimon.eq.funnel.FunnelChartPresentationOptions(
+                animateOnDataChange = false,
+            ),
+            1f,
+            1f,
+        ) ?: error("Expected computed funnel layout")
+        val firstStage = computed.readField<List<Any>>("stages").first()
+        val tap = Offset(
+            firstStage.readField<Float>("centerX"),
+            firstStage.readField<Float>("centerY"),
+        )
+
+        var clickedLabel: String? = null
+        var clickedValue: Double? = null
+        composeRule.setContent {
+            FunnelChart(
+                stages = stages,
+                modifier = Modifier.size(320.dp, 280.dp),
+                presentationOptions = com.magimon.eq.funnel.FunnelChartPresentationOptions(
+                    animateOnDataChange = false,
+                ),
+                onStageClick = { _, stage, value ->
+                    clickedLabel = stage.label
+                    clickedValue = value
+                },
+            )
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onRoot().performTouchInput { click(tap) }
+        composeRule.waitForIdle()
+
+        assertEquals("Visit", clickedLabel)
+        assertEquals(120.0, clickedValue ?: Double.NaN, 0.0)
     }
 
     @Test

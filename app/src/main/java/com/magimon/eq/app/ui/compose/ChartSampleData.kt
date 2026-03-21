@@ -8,6 +8,7 @@ import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarSeries
 import com.magimon.eq.cycle.CycleLink
 import com.magimon.eq.cycle.CycleNode
+import com.magimon.eq.funnel.FunnelStage
 import com.magimon.eq.gauge.GaugeRange
 import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.histogram.HistogramBin
@@ -136,6 +137,16 @@ object ChartSampleData {
             CycleLink("measure", "learn", 16.0, label = "16", payload = "measure-learn"),
             CycleLink("learn", "plan", 20.0, label = "20", payload = "learn-plan"),
             CycleLink("measure", "plan", 7.0, label = "7", payload = "measure-plan"),
+        )
+    }
+
+    fun funnelStages(): List<FunnelStage> {
+        return listOf(
+            FunnelStage("Visits", 2_400.0, payload = "visits"),
+            FunnelStage("Qualified", 1_650.0, payload = "qualified"),
+            FunnelStage("Demo", 920.0, payload = "demo"),
+            FunnelStage("Proposal", 410.0, payload = "proposal"),
+            FunnelStage("Won", 180.0, payload = "won"),
         )
     }
 

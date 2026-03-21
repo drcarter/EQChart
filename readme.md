@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
+It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `Funnel`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
 
 ## Project Structure
 
@@ -25,6 +25,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `
 - Bar: Grouped / stacked bar chart with vertical / horizontal orientation
 - Histogram: Ordered bucket chart for count / frequency distribution
 - Waterfall: Ordered cumulative delta chart with subtotal / total bars and connectors
+- Funnel: Vertical conversion funnel chart with tapered stages and click callbacks
 - PCM Waveform: Real-time 16-bit mono PCM waveform rendering
 - Radar: Multi-series radar chart (legend/animation/point click)
 - Pie: Ratio-based pie chart (legend/labels/click)
@@ -37,7 +38,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `
 ## Chart Families
 
 - Tiled: Heatmap
-- Axis-based: Bubble, Line, Area, Bar, Histogram, Waterfall
+- Axis-based: Bubble, Line, Area, Bar, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
 - Flow: Sankey, Cycle, Step Flow
 - Signal: PCM Waveform
@@ -154,6 +155,8 @@ Build, start the local preview server, and open the browser in one step:
 ./gradlew referenceDocsPreview
 ```
 
+If `docs/reference/index.html` is missing, the preview script builds the reference docs before starting the server.
+
 Generated site:
 
 - `docs/reference/index.html`
@@ -207,6 +210,7 @@ Compose module exports:
 - `BarChart(...)`
 - `HistogramChart(...)`
 - `WaterfallChart(...)`
+- `FunnelChart(...)`
 - `PcmWaveformChart(...)` + `rememberPcmWaveformController(...)`
 - `RadarChart(...)`
 - `PieChart(...)`, `DonutChart(...)`
