@@ -40,9 +40,12 @@ fun resolveFunnelChartLayout(
         )
     }
 
-    val maxValue = sanitized.maxOfOrNull { it.value } ?: 1.0
+    var maxValue = 0.0
+    for (stage in sanitized) {
+        if (stage.value > maxValue) maxValue = stage.value
+    }
     fun widthRatio(value: Double): Float {
-        val normalized = if (maxValue <= 0.0) 1f else (value / maxValue).toFloat().coerceIn(0f, 1f)
+        val normalized = (value / maxValue).toFloat().coerceIn(0f, 1f)
         return style.minStageWidthRatio + (1f - style.minStageWidthRatio) * normalized
     }
 
