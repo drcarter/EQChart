@@ -32,7 +32,7 @@ data class HistogramChartPresentationOptions(
     val yLabelFormatter: (Double) -> String = { it.toInt().toString() },
     val valueLabelFormatter: (Double) -> String = { it.toInt().toString() },
     val binLabelFormatter: (HistogramBin) -> String = { bin ->
-        bin.label ?: "${bin.start.toInt()}-${bin.end.toInt()}"
+        bin.label ?: "${formatHistogramBoundary(bin.start)}-${formatHistogramBoundary(bin.end)}"
     },
     val yTickCount: Int = 6,
 )

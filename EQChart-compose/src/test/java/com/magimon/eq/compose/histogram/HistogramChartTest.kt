@@ -35,6 +35,27 @@ class HistogramChartTest {
     }
 
     @Test
+    fun computeHistogramLayout_respectsUnequalBinWidths() {
+        val computed = computeHistogramLayout(
+            widthPx = 360f,
+            heightPx = 240f,
+            bins = listOf(
+                HistogramBin(0.5, 1.0, 4.0),
+                HistogramBin(1.0, 3.0, 9.0),
+            ),
+            style = HistogramChartStyleOptions(),
+            presentation = HistogramChartPresentationOptions(animateOnDataChange = false),
+            progress = 1f,
+            density = 1f,
+            scaledDensity = 1f,
+        )
+
+        val firstWidth = computed.bars[0].right - computed.bars[0].left
+        val secondWidth = computed.bars[1].right - computed.bars[1].left
+        assertTrue(secondWidth > firstWidth)
+    }
+
+    @Test
     fun computeHistogramLayout_filtersInvalidBinsAndKeepsEmptyState() {
         val computed = computeHistogramLayout(
             widthPx = 300f,

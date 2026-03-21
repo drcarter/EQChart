@@ -134,14 +134,7 @@ class HistogramChartView @JvmOverloads constructor(
                 if (hit != null) {
                     onBinClickListener?.invoke(
                         hit.bin.index,
-                        HistogramBin(
-                            start = hit.bin.start,
-                            end = hit.bin.end,
-                            value = hit.bin.value,
-                            label = hit.bin.label,
-                            color = hit.bin.color,
-                            payload = hit.bin.payload,
-                        ),
+                        hit.bin.sourceBin,
                         hit.bin.value,
                     )
                     performClick()
@@ -227,6 +220,13 @@ class HistogramChartView @JvmOverloads constructor(
         return chartArea.bottom - ratio * chartArea.height()
     }
 
+    private fun valueToX(value: Double): Float {
+        val minValue = layout.minBinStart
+        val maxValue = layout.maxBinEnd
+        val ratio = if (maxValue == minValue) 0.5f else ((value - minValue) / (maxValue - minValue)).toFloat()
+        return chartArea.left + ratio * chartArea.width()
+    }
+
     private fun animatedValue(value: Double): Double {
         if (!presentationOptions.animationDirection) return value
         return layout.baselineValue + (value - layout.baselineValue) * renderProgress.toDouble()
@@ -236,13 +236,15 @@ class HistogramChartView @JvmOverloads constructor(
         bars.clear()
         if (layout.bins.isEmpty() || chartArea.width() <= 0f || chartArea.height() <= 0f) return
 
-        val slotWidth = chartArea.width() / layout.bins.size.toFloat()
         val categoryGap = styleOptions.categorySpacingDp.dpToPx()
-        val barWidth = (slotWidth - categoryGap).coerceAtLeast(1f)
 
-        layout.bins.forEachIndexed { index, bin ->
-            val left = chartArea.left + index * slotWidth + categoryGap * 0.5f
-            val right = left + barWidth
+        layout.bins.forEach { bin ->
+            val rawLeft = valueToX(bin.start)
+            val rawRight = valueToX(bin.end)
+            val maxInset = ((rawRight - rawLeft) * 0.5f) - 0.5f
+            val inset = min(categoryGap * 0.5f, maxInset).coerceAtLeast(0f)
+            val left = rawLeft + inset
+            val right = max(left + 1f, rawRight - inset)
             val startY = valueToY(layout.baselineValue)
             val endY = valueToY(animatedValue(bin.value))
             bars.add(

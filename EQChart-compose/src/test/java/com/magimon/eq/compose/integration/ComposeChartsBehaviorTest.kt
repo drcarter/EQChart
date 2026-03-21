@@ -159,6 +159,8 @@ class ComposeChartsBehaviorTest {
 
         var clickedIndex: Int? = null
         var clickedPayload: Any? = null
+        var clickedLabel: String? = "seed"
+        var clickedColor: Int? = Int.MIN_VALUE
         composeRule.setContent {
             HistogramChart(
                 bins = bins,
@@ -167,6 +169,8 @@ class ComposeChartsBehaviorTest {
                 onBinClick = { index, bin, _ ->
                     clickedIndex = index
                     clickedPayload = bin.payload
+                    clickedLabel = bin.label
+                    clickedColor = bin.color
                 },
             )
         }
@@ -177,6 +181,8 @@ class ComposeChartsBehaviorTest {
 
         assertEquals(0, clickedIndex)
         assertEquals("a", clickedPayload)
+        assertEquals(null, clickedLabel)
+        assertEquals(null, clickedColor)
     }
 
     @Test

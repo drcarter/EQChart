@@ -14,6 +14,7 @@ data class HistogramLayoutBin(
     val value: Double,
     val label: String,
     val color: Int,
+    val sourceBin: HistogramBin,
     val payload: Any?,
 )
 
@@ -22,6 +23,8 @@ data class HistogramLayoutBin(
  */
 data class HistogramChartLayout(
     val bins: List<HistogramLayoutBin>,
+    val minBinStart: Double,
+    val maxBinEnd: Double,
     val minValue: Double,
     val maxValue: Double,
     val baselineValue: Double,
@@ -49,6 +52,8 @@ fun resolveHistogramChartLayout(
         val max = 1.0
         return HistogramChartLayout(
             bins = emptyList(),
+            minBinStart = 0.0,
+            maxBinEnd = 1.0,
             minValue = min,
             maxValue = max,
             baselineValue = resolveHistogramBaseline(min, max),
@@ -64,9 +69,13 @@ fun resolveHistogramChartLayout(
             value = bin.value,
             label = presentation.binLabelFormatter(bin),
             color = bin.color ?: style.barColor,
+            sourceBin = bin,
             payload = bin.payload,
         )
     }
+
+    val minBinStart = layoutBins.minOfOrNull { it.start } ?: 0.0
+    val maxBinEnd = layoutBins.maxOfOrNull { it.end } ?: 1.0
 
     val rawMin = min(layoutBins.minOfOrNull { it.value } ?: -1.0, 0.0)
     val rawMax = max(layoutBins.maxOfOrNull { it.value } ?: 1.0, 0.0)
@@ -82,6 +91,8 @@ fun resolveHistogramChartLayout(
 
     return HistogramChartLayout(
         bins = layoutBins,
+        minBinStart = minBinStart,
+        maxBinEnd = maxBinEnd,
         minValue = resolvedMin,
         maxValue = resolvedMax,
         baselineValue = resolveHistogramBaseline(resolvedMin, resolvedMax),
@@ -98,5 +109,13 @@ fun histogramAxisTicks(minValue: Double, maxValue: Double, count: Int): List<Dou
     if (safeCount == 2) return listOf(minValue, maxValue)
     return List(safeCount) { index ->
         minValue + (maxValue - minValue) * index.toDouble() / (safeCount - 1)
+    }
+}
+
+internal fun formatHistogramBoundary(value: Double): String {
+    return if (abs(value - value.toLong().toDouble()) <= 1e-9) {
+        value.toLong().toString()
+    } else {
+        value.toString().trimEnd('0').trimEnd('.')
     }
 }

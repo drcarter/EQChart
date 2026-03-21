@@ -69,6 +69,7 @@ class HistogramContractsTest {
         assertTrue(defaults.animationDirection)
         assertEquals("No data", defaults.emptyText)
         assertEquals("0-10", defaults.binLabelFormatter(HistogramBin(0.0, 10.0, 3.0)))
+        assertEquals("0.5-1.25", defaults.binLabelFormatter(HistogramBin(0.5, 1.25, 3.0)))
         assertEquals(6, defaults.yTickCount)
 
         assertFalse(custom.showGrid)
@@ -112,10 +113,11 @@ class HistogramContractsTest {
 
     @Test
     fun histogramLayoutEngine_buildsLabelsAndFiltersInvalidBins() {
+        val original = HistogramBin(10.0, 20.0, 9.0, label = "10-20", payload = "b")
         val layout = resolveHistogramChartLayout(
             bins = listOf(
                 HistogramBin(0.0, 10.0, 4.0),
-                HistogramBin(10.0, 20.0, 9.0, label = "10-20", payload = "b"),
+                original,
                 HistogramBin(20.0, 20.0, 2.0),
                 HistogramBin(20.0, 30.0, Double.NaN),
             ),
@@ -124,6 +126,9 @@ class HistogramContractsTest {
         assertEquals(2, layout.bins.size)
         assertEquals("0-10", layout.bins[0].label)
         assertEquals("10-20", layout.bins[1].label)
+        assertSame(original, layout.bins[1].sourceBin)
+        assertEquals(0.0, layout.minBinStart, 0.0)
+        assertEquals(20.0, layout.maxBinEnd, 0.0)
         assertEquals(0.0, layout.baselineValue, 0.0)
         assertEquals(9.0, layout.maxValue, 0.0)
         assertEquals(0.0, layout.minValue, 0.0)

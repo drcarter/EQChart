@@ -66,6 +66,37 @@ class HistogramChartViewTest {
     }
 
     @Test
+    fun histogramChart_preservesOriginalBinInCallback_andUsesBinWidths() {
+        val context = RuntimeEnvironment.getApplication()
+        val view = HistogramChartView(context)
+        var callbackBin: HistogramBin? = null
+        val first = HistogramBin(0.5, 1.0, 4.0)
+        val second = HistogramBin(1.0, 3.0, 9.0)
+
+        view.setPresentationOptions(
+            HistogramChartPresentationOptions(
+                animateOnDataChange = false,
+                binLabelFormatter = { bin -> "display:${bin.start}" },
+            ),
+        )
+        view.setOnBinClickListener { _, bin, _ ->
+            callbackBin = bin
+        }
+        view.setBins(listOf(first, second))
+
+        layoutAndDraw(view, width = 480, height = 320)
+
+        val bars = view.readPrivate<List<Any>>("bars")
+        val firstRect = bars[0].readPrivate<RectF>("rect")
+        val secondRect = bars[1].readPrivate<RectF>("rect")
+        touchUp(view, firstRect.centerX(), firstRect.centerY())
+
+        assertEquals(null, callbackBin?.label)
+        assertEquals(null, callbackBin?.color)
+        assertTrue(secondRect.width() > firstRect.width())
+    }
+
+    @Test
     fun histogramChart_filtersInvalidBinsAndClearsSelectionOnMiss() {
         val context = RuntimeEnvironment.getApplication()
         val view = HistogramChartView(context)

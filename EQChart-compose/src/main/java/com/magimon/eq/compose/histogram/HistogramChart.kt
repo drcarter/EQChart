@@ -55,6 +55,11 @@ private fun valueToY(chartRect: Rect, value: Double, minValue: Double, maxValue:
     return chartRect.bottom - ratio * chartRect.height
 }
 
+private fun valueToX(chartRect: Rect, value: Double, minValue: Double, maxValue: Double): Float {
+    val ratio = if (maxValue == minValue) 0.5f else ((value - minValue) / (maxValue - minValue)).toFloat()
+    return chartRect.left + ratio * chartRect.width
+}
+
 private fun animatedValue(
     value: Double,
     baselineValue: Double,
@@ -114,11 +119,14 @@ internal fun computeHistogramLayout(
         )
     }
 
-    val slotWidth = chartRect.width / resolved.bins.size.toFloat()
-    val barWidth = (slotWidth - dpToPx(style.categorySpacingDp, density)).coerceAtLeast(1f)
-    val bars = resolved.bins.mapIndexed { index, bin ->
-        val left = chartRect.left + index * slotWidth + dpToPx(style.categorySpacingDp, density) * 0.5f
-        val right = left + barWidth
+    val categoryGap = dpToPx(style.categorySpacingDp, density)
+    val bars = resolved.bins.map { bin ->
+        val rawLeft = valueToX(chartRect, bin.start, resolved.minBinStart, resolved.maxBinEnd)
+        val rawRight = valueToX(chartRect, bin.end, resolved.minBinStart, resolved.maxBinEnd)
+        val maxInset = ((rawRight - rawLeft) * 0.5f) - 0.5f
+        val inset = min(categoryGap * 0.5f, maxInset).coerceAtLeast(0f)
+        val left = rawLeft + inset
+        val right = max(left + 1f, rawRight - inset)
         val startY = valueToY(chartRect, resolved.baselineValue, resolved.minValue, resolved.maxValue)
         val endY = valueToY(
             chartRect,
@@ -247,14 +255,7 @@ fun HistogramChart(
                         hit?.let {
                             onBinClick?.invoke(
                                 it.bin.index,
-                                HistogramBin(
-                                    start = it.bin.start,
-                                    end = it.bin.end,
-                                    value = it.bin.value,
-                                    label = it.bin.label,
-                                    color = it.bin.color,
-                                    payload = it.bin.payload,
-                                ),
+                                it.bin.sourceBin,
                                 it.bin.value,
                             )
                         }
