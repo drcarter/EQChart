@@ -18,6 +18,7 @@ import com.magimon.eq.compose.bubble.BubbleChart
 import com.magimon.eq.compose.bubble.computeBubbleChart
 import com.magimon.eq.compose.gauge.GaugeChart
 import com.magimon.eq.compose.heatmap.StockHeatmapChart
+import com.magimon.eq.compose.histogram.HistogramChart
 import com.magimon.eq.compose.line.LineChart
 import com.magimon.eq.compose.pie.PieChart
 import com.magimon.eq.compose.pie.buildPieSegments
@@ -43,6 +44,8 @@ import com.magimon.eq.gauge.GaugeChartPresentationOptions
 import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.heatmap.StockHeatmapItem
 import com.magimon.eq.heatmap.StockHeatmapSection
+import com.magimon.eq.histogram.HistogramBin
+import com.magimon.eq.histogram.HistogramChartPresentationOptions
 import com.magimon.eq.line.LineChartPresentationOptions
 import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
@@ -125,6 +128,61 @@ class ComposeChartsBehaviorTest {
 
         assertEquals(0, clickedCategory)
         assertEquals("jan", clickedPayload)
+    }
+
+    @Test
+    fun histogramChart_dispatchesClickForComputedBar() {
+        val bins = listOf(
+            HistogramBin(0.0, 10.0, 4.0, payload = "a"),
+            HistogramBin(10.0, 20.0, 9.0, payload = "b"),
+        )
+        val options = HistogramChartPresentationOptions(
+            animateOnDataChange = false,
+        )
+        val computed = invokePrivateTopLevel(
+            "com.magimon.eq.compose.histogram.HistogramChartKt",
+            "computeHistogramLayout",
+            320f,
+            220f,
+            bins,
+            com.magimon.eq.histogram.HistogramChartStyleOptions(),
+            options,
+            1f,
+            1f,
+            1f,
+        ) ?: error("Expected computed histogram layout")
+        val firstBar = computed.readField<List<Any>>("bars").first()
+        val tap = Offset(
+            (firstBar.readField<Float>("left") + firstBar.readField<Float>("right")) * 0.5f,
+            (firstBar.readField<Float>("top") + firstBar.readField<Float>("bottom")) * 0.5f,
+        )
+
+        var clickedIndex: Int? = null
+        var clickedPayload: Any? = null
+        var clickedLabel: String? = "seed"
+        var clickedColor: Int? = Int.MIN_VALUE
+        composeRule.setContent {
+            HistogramChart(
+                bins = bins,
+                modifier = Modifier.size(320.dp, 220.dp),
+                presentationOptions = options,
+                onBinClick = { index, bin, _ ->
+                    clickedIndex = index
+                    clickedPayload = bin.payload
+                    clickedLabel = bin.label
+                    clickedColor = bin.color
+                },
+            )
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onRoot().performTouchInput { click(tap) }
+        composeRule.waitForIdle()
+
+        assertEquals(0, clickedIndex)
+        assertEquals("a", clickedPayload)
+        assertEquals(null, clickedLabel)
+        assertEquals(null, clickedColor)
     }
 
     @Test

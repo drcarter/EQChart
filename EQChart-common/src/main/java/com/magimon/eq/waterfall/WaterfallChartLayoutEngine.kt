@@ -119,13 +119,13 @@ fun resolveWaterfallChartLayout(
             add(entry.endValue)
         }
     }
-    val rawMin = values.minOrNull() ?: -1.0
-    val rawMax = values.maxOrNull() ?: 1.0
+    val rawMin = values.minOrNull()!!
+    val rawMax = values.maxOrNull()!!
     val minValue = min(rawMin, 0.0)
     val maxValue = max(rawMax, 0.0)
     val resolvedMin: Double
     val resolvedMax: Double
-    if (!minValue.isFinite() || !maxValue.isFinite() || abs(maxValue - minValue) <= 1e-12) {
+    if (abs(maxValue - minValue) <= 1e-12) {
         resolvedMin = minValue - 1.0
         resolvedMax = maxValue + 1.0
     } else {
