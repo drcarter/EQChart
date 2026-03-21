@@ -110,6 +110,22 @@ private fun pointInStage(x: Float, y: Float, stage: RenderFunnelStage): Boolean 
     return inside
 }
 
+/**
+ * Compose funnel chart for ordered conversion-stage style data.
+ *
+ * The composable consumes shared [FunnelStage] contracts and uses
+ * [com.magimon.eq.funnel.resolveFunnelChartLayout] to normalize tapered stage widths before
+ * drawing them on a Compose [Canvas].
+ *
+ * @param stages Ordered funnel stages rendered from top to bottom.
+ * @param modifier Compose modifier applied to the chart container.
+ * @param styleOptions Shared visual styling for borders, colors, and spacing.
+ * @param presentationOptions Shared behavior for labels, values, empty state, and animation.
+ * @param onStageClick Optional callback invoked when a rendered stage is tapped.
+ * @see FunnelStage
+ * @see FunnelChartStyleOptions
+ * @see FunnelChartPresentationOptions
+ */
 @Composable
 fun FunnelChart(
     stages: List<FunnelStage>,

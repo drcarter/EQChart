@@ -19,6 +19,7 @@ import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarSeries
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
+import com.magimon.eq.sunburst.SunburstNode
 import com.magimon.eq.stepflow.StepFlowHubContent
 import com.magimon.eq.stepflow.StepFlowStep
 import com.magimon.eq.waterfall.WaterfallEntry
@@ -116,6 +117,50 @@ object ChartSampleData {
             SankeyLink("pricing", "trial", 18.0),
             SankeyLink("trial", "paid", 16.0),
             SankeyLink("trial", "churn", 32.0),
+        )
+    }
+
+    fun sunburstNodes(): List<SunburstNode> {
+        return listOf(
+            SunburstNode(
+                label = "Company",
+                value = 1000.0,
+                color = Color.parseColor("#0F172A"),
+                children = listOf(
+                    SunburstNode(
+                        label = "Growth",
+                        value = 420.0,
+                        color = Color.parseColor("#2563EB"),
+                        children = listOf(
+                            SunburstNode("Paid", 180.0, Color.parseColor("#3B82F6"), payload = "paid"),
+                            SunburstNode("Organic", 150.0, Color.parseColor("#60A5FA"), payload = "organic"),
+                            SunburstNode("Referral", 90.0, Color.parseColor("#93C5FD"), payload = "referral"),
+                        ),
+                        payload = "growth",
+                    ),
+                    SunburstNode(
+                        label = "Product",
+                        value = 360.0,
+                        color = Color.parseColor("#14B8A6"),
+                        children = listOf(
+                            SunburstNode("Subscriptions", 240.0, Color.parseColor("#2DD4BF"), payload = "subscriptions"),
+                            SunburstNode("Services", 120.0, Color.parseColor("#5EEAD4"), payload = "services"),
+                        ),
+                        payload = "product",
+                    ),
+                    SunburstNode(
+                        label = "Ops",
+                        value = 220.0,
+                        color = Color.parseColor("#F97316"),
+                        children = listOf(
+                            SunburstNode("Support", 120.0, Color.parseColor("#FB923C"), payload = "support"),
+                            SunburstNode("Logistics", 100.0, Color.parseColor("#FDBA74"), payload = "logistics"),
+                        ),
+                        payload = "ops",
+                    ),
+                ),
+                payload = "company",
+            ),
         )
     }
 

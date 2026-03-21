@@ -68,6 +68,11 @@
             android:label="Funnel Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.SunburstActivity"
+            android:exported="true"
+            android:label="Sunburst Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.BubbleActivity"
             android:exported="true"
             android:label="Bubble Chart"
@@ -191,6 +196,11 @@
             android:name=".ui.compose.ComposeFunnelActivity"
             android:exported="true"
             android:label="Compose Funnel"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeSunburstActivity"
+            android:exported="true"
+            android:label="Compose Sunburst"
             android:theme="@style/Theme.EQChart" />
     </application>
 

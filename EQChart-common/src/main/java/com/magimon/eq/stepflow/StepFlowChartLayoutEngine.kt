@@ -9,6 +9,24 @@ import kotlin.math.pow
 
 /**
  * Pixel-based layout configuration consumed by [StepFlowChartLayoutEngine].
+ *
+ * @property widthPx Available renderer width in pixels.
+ * @property heightPx Available renderer height in pixels.
+ * @property contentPaddingPx Outer content padding in pixels.
+ * @property hubRadiusPx Radius of the central hub in pixels.
+ * @property hubRingThicknessPx Thickness of the colored hub ring in pixels.
+ * @property spineWidthPx Stroke width of the curved spine in pixels.
+ * @property spineDotRadiusPx Radius of each step anchor dot in pixels.
+ * @property tailDotRadiusPx Radius of the decorative top and bottom tail dots in pixels.
+ * @property badgeRadiusPx Radius of the circular step badge in pixels.
+ * @property cardWidthPx Preferred width of each step card in pixels.
+ * @property cardHeightPx Preferred height of each step card in pixels.
+ * @property cardCornerRadiusPx Corner radius of each step card in pixels.
+ * @property connectorWidthPx Stroke width of the connector between spine and badge in pixels.
+ * @property iconCircleRadiusPx Radius of the trailing icon circle in pixels.
+ * @property cardGapPx Gap between the spine/badge cluster and the step card in pixels.
+ * @property badgeOverlapPx Overlap amount between the badge and card in pixels.
+ * @property topBottomInsetPx Reserved inset above the first step and below the last step in pixels.
  */
 data class StepFlowChartLayoutConfig(
     val widthPx: Float,
@@ -77,6 +95,19 @@ data class StepFlowChartLayoutConfig(
 
 /**
  * Shared hub geometry produced by [StepFlowChartLayoutEngine.compute].
+ *
+ * @property content Source hub content copied into the layout.
+ * @property centerX Hub center x-coordinate in pixels.
+ * @property centerY Hub center y-coordinate in pixels.
+ * @property radius Hub radius in pixels.
+ * @property ringThickness Hub ring thickness in pixels.
+ * @property eyebrowCenterX Horizontal anchor for the eyebrow text.
+ * @property eyebrowBaselineY Baseline position for the eyebrow text.
+ * @property titleCenterX Horizontal anchor for the title text.
+ * @property titleBaselineY Baseline position for the title text.
+ * @property descriptionCenterX Horizontal anchor for the description text.
+ * @property descriptionBaselineY Baseline position for the description text.
+ * @see StepFlowHubContent
  */
 data class StepFlowHubLayout(
     val content: StepFlowHubContent,
@@ -106,6 +137,11 @@ data class StepFlowHubLayout(
 
 /**
  * Colored ring segment drawn around the hub.
+ *
+ * @property originalIndex Original zero-based step index represented by the segment.
+ * @property color Segment color resolved from [StepFlowStep.accentColor].
+ * @property startAngleDeg Start angle of the segment in degrees.
+ * @property sweepAngleDeg Sweep angle of the segment in degrees.
  */
 data class StepFlowHubRingSegment(
     val originalIndex: Int,
@@ -116,6 +152,13 @@ data class StepFlowHubRingSegment(
 
 /**
  * Quadratic spine segment used to reconstruct the curved step spine.
+ *
+ * @property startX Segment start x-coordinate.
+ * @property startY Segment start y-coordinate.
+ * @property controlX Quadratic control point x-coordinate.
+ * @property controlY Quadratic control point y-coordinate.
+ * @property endX Segment end x-coordinate.
+ * @property endY Segment end y-coordinate.
  */
 data class StepFlowSpineSegment(
     val startX: Float,
@@ -128,6 +171,11 @@ data class StepFlowSpineSegment(
 
 /**
  * Decorative tail dot rendered above or below the step spine.
+ *
+ * @property isTop Whether the dot belongs to the top edge instead of the bottom edge.
+ * @property centerX Dot center x-coordinate.
+ * @property centerY Dot center y-coordinate.
+ * @property radius Dot radius in pixels.
  */
 data class StepFlowTailDotLayout(
     val isTop: Boolean,
@@ -138,6 +186,33 @@ data class StepFlowTailDotLayout(
 
 /**
  * Full step geometry produced by [StepFlowChartLayoutEngine.compute].
+ *
+ * @property originalIndex Original zero-based step index.
+ * @property step Source step copied into the layout.
+ * @property spineDotCenterX Spine anchor dot center x-coordinate.
+ * @property spineDotCenterY Spine anchor dot center y-coordinate.
+ * @property spineDotRadius Radius of the spine anchor dot in pixels.
+ * @property badgeCenterX Step badge center x-coordinate.
+ * @property badgeCenterY Step badge center y-coordinate.
+ * @property badgeRadius Step badge radius in pixels.
+ * @property cardLeft Left edge of the step card in pixels.
+ * @property cardTop Top edge of the step card in pixels.
+ * @property cardRight Right edge of the step card in pixels.
+ * @property cardBottom Bottom edge of the step card in pixels.
+ * @property cardCornerRadius Rounded corner radius of the step card in pixels.
+ * @property connectorStartX Connector start x-coordinate.
+ * @property connectorStartY Connector start y-coordinate.
+ * @property connectorEndX Connector end x-coordinate.
+ * @property connectorEndY Connector end y-coordinate.
+ * @property iconCenterX Trailing icon circle center x-coordinate.
+ * @property iconCenterY Trailing icon circle center y-coordinate.
+ * @property iconRadius Trailing icon circle radius in pixels.
+ * @property titleX Left anchor used for the step title text.
+ * @property titleBaselineY Baseline used for the step title text.
+ * @property bodyX Left anchor used for the step description text.
+ * @property bodyBaselineY Baseline used for the step description text.
+ * @property textRight Right edge available to text content before the icon slot.
+ * @see StepFlowStep
  */
 data class StepFlowStepLayout(
     val originalIndex: Int,
@@ -175,6 +250,16 @@ data class StepFlowStepLayout(
 
 /**
  * Complete shared layout result for the step flow infographic chart.
+ *
+ * @property hubLayout Optional hub geometry.
+ * @property hubRingSegments Colored segments drawn around the hub.
+ * @property spineSegments Curved spine segments connecting the step anchors.
+ * @property tailDots Decorative tail dots rendered at the ends of the spine.
+ * @property stepLayouts Full per-step geometry in draw order.
+ * @property isRenderable Whether the layout is valid and can be rendered.
+ * @property emptyReason Optional failure reason when [isRenderable] is `false`.
+ * @see StepFlowHubLayout
+ * @see StepFlowStepLayout
  */
 data class StepFlowChartLayoutResult(
     val hubLayout: StepFlowHubLayout?,
@@ -188,9 +273,29 @@ data class StepFlowChartLayoutResult(
 
 /**
  * Shared layout and hit-test engine for the step flow infographic chart.
+ *
+ * @see StepFlowStep
+ * @see StepFlowHubContent
+ * @see StepFlowChartLayoutResult
  */
 object StepFlowChartLayoutEngine {
 
+    /**
+     * Builds a renderer-agnostic pixel layout for the step flow infographic chart.
+     *
+     * Validation fails when the supplied dimensions are non-positive, when required geometry would
+     * overflow the available bounds, or when the step list contains invalid identifiers or text.
+     *
+     * @param hubContent Optional content for the central hub.
+     * @param steps Ordered steps rendered along the curved spine.
+     * @param config Pixel layout configuration for the current renderer bounds.
+     * @param styleOptions Shared style values consumed by the renderers.
+     * @param presentationOptions Shared behavioral options that affect geometry generation.
+     * @return A normalized [StepFlowChartLayoutResult] for View and Compose renderers.
+     * @see StepFlowChartLayoutConfig
+     * @see StepFlowStep
+     * @see StepFlowHubContent
+     */
     fun compute(
         hubContent: StepFlowHubContent?,
         steps: List<StepFlowStep>,
@@ -339,7 +444,7 @@ object StepFlowChartLayoutEngine {
         }
         val spineSegments = buildSpineSegments(spinePoints)
 
-        if (stepLayouts.any { it.cardTop < config.contentPaddingPx || it.cardBottom > (config.heightPx - config.contentPaddingPx) }) {
+        if (config.topBottomInsetPx < (config.cardHeightPx * 0.5f)) {
             return invalid("card vertical overflow")
         }
 

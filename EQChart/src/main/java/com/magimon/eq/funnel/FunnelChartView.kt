@@ -14,7 +14,15 @@ import android.view.animation.DecelerateInterpolator
 /**
  * Vertical funnel chart renderer.
  *
+ * The view renders ordered [FunnelStage] items as tapered blocks whose widths are normalized by
+ * [resolveFunnelChartLayout]. Style and presentation options are shared with the Compose variant.
+ *
  * Supports tapered stages, centered labels, and click callbacks.
+ *
+ * @see FunnelStage
+ * @see FunnelChartStyleOptions
+ * @see FunnelChartPresentationOptions
+ * @see resolveFunnelChartLayout
  */
 class FunnelChartView @JvmOverloads constructor(
     context: Context,
@@ -69,6 +77,12 @@ class FunnelChartView @JvmOverloads constructor(
         applyStyle()
     }
 
+    /**
+     * Replaces the funnel stages rendered by this view.
+     *
+     * @param items Ordered stages to render from top to bottom.
+     * @see FunnelStage
+     */
     fun setStages(items: List<FunnelStage>) {
         sourceStages.clear()
         sourceStages.addAll(items)
@@ -76,16 +90,35 @@ class FunnelChartView @JvmOverloads constructor(
         refreshAndRender()
     }
 
+    /**
+     * Replaces funnel stages by mapping arbitrary source items into [FunnelStage] instances.
+     *
+     * @param items Source items to map.
+     * @param mapper Converts each source item into a [FunnelStage].
+     * @see FunnelStage
+     */
     fun <T> setStages(items: List<T>, mapper: (T) -> FunnelStage) {
         setStages(items.map(mapper))
     }
 
+    /**
+     * Applies shared style options used to draw the chart.
+     *
+     * @param options Updated visual styling.
+     * @see FunnelChartStyleOptions
+     */
     fun setStyleOptions(options: FunnelChartStyleOptions) {
         styleOptions = options
         applyStyle()
         refreshAndRender()
     }
 
+    /**
+     * Applies shared presentation options used to animate and label the chart.
+     *
+     * @param options Updated presentation behavior.
+     * @see FunnelChartPresentationOptions
+     */
     fun setPresentationOptions(options: FunnelChartPresentationOptions) {
         presentationOptions = options
         applyStyle()
@@ -94,6 +127,9 @@ class FunnelChartView @JvmOverloads constructor(
 
     /**
      * Callback format: `(index, stage, value)`.
+     *
+     * @param listener Listener invoked when a rendered stage is tapped.
+     * @see FunnelStage
      */
     fun setOnStageClickListener(listener: (Int, FunnelStage, Double) -> Unit) {
         onStageClickListener = listener

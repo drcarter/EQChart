@@ -108,6 +108,18 @@ subprojects {
                             value = "COVEREDRATIO"
                             minimum = BigDecimal("1.0")
                         }
+
+                        limit {
+                            counter = "LINE"
+                            value = "COVEREDRATIO"
+                            minimum = BigDecimal("1.0")
+                        }
+
+                        limit {
+                            counter = "BRANCH"
+                            value = "COVEREDRATIO"
+                            minimum = BigDecimal("1.0")
+                        }
                     }
                 }
             }

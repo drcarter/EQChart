@@ -91,6 +91,9 @@ class BarChartView @JvmOverloads constructor(
 
     /**
      * Replaces all bar series.
+     *
+     * @param items Ordered [BarSeries] values to render.
+     * @see BarSeries
      */
     fun setSeries(items: List<BarSeries>) {
         seriesList.clear()
@@ -119,6 +122,10 @@ class BarChartView @JvmOverloads constructor(
 
     /**
      * Replaces series data by mapping arbitrary objects.
+     *
+     * @param items Source items to map into [BarSeries] values.
+     * @param mapper Converts each source item into a [BarSeries].
+     * @see BarSeries
      */
     fun <T> setSeries(items: List<T>, mapper: (T) -> BarSeries) {
         setSeries(items.map(mapper))
@@ -126,6 +133,9 @@ class BarChartView @JvmOverloads constructor(
 
     /**
      * Sets render style options.
+     *
+     * @param options Updated styling values.
+     * @see BarChartStyleOptions
      */
     fun setStyleOptions(options: BarChartStyleOptions) {
         styleOptions = options
@@ -135,6 +145,9 @@ class BarChartView @JvmOverloads constructor(
 
     /**
      * Sets presentation behavior.
+     *
+     * @param options Updated presentation values.
+     * @see BarChartPresentationOptions
      */
     fun setPresentationOptions(options: BarChartPresentationOptions) {
         presentationOptions = options
@@ -150,6 +163,9 @@ class BarChartView @JvmOverloads constructor(
      * Sets bar click callback.
      *
      * Callback format: `(seriesIndex, categoryIndex, value, payload)`.
+     *
+     * @param listener Listener invoked when a rendered bar is tapped.
+     * @see BarSeries
      */
     fun setOnBarClickListener(listener: (Int, Int, Double, Any?) -> Unit) {
         onBarClickListener = listener

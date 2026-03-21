@@ -132,6 +132,65 @@ class StepFlowContractsTest {
         assertEquals("No data", presentationOptions.emptyText)
         assertEquals(200f, styleOptions.copy(cardWidthDp = 200f).cardWidthDp, 0.0f)
         assertFalse(presentationOptions.copy(showBottomTailDot = false).showBottomTailDot)
+        val partialStyle = StepFlowChartStyleOptions(
+            cardWidthDp = 190f,
+            selectedStrokeWidthDp = 3.5f,
+        ).copy(cardHeightDp = 60f)
+        assertEquals(190f, partialStyle.cardWidthDp, 0.0f)
+        assertEquals(60f, partialStyle.cardHeightDp, 0.0f)
+        assertEquals(3.5f, partialStyle.selectedStrokeWidthDp, 0.0f)
+        assertEquals(styleOptions.backgroundColor, partialStyle.backgroundColor)
+        val syntheticCtor = StepFlowChartStyleOptions::class.java.declaredConstructors
+            .first { constructor ->
+                constructor.parameterTypes.lastOrNull()?.name == "kotlin.jvm.internal.DefaultConstructorMarker"
+            }
+        val reflected = syntheticCtor.newInstance(
+            1,
+            2f,
+            3f,
+            4f,
+            5,
+            6,
+            7f,
+            8,
+            9f,
+            10,
+            11f,
+            12,
+            13f,
+            14,
+            15f,
+            16f,
+            17f,
+            18f,
+            19,
+            20,
+            21f,
+            22,
+            23f,
+            24f,
+            25f,
+            26f,
+            27f,
+            28f,
+            29,
+            30f,
+            31,
+            32f,
+            33f,
+            34,
+            35f,
+            36,
+            37,
+            38f,
+            39,
+            40f,
+            0,
+            0,
+            null,
+        ) as StepFlowChartStyleOptions
+        assertEquals(1, reflected.backgroundColor)
+        assertEquals(40f, reflected.selectedStrokeWidthDp, 0.0f)
         assertEquals(1, customStyle.backgroundColor)
         assertEquals(2f, customStyle.contentPaddingDp, 0.0f)
         assertEquals(3f, customStyle.hubRadiusDp, 0.0f)
