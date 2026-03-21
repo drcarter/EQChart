@@ -1,4 +1,5 @@
 import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -81,6 +82,22 @@ gradle.taskGraph.whenReady {
 subprojects {
     plugins.withId("maven-publish") {
         extensions.configure<PublishingExtension>("publishing") {
+            publications.withType<MavenPublication>().configureEach {
+                pom {
+                    licenses {
+                        license {
+                            name.set("Apache License, Version 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                            distribution.set("repo")
+                        }
+                    }
+                    scm {
+                        url.set("https://github.com/drcarter/EQChart")
+                        connection.set("scm:git:https://github.com/drcarter/EQChart.git")
+                        developerConnection.set("scm:git:ssh://git@github.com/drcarter/EQChart.git")
+                    }
+                }
+            }
             repositories {
                 maven {
                     name = "GitHubPackages"

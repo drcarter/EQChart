@@ -818,3 +818,11 @@ Notes:
 ```
 
 Unit tests currently focus on chart math/utility logic.
+
+## Open Source License
+
+EQChart is licensed under the Apache License, Version 2.0.
+See [LICENSE](LICENSE) for the full text.
+
+Third-party tools, plugins, and dependencies used by this project remain
+subject to their own respective licenses.
