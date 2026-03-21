@@ -19,6 +19,8 @@ import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
 import com.magimon.eq.stepflow.StepFlowHubContent
 import com.magimon.eq.stepflow.StepFlowStep
+import com.magimon.eq.waterfall.WaterfallEntry
+import com.magimon.eq.waterfall.WaterfallEntryKind
 import kotlin.random.Random
 import kotlin.math.PI
 import kotlin.math.sin
@@ -281,6 +283,18 @@ object ChartSampleData {
                     BarDatum(label, (3.0 + index * 2.5 + Random(index + 99).nextDouble(0.0, 1.2)))
                 },
             ),
+        )
+    }
+
+    fun waterfallEntries(): List<WaterfallEntry> {
+        return listOf(
+            WaterfallEntry("Revenue", 240.0, payload = "Revenue"),
+            WaterfallEntry("Returns", -42.0, payload = "Returns"),
+            WaterfallEntry("Services", 68.0, payload = "Services"),
+            WaterfallEntry("Subtotal", 0.0, kind = WaterfallEntryKind.SUBTOTAL, payload = "Subtotal"),
+            WaterfallEntry("Marketing", -36.0, payload = "Marketing"),
+            WaterfallEntry("Support", -22.0, payload = "Support"),
+            WaterfallEntry("Total", 0.0, kind = WaterfallEntryKind.TOTAL, payload = "Total"),
         )
     }
 

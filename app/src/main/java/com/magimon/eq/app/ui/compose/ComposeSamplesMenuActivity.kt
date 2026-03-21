@@ -20,6 +20,7 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
                 ChartMenuEntry("Line", R.drawable.ic_chart_line, Color.parseColor("#2563EB"), ComposeLineActivity::class.java),
                 ChartMenuEntry("Area", R.drawable.ic_chart_area, Color.parseColor("#14B8A6"), ComposeAreaActivity::class.java),
                 ChartMenuEntry("Bar", R.drawable.ic_chart_bar, Color.parseColor("#F97316"), ComposeBarActivity::class.java),
+                ChartMenuEntry("Waterfall", R.drawable.ic_chart_waterfall, Color.parseColor("#0F766E"), ComposeWaterfallActivity::class.java),
                 ChartMenuEntry("PCM Waveform", R.drawable.ic_chart_waveform, Color.parseColor("#8B5CF6"), ComposeWaveformActivity::class.java),
                 ChartMenuEntry("Radar", R.drawable.ic_chart_radar, Color.parseColor("#7C3AED"), ComposeRadarActivity::class.java),
                 ChartMenuEntry("Pie", R.drawable.ic_chart_pie, Color.parseColor("#EF4444"), ComposePieActivity::class.java),
