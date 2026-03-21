@@ -11,6 +11,8 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
   - Android View-based chart components
 - `:EQChart-compose`
   - Native Compose chart components
+- `:EQChart-bom`
+  - Maven BOM for aligning EQChart module versions
 - `:app`
   - Sample app for both View and Compose demos
 
@@ -95,11 +97,14 @@ gpr.key=YOUR_GITHUB_TOKEN_WITH_read:packages
 
 ```kotlin
 dependencies {
+    // Align EQChart module versions with a single platform import
+    implementation(platform("com.magimon.eq:eqchart-bom:latest_version"))
+
     // View charts
-    implementation("com.magimon.eq:eqchart:latest_version")
+    implementation("com.magimon.eq:eqchart")
 
     // Compose charts
-    implementation("com.magimon.eq:eqchart-compose:latest_version")
+    implementation("com.magimon.eq:eqchart-compose")
 }
 ```
 
@@ -108,10 +113,14 @@ Replace `latest_version` with the latest published EQChart version.
 `eqchart` and `eqchart-compose` transitively include `eqchart-common`,
 so `eqchart-common` usually does not need to be added separately.
 
+If you do not want to use the BOM, you can keep specifying versions on each
+artifact individually.
+
 ### 3) Local multi-module usage (this repository)
 
 ```kotlin
 dependencies {
+    implementation(platform(project(":EQChart-bom")))
     implementation(project(":EQChart"))
     implementation(project(":EQChart-compose"))
 }
@@ -126,6 +135,8 @@ dependencies {
 # Same-day republish
 ./gradlew publish -PpublishDate=2026.03.08 -PpublishIncrement=1
 ```
+
+Published artifacts: `eqchart-common`, `eqchart`, `eqchart-compose`, `eqchart-bom`
 
 ## Reference Docs
 
