@@ -53,6 +53,11 @@
             android:label="Bar Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.WaterfallActivity"
+            android:exported="true"
+            android:label="Waterfall Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.BubbleActivity"
             android:exported="true"
             android:label="Bubble Chart"
@@ -161,6 +166,11 @@
             android:name=".ui.compose.ComposeBarActivity"
             android:exported="true"
             android:label="Compose Bar"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeWaterfallActivity"
+            android:exported="true"
+            android:label="Compose Waterfall"
             android:theme="@style/Theme.EQChart" />
     </application>
 

@@ -27,6 +27,7 @@ import com.magimon.eq.compose.sankey.SankeyChart
 import com.magimon.eq.compose.sankey.computeSankeyLayout
 import com.magimon.eq.compose.sankey.sankeyLinkCenterPoint
 import com.magimon.eq.compose.waveform.PcmWaveformChart
+import com.magimon.eq.compose.waterfall.WaterfallChart
 import com.magimon.eq.compose.waveform.rememberPcmWaveformController
 import com.magimon.eq.compose.internal.degreeToOffset
 import com.magimon.eq.bar.BarChartPresentationOptions
@@ -53,6 +54,9 @@ import com.magimon.eq.radar.RadarSeries
 import com.magimon.eq.sankey.SankeyChartPresentationOptions
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
+import com.magimon.eq.waterfall.WaterfallChartPresentationOptions
+import com.magimon.eq.waterfall.WaterfallEntry
+import com.magimon.eq.waterfall.WaterfallEntryKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -278,6 +282,59 @@ class ComposeChartsBehaviorTest {
         composeRule.waitForIdle()
 
         assertEquals("slice-a", clickedPayload)
+    }
+
+    @Test
+    fun waterfallChart_dispatchesClickForComputedBar() {
+        val entries = listOf(
+            WaterfallEntry("Revenue", 120.0, payload = "revenue"),
+            WaterfallEntry("Costs", -35.0, payload = "costs"),
+            WaterfallEntry("Subtotal", 0.0, kind = WaterfallEntryKind.SUBTOTAL, payload = "subtotal"),
+        )
+        val computed = invokePrivateTopLevel(
+            "com.magimon.eq.compose.waterfall.WaterfallChartKt",
+            "computeWaterfallLayout",
+            320f,
+            240f,
+            entries,
+            com.magimon.eq.waterfall.WaterfallChartStyleOptions(),
+            WaterfallChartPresentationOptions(
+                animateOnDataChange = false,
+                showConnectorLines = true,
+            ),
+            1f,
+            1f,
+            1f,
+        ) ?: error("Expected computed waterfall layout")
+        val firstBar = computed.readField<List<Any>>("bars").first()
+        val tap = Offset(
+            (firstBar.readField<Float>("left") + firstBar.readField<Float>("right")) * 0.5f,
+            (firstBar.readField<Float>("top") + firstBar.readField<Float>("bottom")) * 0.5f,
+        )
+
+        var clickedLabel: String? = null
+        var clickedTotal: Double? = null
+        composeRule.setContent {
+            WaterfallChart(
+                entries = entries,
+                modifier = Modifier.size(320.dp, 240.dp),
+                presentationOptions = WaterfallChartPresentationOptions(
+                    animateOnDataChange = false,
+                    showConnectorLines = true,
+                ),
+                onEntryClick = { _, entry, cumulativeTotal ->
+                    clickedLabel = entry.label
+                    clickedTotal = cumulativeTotal
+                },
+            )
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onRoot().performTouchInput { click(tap) }
+        composeRule.waitForIdle()
+
+        assertEquals("Revenue", clickedLabel)
+        assertEquals(120.0, clickedTotal ?: Double.NaN, 0.0)
     }
 
     @Test
