@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import com.magimon.eq.bubble3d.Bubble3DDatum
 import com.magimon.eq.compose.bubble3d.Bubble3DChart
+import com.magimon.eq.compose.pointline3d.PointLine3DChart
 import com.magimon.eq.compose.bar.BarChart
 import com.magimon.eq.compose.bubble.BubbleChart
 import com.magimon.eq.compose.gauge.GaugeChart
@@ -38,6 +39,8 @@ import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
 import com.magimon.eq.pie.PieDonutPresentationOptions
 import com.magimon.eq.pie.PieSlice
+import com.magimon.eq.pointline3d.PointLine3DDatum
+import com.magimon.eq.pointline3d.PointLine3DSeries
 import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarChartPresentationOptions
 import com.magimon.eq.radar.RadarSeries
@@ -237,6 +240,30 @@ class ComposeChartsSmokeTest {
                         size = 120.0,
                         color = 0xFF7C3AED.toInt(),
                         label = "Center",
+                    ),
+                ),
+                modifier = Modifier.size(320.dp, 240.dp),
+            )
+        }
+
+        composeRule.waitForIdle()
+    }
+
+    @Test
+    fun pointLine3DChart_rendersInsideCompose() {
+        assumeTrue(isOpenGlEsUnitTestEnvironmentAvailable())
+
+        composeRule.setContent {
+            PointLine3DChart(
+                series = listOf(
+                    PointLine3DSeries(
+                        name = "Flight Path",
+                        lineColor = 0xFF38BDF8.toInt(),
+                        points = listOf(
+                            PointLine3DDatum(x = 0.0, y = 0.0, z = 0.0, label = "A"),
+                            PointLine3DDatum(x = 1.0, y = 1.5, z = 0.8, label = "B"),
+                            PointLine3DDatum(x = 2.0, y = 2.2, z = 1.4, label = "C"),
+                        ),
                     ),
                 ),
                 modifier = Modifier.size(320.dp, 240.dp),
