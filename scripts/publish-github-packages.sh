@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-PACKAGE_NAMES_DEFAULT="eqchart-common,eqchart,eqchart-compose,eqchart-bom"
+PACKAGE_NAMES_DEFAULT="eqchart-common,eqchart-3d-core,eqchart,eqchart-compose,eqchart-bom"
 PACKAGE_NAMES="${PACKAGE_NAMES_DEFAULT}"
 DATE_OVERRIDE=""
 OWNER_OVERRIDE=""
@@ -20,7 +20,7 @@ Options:
   --date YYYY.MM.DD       Override base date (default: Asia/Seoul today)
   --owner OWNER           Override GitHub owner (default: parsed from origin remote)
   --repo REPO             Override GitHub repo (default: parsed from origin remote)
-  --packages a,b,c        Comma-separated package names (default: eqchart-common,eqchart,eqchart-compose,eqchart-bom)
+  --packages a,b,c        Comma-separated package names (default: eqchart-common,eqchart-3d-core,eqchart,eqchart-compose,eqchart-bom)
   --resolve-only          Print resolved version only (no publish)
   -h, --help              Show this help
 EOF

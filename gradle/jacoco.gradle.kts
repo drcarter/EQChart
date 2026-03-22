@@ -7,6 +7,7 @@ import java.math.BigDecimal
 
 val coverageModules = setOf(
     ":EQChart",
+    ":EQChart-3d-core",
     ":EQChart-common",
     ":EQChart-compose",
 )

@@ -44,8 +44,8 @@ android {
 }
 
 dependencies {
-
     api(project(":EQChart-common"))
+    api(project(":EQChart-3d-core"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

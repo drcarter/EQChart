@@ -7,6 +7,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
+import com.magimon.eq.bubble3d.Bubble3DDatum
+import com.magimon.eq.compose.bubble3d.Bubble3DChart
 import com.magimon.eq.compose.bar.BarChart
 import com.magimon.eq.compose.bubble.BubbleChart
 import com.magimon.eq.compose.gauge.GaugeChart
@@ -43,6 +45,7 @@ import com.magimon.eq.sankey.SankeyChartPresentationOptions
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
 import com.magimon.eq.waveform.PcmWaveFormStyleOptions
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -215,6 +218,38 @@ class ComposeChartsSmokeTest {
         }
 
         composeRule.waitForIdle()
+    }
+
+    @Test
+    fun bubble3DChart_rendersInsideCompose() {
+        // Robolectric unit tests do not provide the OpenGL ES GL10 classes that
+        // GLSurfaceView initializes against, so only run this smoke test when
+        // the JVM test environment exposes those platform types.
+        assumeTrue(isOpenGlEsUnitTestEnvironmentAvailable())
+
+        composeRule.setContent {
+            Bubble3DChart(
+                data = listOf(
+                    Bubble3DDatum(
+                        x = 0.0,
+                        y = 0.0,
+                        z = 0.0,
+                        size = 120.0,
+                        color = 0xFF7C3AED.toInt(),
+                        label = "Center",
+                    ),
+                ),
+                modifier = Modifier.size(320.dp, 240.dp),
+            )
+        }
+
+        composeRule.waitForIdle()
+    }
+
+    private fun isOpenGlEsUnitTestEnvironmentAvailable(): Boolean {
+        return runCatching {
+            Class.forName("javax.microedition.khronos.opengles.GL10")
+        }.isSuccess
     }
 
     @Test
