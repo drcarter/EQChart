@@ -84,6 +84,9 @@ subprojects {
         extensions.configure<PublishingExtension>("publishing") {
             publications.withType<MavenPublication>().configureEach {
                 pom {
+                    name.set("EQChart")
+                    description.set("A modern Android chart library for expressive 2D and 3D visualizations.")
+                    url.set("https://github.com/drcarter/EQChart")
                     licenses {
                         license {
                             name.set("Apache License, Version 2.0")

@@ -1,7 +1,7 @@
 # EQChart
 
-EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
+EQChart is a modern Android chart library for expressive 2D and 3D visualizations.
+It is designed for easy integration across both Android View and Compose, and currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
 
 ## Project Structure
 
@@ -9,6 +9,8 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `
   - Shared chart models/options/enums used by both View and Compose
 - `:EQChart`
   - Android View-based chart components
+- `:EQChart-3d-core`
+  - OpenGL ES-based true 3D chart rendering core for View and Compose hosts
 - `:EQChart-compose`
   - Native Compose chart components
 - `:EQChart-bom`
@@ -35,6 +37,9 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `
 - Sankey: Flow diagram with nodes/links, stage inference, and tap highlight
 - Cycle: Circular flow diagram with nodes on a ring and directional inner links
 - Step Flow: Ordered infographic steps with a hub, curved spine, and right-side pill cards
+- Bubble 3D: Interactive true 3D bubble chart with camera controls and axis overlays
+- Point Line 3D: True 3D point-and-line chart for connected trajectories in 3D space
+- Point Cloud 3D: True 3D dense scatter chart with per-point color and size control
 
 ## Chart Families
 
@@ -44,6 +49,7 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `
 - Hierarchical radial: Sunburst
 - Flow: Sankey, Cycle, Step Flow
 - Signal: PCM Waveform
+- 3D point: Bubble 3D, Point Line 3D, Point Cloud 3D
 
 ## Development Environment
 
