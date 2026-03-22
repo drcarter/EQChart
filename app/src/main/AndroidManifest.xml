@@ -83,6 +83,11 @@
             android:label="Bubble 3D"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.PointLine3DActivity"
+            android:exported="true"
+            android:label="Point Line 3D"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.WaveformFileActivity"
             android:exported="true"
             android:label="PCM Waveform"
@@ -136,6 +141,11 @@
             android:name=".ui.compose.ComposeBubble3DActivity"
             android:exported="true"
             android:label="Compose Bubble 3D"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposePointLine3DActivity"
+            android:exported="true"
+            android:label="Compose Point Line 3D"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeWaveformActivity"
