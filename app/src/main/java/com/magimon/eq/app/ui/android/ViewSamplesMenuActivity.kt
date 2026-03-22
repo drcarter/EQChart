@@ -23,6 +23,7 @@ class ViewSamplesMenuActivity : AppCompatActivity() {
                 ChartMenuEntry("Line", R.drawable.ic_chart_line, Color.parseColor("#2563EB"), LineActivity::class.java),
                 ChartMenuEntry("Area", R.drawable.ic_chart_area, Color.parseColor("#14B8A6"), AreaActivity::class.java),
                 ChartMenuEntry("Bar", R.drawable.ic_chart_bar, Color.parseColor("#F97316"), BarActivity::class.java),
+                ChartMenuEntry("Range Bar", R.drawable.ic_chart_bar, Color.parseColor("#0F766E"), RangeBarActivity::class.java),
                 ChartMenuEntry("Histogram", R.drawable.ic_chart_histogram, Color.parseColor("#2563EB"), HistogramActivity::class.java),
                 ChartMenuEntry("Waterfall", R.drawable.ic_chart_waterfall, Color.parseColor("#0F766E"), WaterfallActivity::class.java),
                 ChartMenuEntry("Funnel", R.drawable.ic_chart_funnel, Color.parseColor("#DC2626"), FunnelActivity::class.java),
