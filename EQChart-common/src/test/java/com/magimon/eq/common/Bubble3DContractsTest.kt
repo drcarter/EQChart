@@ -43,7 +43,10 @@ class Bubble3DContractsTest {
         assertNull(options.yAxisTitle)
         assertNull(options.zAxisTitle)
         assertEquals("1.0B", options.xLabelFormatter(1_000_000_000.0))
+        assertEquals("2.0M", options.xLabelFormatter(2_000_000.0))
+        assertEquals("1.5K", options.yLabelFormatter(1_500.0))
         assertEquals("500", options.yLabelFormatter(500.0))
+        assertEquals("42.5", options.zLabelFormatter(42.5))
         assertEquals("9.50", options.zLabelFormatter(9.5))
     }
 
