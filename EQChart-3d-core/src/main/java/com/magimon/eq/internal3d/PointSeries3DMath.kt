@@ -88,6 +88,19 @@ internal object PointSeries3DMath {
     }
 
     /**
+     * Maps a data-space value into an arbitrary output range.
+     */
+    fun mapToRange(
+        value: Double,
+        range: NumericRange,
+        minValue: Float,
+        maxValue: Float,
+    ): Float {
+        val t = normalize(value, range)
+        return minValue + ((maxValue - minValue) * t)
+    }
+
+    /**
      * Computes the orbit camera eye position for the current 3D view.
      */
     fun computeEyePosition(camera: OrbitCamera): FloatArray {
