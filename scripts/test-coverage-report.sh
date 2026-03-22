@@ -6,6 +6,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 MODULES=(
   "EQChart"
+  "EQChart-3d-core"
   "EQChart-common"
   "EQChart-compose"
 )
@@ -23,6 +24,7 @@ Description:
 
 Expected report paths:
   EQChart/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml
+  EQChart-3d-core/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml
   EQChart-common/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml
   EQChart-compose/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml
 
