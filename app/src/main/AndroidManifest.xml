@@ -133,6 +133,11 @@
             android:label="Compose Bubble"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.compose.ComposeBubble3DActivity"
+            android:exported="true"
+            android:label="Compose Bubble 3D"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.compose.ComposeWaveformActivity"
             android:exported="true"
             android:label="Compose Waveform"

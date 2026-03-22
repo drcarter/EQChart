@@ -22,6 +22,8 @@ internal class Bubble3DSceneView @JvmOverloads constructor(
         object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
                 renderer.zoomBy(detector.scaleFactor)
+                cameraOptions = renderer.getCameraOptionsSnapshot()
+                notifyOverlayStateChanged()
                 requestRender()
                 return true
             }
@@ -32,8 +34,12 @@ internal class Bubble3DSceneView @JvmOverloads constructor(
     private var lastY = 0f
     private var totalDx = 0f
     private var totalDy = 0f
+    private var axisOptions = Bubble3DAxisOptions()
+    private var cameraOptions = Bubble3DCameraOptions()
+    private var presentationOptions = Bubble3DPresentationOptions()
 
     var onBubbleTap: ((Bubble3DDatum) -> Unit)? = null
+    var onSceneOverlayStateChanged: ((Bubble3DAxisOptions, Bubble3DCameraOptions, Bubble3DPresentationOptions) -> Unit)? = null
 
     init {
         setEGLContextClientVersion(2)
@@ -54,7 +60,9 @@ internal class Bubble3DSceneView @JvmOverloads constructor(
      * Applies axis and grid settings to the renderer.
      */
     fun setAxisOptions(options: Bubble3DAxisOptions) {
+        axisOptions = options
         renderer.setAxisOptions(options)
+        notifyOverlayStateChanged()
         requestRender()
     }
 
@@ -62,7 +70,9 @@ internal class Bubble3DSceneView @JvmOverloads constructor(
      * Applies color, lighting, and radius options to the renderer.
      */
     fun setPresentationOptions(options: Bubble3DPresentationOptions) {
+        presentationOptions = options
         renderer.setPresentationOptions(options)
+        notifyOverlayStateChanged()
         requestRender()
     }
 
@@ -79,6 +89,8 @@ internal class Bubble3DSceneView @JvmOverloads constructor(
      */
     fun setCameraOptions(options: Bubble3DCameraOptions) {
         renderer.setCameraOptions(options)
+        cameraOptions = renderer.getCameraOptionsSnapshot()
+        notifyOverlayStateChanged()
         requestRender()
     }
 
@@ -106,6 +118,8 @@ internal class Bubble3DSceneView @JvmOverloads constructor(
                         yawDelta = dx * 0.35f,
                         pitchDelta = -dy * 0.35f,
                     )
+                    cameraOptions = renderer.getCameraOptionsSnapshot()
+                    notifyOverlayStateChanged()
                     requestRender()
                     lastX = event.x
                     lastY = event.y
@@ -126,5 +140,9 @@ internal class Bubble3DSceneView @JvmOverloads constructor(
         }
 
         return true
+    }
+
+    private fun notifyOverlayStateChanged() {
+        onSceneOverlayStateChanged?.invoke(axisOptions, cameraOptions, presentationOptions)
     }
 }

@@ -1,16 +1,17 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
     id("maven-publish")
 }
 
 android {
-    namespace = "com.magimon.eq.compose"
+    namespace = "com.magimon.eq.threed.core"
     compileSdk = 36
 
     defaultConfig {
         minSdk = 24
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -36,36 +37,18 @@ android {
         jvmTarget = "11"
     }
 
-    buildFeatures {
-        compose = true
-    }
-
     publishing {
         singleVariant("release") {}
     }
-
 }
 
 dependencies {
     api(project(":EQChart-common"))
-    implementation(project(":EQChart-3d-core"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-
-    debugImplementation(libs.androidx.ui.tooling)
-
-    testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
 
 afterEvaluate {
@@ -73,7 +56,7 @@ afterEvaluate {
         publications {
             create<org.gradle.api.publish.maven.MavenPublication>("release") {
                 from(components["release"])
-                artifactId = "eqchart-compose"
+                artifactId = "eqchart-3d-core"
             }
         }
     }

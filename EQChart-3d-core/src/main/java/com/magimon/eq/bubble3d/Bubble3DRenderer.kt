@@ -9,9 +9,6 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
-import kotlin.math.cos
-import kotlin.math.sin
-
 /**
  * OpenGL ES renderer for the true 3D bubble chart.
  *
@@ -96,6 +93,13 @@ internal class Bubble3DRenderer : GLSurfaceView.Renderer {
         synchronized(lock) {
             cameraOptions = clampCamera(options)
         }
+    }
+
+    /**
+     * Returns a stable snapshot of the current orbit camera configuration.
+     */
+    fun getCameraOptionsSnapshot(): Bubble3DCameraOptions {
+        return synchronized(lock) { cameraOptions }
     }
 
     /**
@@ -224,7 +228,7 @@ internal class Bubble3DRenderer : GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
 
         val aspectRatio = snapshot.viewportWidth.toFloat() / snapshot.viewportHeight.toFloat()
-        val eyePosition = computeEyePosition(snapshot.cameraOptions)
+        val eyePosition = Bubble3DChartMath.computeEyePosition(snapshot.cameraOptions)
         Matrix.setLookAtM(
             viewMatrix,
             0,
@@ -505,18 +509,6 @@ internal class Bubble3DRenderer : GLSurfaceView.Renderer {
             vertices += -1f
         }
         return vertices.toFloatArray()
-    }
-
-    private fun computeEyePosition(camera: Bubble3DCameraOptions): FloatArray {
-        val yaw = Math.toRadians(camera.yawDegrees.toDouble())
-        val pitch = Math.toRadians(camera.pitchDegrees.toDouble())
-        val radius = camera.distance
-
-        val horizontalRadius = (radius * cos(pitch)).toFloat()
-        val x = (horizontalRadius * sin(yaw)).toFloat()
-        val y = (radius * sin(pitch)).toFloat()
-        val z = (horizontalRadius * cos(yaw)).toFloat()
-        return floatArrayOf(x, y, z)
     }
 
     private fun clampCamera(camera: Bubble3DCameraOptions): Bubble3DCameraOptions {

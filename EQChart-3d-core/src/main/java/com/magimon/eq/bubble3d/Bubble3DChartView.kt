@@ -8,8 +8,9 @@ import android.widget.FrameLayout
 /**
  * Public Android View entry point for the true 3D bubble chart.
  *
- * This view hosts an internal [GLSurfaceView]-backed scene and exposes a
- * chart-style API similar to the other EQChart View components.
+ * This view hosts an internal [GLSurfaceView]-backed scene plus a lightweight
+ * axis-title overlay, and exposes a chart-style API similar to the other
+ * EQChart View components.
  */
 class Bubble3DChartView @JvmOverloads constructor(
     context: Context,
@@ -18,6 +19,7 @@ class Bubble3DChartView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val sceneView = Bubble3DSceneView(context)
+    private val axisLabelOverlayView = Bubble3DAxisLabelOverlayView(context)
 
     init {
         addView(
@@ -27,6 +29,21 @@ class Bubble3DChartView @JvmOverloads constructor(
                 ViewGroup.LayoutParams.MATCH_PARENT,
             ),
         )
+        addView(
+            axisLabelOverlayView,
+            LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            ),
+        )
+
+        sceneView.onSceneOverlayStateChanged = { axisOptions, cameraOptions, presentationOptions ->
+            axisLabelOverlayView.updateOverlayState(
+                axisOptions = axisOptions,
+                cameraOptions = cameraOptions,
+                presentationOptions = presentationOptions,
+            )
+        }
     }
 
     /**

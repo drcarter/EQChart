@@ -39,6 +39,9 @@ class Bubble3DContractsTest {
         assertTrue(options.showGridPlanes)
         assertTrue(options.showTicks)
         assertEquals(4, options.gridDivisions)
+        assertNull(options.xAxisTitle)
+        assertNull(options.yAxisTitle)
+        assertNull(options.zAxisTitle)
         assertEquals("1.0B", options.xLabelFormatter(1_000_000_000.0))
         assertEquals("500", options.yLabelFormatter(500.0))
         assertEquals("9.50", options.zLabelFormatter(9.5))
@@ -51,6 +54,9 @@ class Bubble3DContractsTest {
             showGridPlanes = false,
             showTicks = false,
             gridDivisions = 6,
+            xAxisTitle = "Talent",
+            yAxisTitle = "Funding",
+            zAxisTitle = "Scale",
             xLabelFormatter = { value -> "x=${value.toInt()}" },
             yLabelFormatter = { value -> "y=${value.toInt()}" },
             zLabelFormatter = { value -> "z=${value.toInt()}" },
@@ -60,6 +66,9 @@ class Bubble3DContractsTest {
         assertFalse(options.showGridPlanes)
         assertFalse(options.showTicks)
         assertEquals(6, options.gridDivisions)
+        assertEquals("Talent", options.xAxisTitle)
+        assertEquals("Funding", options.yAxisTitle)
+        assertEquals("Scale", options.zAxisTitle)
         assertEquals("x=4", options.xLabelFormatter(4.8))
         assertEquals("y=5", options.yLabelFormatter(5.1))
         assertEquals("z=6", options.zLabelFormatter(6.9))

@@ -40,6 +40,14 @@ internal object Bubble3DChartMath {
     )
 
     /**
+     * Screen-space coordinate used for overlay label placement.
+     */
+    data class ScreenPoint(
+        val x: Float,
+        val y: Float,
+    )
+
+    /**
      * Resolves a stable numeric range from raw values and optional overrides.
      */
     fun resolveRange(
@@ -189,6 +197,91 @@ internal object Bubble3DChartMath {
             vector[0] / magnitude,
             vector[1] / magnitude,
             vector[2] / magnitude,
+        )
+    }
+
+    /**
+     * Computes the orbit camera eye position for the current 3D view.
+     */
+    fun computeEyePosition(camera: Bubble3DCameraOptions): FloatArray {
+        val yaw = Math.toRadians(camera.yawDegrees.toDouble())
+        val pitch = Math.toRadians(camera.pitchDegrees.toDouble())
+        val radius = camera.distance
+
+        val horizontalRadius = (radius * kotlin.math.cos(pitch)).toFloat()
+        val x = (horizontalRadius * kotlin.math.sin(yaw)).toFloat()
+        val y = (radius * kotlin.math.sin(pitch)).toFloat()
+        val z = (horizontalRadius * kotlin.math.cos(yaw)).toFloat()
+        return floatArrayOf(x, y, z)
+    }
+
+    /**
+     * Builds the camera view-projection matrix shared by the renderer and overlays.
+     */
+    fun buildViewProjectionMatrix(
+        camera: Bubble3DCameraOptions,
+        aspectRatio: Float,
+    ): FloatArray {
+        val eyePosition = computeEyePosition(camera)
+        val viewMatrix = FloatArray(16)
+        val projectionMatrix = FloatArray(16)
+        val viewProjectionMatrix = FloatArray(16)
+
+        Matrix.setLookAtM(
+            viewMatrix,
+            0,
+            eyePosition[0],
+            eyePosition[1],
+            eyePosition[2],
+            0f,
+            0f,
+            0f,
+            0f,
+            1f,
+            0f,
+        )
+        Matrix.perspectiveM(
+            projectionMatrix,
+            0,
+            camera.fovDegrees,
+            aspectRatio,
+            0.1f,
+            20f,
+        )
+        Matrix.multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
+        return viewProjectionMatrix
+    }
+
+    /**
+     * Projects a world-space point into the current viewport.
+     */
+    fun projectWorldToScreen(
+        x: Float,
+        y: Float,
+        z: Float,
+        viewProjectionMatrix: FloatArray,
+        viewportWidth: Int,
+        viewportHeight: Int,
+    ): ScreenPoint? {
+        if (viewportWidth <= 0 || viewportHeight <= 0) return null
+
+        val clip = FloatArray(4)
+        Matrix.multiplyMV(
+            clip,
+            0,
+            viewProjectionMatrix,
+            0,
+            floatArrayOf(x, y, z, 1f),
+            0,
+        )
+        val w = clip[3]
+        if (abs(w) < 1e-6f || w <= 0f) return null
+
+        val xNdc = clip[0] / w
+        val yNdc = clip[1] / w
+        return ScreenPoint(
+            x = ((xNdc + 1f) * 0.5f) * viewportWidth,
+            y = ((1f - yNdc) * 0.5f) * viewportHeight,
         )
     }
 }

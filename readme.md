@@ -108,6 +108,9 @@ dependencies {
     // View charts
     implementation("com.magimon.eq:eqchart")
 
+    // Optional direct true 3D module when you want the OpenGL-based core surface explicitly
+    implementation("com.magimon.eq:eqchart-3d-core")
+
     // Compose charts
     implementation("com.magimon.eq:eqchart-compose")
 }
@@ -115,8 +118,12 @@ dependencies {
 
 Replace `latest_version` with the latest published EQChart version.
 
-`eqchart` and `eqchart-compose` transitively include `eqchart-common`,
-so `eqchart-common` usually does not need to be added separately.
+`eqchart`, `eqchart-3d-core`, and `eqchart-compose` transitively include
+`eqchart-common`, so `eqchart-common` usually does not need to be added
+separately.
+
+`eqchart` also includes `eqchart-3d-core`, so View consumers can keep
+depending on `eqchart` alone unless they want the 3D module explicitly.
 
 If you do not want to use the BOM, you can keep specifying versions on each
 artifact individually.
@@ -127,6 +134,7 @@ artifact individually.
 dependencies {
     implementation(platform(project(":EQChart-bom")))
     implementation(project(":EQChart"))
+    implementation(project(":EQChart-3d-core"))
     implementation(project(":EQChart-compose"))
 }
 ```
@@ -141,7 +149,7 @@ dependencies {
 ./gradlew publish -PpublishDate=2026.03.08 -PpublishIncrement=1
 ```
 
-Published artifacts: `eqchart-common`, `eqchart`, `eqchart-compose`, `eqchart-bom`
+Published artifacts: `eqchart-common`, `eqchart-3d-core`, `eqchart`, `eqchart-compose`, `eqchart-bom`
 
 ## Reference Docs
 
@@ -167,6 +175,7 @@ Per-module Dokka tasks are also available:
 
 - `./gradlew :EQChart-common:dokkaHtml`
 - `./gradlew :EQChart:dokkaHtml`
+- `./gradlew :EQChart-3d-core:dokkaHtml`
 - `./gradlew :EQChart-compose:dokkaHtml`
 
 Compatibility aliases are also kept for familiar Dokka task names:

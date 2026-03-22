@@ -6,8 +6,9 @@ import kotlin.math.abs
  * Axis, grid, and tick rendering options for a 3D bubble chart.
  *
  * The first Android View implementation renders axis lines, simple grid planes,
- * and tick marks in OpenGL ES. Label formatter lambdas are reserved for
- * overlay/tick-text expansion in later iterations.
+ * and tick marks in OpenGL ES. Axis titles are rendered as a lightweight text
+ * overlay, while label formatter lambdas remain reserved for future tick-text
+ * expansion.
  */
 data class Bubble3DAxisOptions(
     /** Whether to render the three primary axis lines. */
@@ -18,6 +19,12 @@ data class Bubble3DAxisOptions(
     val showTicks: Boolean = true,
     /** Number of divisions used when generating grid lines and tick marks. */
     val gridDivisions: Int = 4,
+    /** Optional title rendered near the positive X axis endpoint. */
+    val xAxisTitle: String? = null,
+    /** Optional title rendered near the positive Y axis endpoint. */
+    val yAxisTitle: String? = null,
+    /** Optional title rendered near the positive Z axis endpoint. */
+    val zAxisTitle: String? = null,
     /** Formats values on the X axis. */
     val xLabelFormatter: (Double) -> String = { defaultBubble3DNumberFormat(it) },
     /** Formats values on the Y axis. */
