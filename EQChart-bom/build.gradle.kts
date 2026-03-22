@@ -7,6 +7,7 @@ dependencies {
     constraints {
         api(project(":EQChart-common"))
         api(project(":EQChart"))
+        api(project(":EQChart-3d-core"))
         api(project(":EQChart-compose"))
     }
 }

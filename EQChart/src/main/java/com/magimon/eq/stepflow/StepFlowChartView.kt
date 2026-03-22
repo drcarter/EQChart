@@ -110,6 +110,12 @@ class StepFlowChartView @JvmOverloads constructor(
         applyStyle()
     }
 
+    /**
+     * Replaces the optional central hub content.
+     *
+     * @param content New hub content, or `null` to render only the step spine.
+     * @see StepFlowHubContent
+     */
     fun setHubContent(content: StepFlowHubContent?) {
         hubContent = content
         hubSelected = false
@@ -118,6 +124,12 @@ class StepFlowChartView @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * Replaces the ordered steps rendered by the chart.
+     *
+     * @param items Ordered [StepFlowStep] items rendered from top to bottom.
+     * @see StepFlowStep
+     */
     fun setSteps(items: List<StepFlowStep>) {
         steps = items
         selectedStepIndex = null
@@ -127,6 +139,12 @@ class StepFlowChartView @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * Applies shared visual styling used by the chart renderer.
+     *
+     * @param options Updated styling values.
+     * @see StepFlowChartStyleOptions
+     */
     fun setStyleOptions(options: StepFlowChartStyleOptions) {
         styleOptions = options
         applyStyle()
@@ -134,6 +152,12 @@ class StepFlowChartView @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * Applies shared behavioral and layout options used by the chart renderer.
+     *
+     * @param options Updated presentation values.
+     * @see StepFlowChartPresentationOptions
+     */
     fun setPresentationOptions(options: StepFlowChartPresentationOptions) {
         presentationOptions = options
         resolveLayout(width, height)
@@ -141,10 +165,22 @@ class StepFlowChartView @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * Registers a callback for step taps.
+     *
+     * @param listener Listener invoked with the step index, step model, and payload.
+     * @see StepFlowStep
+     */
     fun setOnStepClickListener(listener: (stepIndex: Int, step: StepFlowStep, payload: Any?) -> Unit) {
         onStepClickListener = listener
     }
 
+    /**
+     * Registers a callback for taps on the central hub.
+     *
+     * @param listener Listener invoked with the hub content and payload.
+     * @see StepFlowHubContent
+     */
     fun setOnHubClickListener(listener: (content: StepFlowHubContent, payload: Any?) -> Unit) {
         onHubClickListener = listener
     }

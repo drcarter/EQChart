@@ -8,8 +8,10 @@ import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarSeries
 import com.magimon.eq.cycle.CycleLink
 import com.magimon.eq.cycle.CycleNode
+import com.magimon.eq.funnel.FunnelStage
 import com.magimon.eq.gauge.GaugeRange
 import com.magimon.eq.gauge.GaugeValue
+import com.magimon.eq.histogram.HistogramBin
 import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
 import com.magimon.eq.pie.PieSlice
@@ -17,8 +19,11 @@ import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarSeries
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
+import com.magimon.eq.sunburst.SunburstNode
 import com.magimon.eq.stepflow.StepFlowHubContent
 import com.magimon.eq.stepflow.StepFlowStep
+import com.magimon.eq.waterfall.WaterfallEntry
+import com.magimon.eq.waterfall.WaterfallEntryKind
 import kotlin.random.Random
 import kotlin.math.PI
 import kotlin.math.sin
@@ -115,6 +120,50 @@ object ChartSampleData {
         )
     }
 
+    fun sunburstNodes(): List<SunburstNode> {
+        return listOf(
+            SunburstNode(
+                label = "Company",
+                value = 1000.0,
+                color = Color.parseColor("#0F172A"),
+                children = listOf(
+                    SunburstNode(
+                        label = "Growth",
+                        value = 420.0,
+                        color = Color.parseColor("#2563EB"),
+                        children = listOf(
+                            SunburstNode("Paid", 180.0, Color.parseColor("#3B82F6"), payload = "paid"),
+                            SunburstNode("Organic", 150.0, Color.parseColor("#60A5FA"), payload = "organic"),
+                            SunburstNode("Referral", 90.0, Color.parseColor("#93C5FD"), payload = "referral"),
+                        ),
+                        payload = "growth",
+                    ),
+                    SunburstNode(
+                        label = "Product",
+                        value = 360.0,
+                        color = Color.parseColor("#14B8A6"),
+                        children = listOf(
+                            SunburstNode("Subscriptions", 240.0, Color.parseColor("#2DD4BF"), payload = "subscriptions"),
+                            SunburstNode("Services", 120.0, Color.parseColor("#5EEAD4"), payload = "services"),
+                        ),
+                        payload = "product",
+                    ),
+                    SunburstNode(
+                        label = "Ops",
+                        value = 220.0,
+                        color = Color.parseColor("#F97316"),
+                        children = listOf(
+                            SunburstNode("Support", 120.0, Color.parseColor("#FB923C"), payload = "support"),
+                            SunburstNode("Logistics", 100.0, Color.parseColor("#FDBA74"), payload = "logistics"),
+                        ),
+                        payload = "ops",
+                    ),
+                ),
+                payload = "company",
+            ),
+        )
+    }
+
     fun cycleNodes(): List<CycleNode> {
         return listOf(
             CycleNode("plan", "Plan", Color.parseColor("#2B80FF"), "Plan"),
@@ -133,6 +182,16 @@ object ChartSampleData {
             CycleLink("measure", "learn", 16.0, label = "16", payload = "measure-learn"),
             CycleLink("learn", "plan", 20.0, label = "20", payload = "learn-plan"),
             CycleLink("measure", "plan", 7.0, label = "7", payload = "measure-plan"),
+        )
+    }
+
+    fun funnelStages(): List<FunnelStage> {
+        return listOf(
+            FunnelStage("Visits", 2_400.0, payload = "visits"),
+            FunnelStage("Qualified", 1_650.0, payload = "qualified"),
+            FunnelStage("Demo", 920.0, payload = "demo"),
+            FunnelStage("Proposal", 410.0, payload = "proposal"),
+            FunnelStage("Won", 180.0, payload = "won"),
         )
     }
 
@@ -281,6 +340,28 @@ object ChartSampleData {
                     BarDatum(label, (3.0 + index * 2.5 + Random(index + 99).nextDouble(0.0, 1.2)))
                 },
             ),
+        )
+    }
+
+    fun histogramBins(): List<HistogramBin> {
+        return listOf(
+            HistogramBin(0.0, 10.0, 4.0, payload = "0-10"),
+            HistogramBin(10.0, 20.0, 9.0, payload = "10-20"),
+            HistogramBin(20.0, 30.0, 13.0, payload = "20-30"),
+            HistogramBin(30.0, 40.0, 8.0, payload = "30-40"),
+            HistogramBin(40.0, 50.0, 3.0, payload = "40-50"),
+        )
+    }
+
+    fun waterfallEntries(): List<WaterfallEntry> {
+        return listOf(
+            WaterfallEntry("Revenue", 240.0, payload = "Revenue"),
+            WaterfallEntry("Returns", -42.0, payload = "Returns"),
+            WaterfallEntry("Services", 68.0, payload = "Services"),
+            WaterfallEntry("Subtotal", 0.0, kind = WaterfallEntryKind.SUBTOTAL, payload = "Subtotal"),
+            WaterfallEntry("Marketing", -36.0, payload = "Marketing"),
+            WaterfallEntry("Support", -22.0, payload = "Support"),
+            WaterfallEntry("Total", 0.0, kind = WaterfallEntryKind.TOTAL, payload = "Total"),
         )
     }
 

@@ -6,6 +6,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 MODULES=(
   "EQChart"
+  "EQChart-3d-core"
   "EQChart-common"
   "EQChart-compose"
 )
@@ -23,6 +24,7 @@ Description:
 
 Expected report paths:
   EQChart/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml
+  EQChart-3d-core/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml
   EQChart-common/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml
   EQChart-compose/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml
 
@@ -30,8 +32,7 @@ Reported metrics:
   INSTRUCTION, BRANCH, LINE, COMPLEXITY, METHOD, CLASS
 
 Notes:
-  - This script only reads existing JaCoCo XML reports.
-  - If any XML report is missing, the script exits with an error.
+  - If any XML report is missing, the script builds the missing JaCoCo reports first.
 EOF
 }
 
@@ -63,11 +64,37 @@ if ! command -v python3 >/dev/null 2>&1; then
 fi
 
 module_args=()
+missing_modules=()
 for module in "${MODULES[@]}"; do
   report_path="${PROJECT_ROOT}/${module}/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml"
   if [[ ! -f "${report_path}" ]]; then
-    err "Missing JaCoCo XML for ${module}: ${report_path}"
-    err "Generate reports first, for example: ./gradlew libraryJacocoReport"
+    missing_modules+=("${module}")
+  fi
+done
+
+if [[ ${#missing_modules[@]} -gt 0 ]]; then
+  if [[ ! -x "${PROJECT_ROOT}/gradlew" ]]; then
+    err "Missing reports and gradlew is not available at ${PROJECT_ROOT}/gradlew"
+    exit 1
+  fi
+
+  gradle_tasks=()
+  for module in "${missing_modules[@]}"; do
+    gradle_tasks+=(":${module}:jacocoDebugUnitTestReport")
+  done
+
+  log "Missing JaCoCo XML for ${#missing_modules[@]} module(s): ${missing_modules[*]}"
+  log "Building missing JaCoCo reports..."
+  (
+    cd "${PROJECT_ROOT}"
+    ./gradlew "${gradle_tasks[@]}"
+  )
+fi
+
+for module in "${MODULES[@]}"; do
+  report_path="${PROJECT_ROOT}/${module}/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml"
+  if [[ ! -f "${report_path}" ]]; then
+    err "JaCoCo XML is still missing for ${module}: ${report_path}"
     exit 1
   fi
   module_args+=("${module}=${report_path}")

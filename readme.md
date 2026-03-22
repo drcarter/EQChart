@@ -1,7 +1,7 @@
 # EQChart
 
-EQChart is an Android custom chart library.
-It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, and `Step Flow` charts.
+EQChart is a modern Android chart library for expressive 2D and 3D visualizations.
+It is designed for easy integration across both Android View and Compose, and currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
 
 ## Project Structure
 
@@ -9,6 +9,8 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
   - Shared chart models/options/enums used by both View and Compose
 - `:EQChart`
   - Android View-based chart components
+- `:EQChart-3d-core`
+  - OpenGL ES-based true 3D chart rendering core for View and Compose hosts
 - `:EQChart-compose`
   - Native Compose chart components
 - `:EQChart-bom`
@@ -23,6 +25,10 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
 - Line: Multi-series Cartesian line chart with grid / legend / point selection
 - Area: Filled line chart variant for trend comparison
 - Bar: Grouped / stacked bar chart with vertical / horizontal orientation
+- Histogram: Ordered bucket chart for count / frequency distribution
+- Waterfall: Ordered cumulative delta chart with subtotal / total bars and connectors
+- Funnel: Vertical conversion funnel chart with tapered stages and click callbacks
+- Sunburst: Hierarchical radial chart for nested part-to-whole breakdowns
 - PCM Waveform: Real-time 16-bit mono PCM waveform rendering
 - Radar: Multi-series radar chart (legend/animation/point click)
 - Pie: Ratio-based pie chart (legend/labels/click)
@@ -31,14 +37,19 @@ It currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `PCM Waveform`
 - Sankey: Flow diagram with nodes/links, stage inference, and tap highlight
 - Cycle: Circular flow diagram with nodes on a ring and directional inner links
 - Step Flow: Ordered infographic steps with a hub, curved spine, and right-side pill cards
+- Bubble 3D: Interactive true 3D bubble chart with camera controls and axis overlays
+- Point Line 3D: True 3D point-and-line chart for connected trajectories in 3D space
+- Point Cloud 3D: True 3D dense scatter chart with per-point color and size control
 
 ## Chart Families
 
 - Tiled: Heatmap
-- Axis-based: Bubble, Line, Area, Bar
+- Axis-based: Bubble, Line, Area, Bar, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
+- Hierarchical radial: Sunburst
 - Flow: Sankey, Cycle, Step Flow
 - Signal: PCM Waveform
+- 3D point: Bubble 3D, Point Line 3D, Point Cloud 3D
 
 ## Development Environment
 
@@ -103,6 +114,9 @@ dependencies {
     // View charts
     implementation("com.magimon.eq:eqchart")
 
+    // Optional direct true 3D module when you want the OpenGL-based core surface explicitly
+    implementation("com.magimon.eq:eqchart-3d-core")
+
     // Compose charts
     implementation("com.magimon.eq:eqchart-compose")
 }
@@ -110,8 +124,12 @@ dependencies {
 
 Replace `latest_version` with the latest published EQChart version.
 
-`eqchart` and `eqchart-compose` transitively include `eqchart-common`,
-so `eqchart-common` usually does not need to be added separately.
+`eqchart`, `eqchart-3d-core`, and `eqchart-compose` transitively include
+`eqchart-common`, so `eqchart-common` usually does not need to be added
+separately.
+
+`eqchart` also includes `eqchart-3d-core`, so View consumers can keep
+depending on `eqchart` alone unless they want the 3D module explicitly.
 
 If you do not want to use the BOM, you can keep specifying versions on each
 artifact individually.
@@ -122,6 +140,7 @@ artifact individually.
 dependencies {
     implementation(platform(project(":EQChart-bom")))
     implementation(project(":EQChart"))
+    implementation(project(":EQChart-3d-core"))
     implementation(project(":EQChart-compose"))
 }
 ```
@@ -136,7 +155,7 @@ dependencies {
 ./gradlew publish -PpublishDate=2026.03.08 -PpublishIncrement=1
 ```
 
-Published artifacts: `eqchart-common`, `eqchart`, `eqchart-compose`, `eqchart-bom`
+Published artifacts: `eqchart-common`, `eqchart-3d-core`, `eqchart`, `eqchart-compose`, `eqchart-bom`
 
 ## Reference Docs
 
@@ -152,6 +171,8 @@ Build, start the local preview server, and open the browser in one step:
 ./gradlew referenceDocsPreview
 ```
 
+If `docs/reference/index.html` is missing, the preview script builds the reference docs before starting the server.
+
 Generated site:
 
 - `docs/reference/index.html`
@@ -160,6 +181,7 @@ Per-module Dokka tasks are also available:
 
 - `./gradlew :EQChart-common:dokkaHtml`
 - `./gradlew :EQChart:dokkaHtml`
+- `./gradlew :EQChart-3d-core:dokkaHtml`
 - `./gradlew :EQChart-compose:dokkaHtml`
 
 Compatibility aliases are also kept for familiar Dokka task names:
@@ -203,6 +225,10 @@ Compose module exports:
 - `BubbleChart(...)`
 - `LineChart(...)`, `AreaChart(...)`
 - `BarChart(...)`
+- `HistogramChart(...)`
+- `WaterfallChart(...)`
+- `FunnelChart(...)`
+- `SunburstChart(...)`
 - `PcmWaveformChart(...)` + `rememberPcmWaveformController(...)`
 - `RadarChart(...)`
 - `PieChart(...)`, `DonutChart(...)`
@@ -759,6 +785,47 @@ Notes:
 - Compose uses `StepFlowChart(hubContent = ..., steps = ...)` with the same shared models/options
 - This chart is diagram-oriented and does not use axis or free-form graph links
 
+### 12) Sunburst
+
+Key classes:
+- `SunburstChartView`
+- `SunburstNode`
+- `SunburstChartStyleOptions`, `SunburstChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val sunburstView = SunburstChartView(this).apply {
+    setStyleOptions(SunburstChartStyleOptions())
+    setPresentationOptions(SunburstChartPresentationOptions())
+    setNodes(
+        listOf(
+            SunburstNode(
+                label = "Company",
+                value = 1000.0,
+                color = Color.parseColor("#0F172A"),
+                children = listOf(
+                    SunburstNode("Growth", 420.0, Color.parseColor("#2563EB")),
+                    SunburstNode("Product", 360.0, Color.parseColor("#14B8A6")),
+                    SunburstNode("Ops", 220.0, Color.parseColor("#F97316")),
+                ),
+            ),
+        ),
+    )
+    setOnNodeClickListener { _, node, _ ->
+        // use node.label / node.value / node.payload
+    }
+}
+
+setContentView(sunburstView)
+```
+
+Notes:
+- Sunburst renders nested nodes as radial rings from the root outward
+- Leaves require `SunburstNode.value` to be finite and `> 0`
+- Parents can either provide their own value or derive it from valid children; rendering uses child sums when descendants exist
+- Compose uses `SunburstChart(nodes = ..., ...)` with the same shared models/options
+
 ## Test
 
 ```bash
@@ -766,3 +833,11 @@ Notes:
 ```
 
 Unit tests currently focus on chart math/utility logic.
+
+## Open Source License
+
+EQChart is licensed under the Apache License, Version 2.0.
+See [LICENSE](LICENSE) for the full text.
+
+Third-party tools, plugins, and dependencies used by this project remain
+subject to their own respective licenses.

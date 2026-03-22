@@ -35,6 +35,25 @@ import com.magimon.eq.stepflow.StepFlowSpineSegment
 import com.magimon.eq.stepflow.StepFlowStep
 import com.magimon.eq.stepflow.StepFlowStepLayout
 
+/**
+ * Compose step flow infographic chart with an optional hub and ordered steps.
+ *
+ * The composable consumes shared [StepFlowHubContent] and [StepFlowStep] contracts, then uses the
+ * common layout engine through Compose-specific helpers to render the hub, spine, badges, and
+ * cards.
+ *
+ * @param hubContent Optional central hub content.
+ * @param steps Ordered steps rendered along the curved spine.
+ * @param modifier Compose modifier applied to the chart container.
+ * @param styleOptions Shared visual styling for hub, spine, badges, cards, and selection.
+ * @param presentationOptions Shared behavior controlling descriptions, curvature, and animation.
+ * @param onStepClick Optional callback invoked when a rendered step is tapped.
+ * @param onHubClick Optional callback invoked when the central hub is tapped.
+ * @see StepFlowHubContent
+ * @see StepFlowStep
+ * @see StepFlowChartStyleOptions
+ * @see StepFlowChartPresentationOptions
+ */
 @Composable
 fun StepFlowChart(
     hubContent: StepFlowHubContent?,

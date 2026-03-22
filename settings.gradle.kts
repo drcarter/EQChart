@@ -22,6 +22,7 @@ dependencyResolutionManagement {
 rootProject.name = "EQChart"
 include(":app")
 include(":EQChart")
+include(":EQChart-3d-core")
 include(":EQChart-common")
 include(":EQChart-compose")
 include(":EQChart-bom")
