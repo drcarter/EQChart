@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is a modern Android chart library for expressive 2D and 3D visualizations.
-It is designed for easy integration across both Android View and Compose, and currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
+It is designed for easy integration across both Android View and Compose, and currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Range Bar`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
 
 ## Project Structure
 
@@ -25,6 +25,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 - Line: Multi-series Cartesian line chart with grid / legend / point selection
 - Area: Filled line chart variant for trend comparison
 - Bar: Grouped / stacked bar chart with vertical / horizontal orientation
+- Range Bar: Horizontal start/end interval chart suitable for roadmap and timeline views
 - Histogram: Ordered bucket chart for count / frequency distribution
 - Waterfall: Ordered cumulative delta chart with subtotal / total bars and connectors
 - Funnel: Vertical conversion funnel chart with tapered stages and click callbacks
@@ -44,7 +45,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 ## Chart Families
 
 - Tiled: Heatmap
-- Axis-based: Bubble, Line, Area, Bar, Histogram, Waterfall, Funnel
+- Axis-based: Bubble, Line, Area, Bar, Range Bar, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
 - Hierarchical radial: Sunburst
 - Flow: Sankey, Cycle, Step Flow
@@ -225,6 +226,7 @@ Compose module exports:
 - `BubbleChart(...)`
 - `LineChart(...)`, `AreaChart(...)`
 - `BarChart(...)`
+- `RangeBarChart(...)`
 - `HistogramChart(...)`
 - `WaterfallChart(...)`
 - `FunnelChart(...)`

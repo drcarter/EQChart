@@ -17,6 +17,7 @@ import com.magimon.eq.line.LineSeries
 import com.magimon.eq.pie.PieSlice
 import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarSeries
+import com.magimon.eq.rangebar.RangeBarEntry
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
 import com.magimon.eq.sunburst.SunburstNode
@@ -192,6 +193,46 @@ object ChartSampleData {
             FunnelStage("Demo", 920.0, payload = "demo"),
             FunnelStage("Proposal", 410.0, payload = "proposal"),
             FunnelStage("Won", 180.0, payload = "won"),
+        )
+    }
+
+    fun rangeBarEntries(): List<RangeBarEntry> {
+        return listOf(
+            RangeBarEntry(
+                label = "Discovery",
+                start = 0.0,
+                end = 2.0,
+                color = Color.parseColor("#2563EB"),
+                payload = "Discovery",
+            ),
+            RangeBarEntry(
+                label = "Design",
+                start = 1.0,
+                end = 4.0,
+                color = Color.parseColor("#14B8A6"),
+                payload = "Design",
+            ),
+            RangeBarEntry(
+                label = "Platform",
+                start = 3.0,
+                end = 7.0,
+                color = Color.parseColor("#7C3AED"),
+                payload = "Platform",
+            ),
+            RangeBarEntry(
+                label = "QA",
+                start = 6.0,
+                end = 8.0,
+                color = Color.parseColor("#F59E0B"),
+                payload = "QA",
+            ),
+            RangeBarEntry(
+                label = "Launch",
+                start = 8.0,
+                end = 9.0,
+                color = Color.parseColor("#EF4444"),
+                payload = "Launch",
+            ),
         )
     }
 
