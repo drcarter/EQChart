@@ -24,8 +24,8 @@ internal object PointSeries3DShaderProgram {
         val programId: Int,
         val positionHandle: Int,
         val pointSizeHandle: Int,
-        val mvpMatrixHandle: Int,
         val colorHandle: Int,
+        val mvpMatrixHandle: Int,
     )
 
     /**
@@ -66,24 +66,27 @@ internal object PointSeries3DShaderProgram {
         val programId = linkProgram(
             vertexSource = """
                 uniform mat4 uMvpMatrix;
-                uniform float uPointSize;
                 attribute vec3 aPosition;
+                attribute float aPointSize;
+                attribute vec4 aColor;
+                varying vec4 vColor;
 
                 void main() {
                     gl_Position = uMvpMatrix * vec4(aPosition, 1.0);
-                    gl_PointSize = uPointSize;
+                    gl_PointSize = aPointSize;
+                    vColor = aColor;
                 }
             """.trimIndent(),
             fragmentSource = """
                 precision mediump float;
-                uniform vec4 uColor;
+                varying vec4 vColor;
 
                 void main() {
                     vec2 centered = gl_PointCoord - vec2(0.5, 0.5);
                     if (dot(centered, centered) > 0.25) {
                         discard;
                     }
-                    gl_FragColor = uColor;
+                    gl_FragColor = vColor;
                 }
             """.trimIndent(),
         )
@@ -91,9 +94,9 @@ internal object PointSeries3DShaderProgram {
         return PointProgram(
             programId = programId,
             positionHandle = GLES20.glGetAttribLocation(programId, "aPosition"),
-            pointSizeHandle = GLES20.glGetUniformLocation(programId, "uPointSize"),
+            pointSizeHandle = GLES20.glGetAttribLocation(programId, "aPointSize"),
+            colorHandle = GLES20.glGetAttribLocation(programId, "aColor"),
             mvpMatrixHandle = GLES20.glGetUniformLocation(programId, "uMvpMatrix"),
-            colorHandle = GLES20.glGetUniformLocation(programId, "uColor"),
         )
     }
 
