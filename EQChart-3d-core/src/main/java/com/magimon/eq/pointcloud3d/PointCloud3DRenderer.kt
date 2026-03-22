@@ -1,4 +1,4 @@
-package com.magimon.eq.pointline3d
+package com.magimon.eq.pointcloud3d
 
 import android.graphics.Color
 import android.opengl.GLES20
@@ -14,42 +14,31 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 /**
- * OpenGL ES renderer for the true 3D point-line chart.
+ * OpenGL ES renderer for the true 3D point cloud chart.
  *
- * This renderer owns scene state, camera matrices, guide rendering, line/point
- * rendering, and nearest-point tap picking.
+ * The cloud renderer batches point positions, per-point sizes, and per-point
+ * colors while reusing the shared point-series camera and guide logic.
  */
-internal class PointLine3DRenderer : GLSurfaceView.Renderer {
-
-    data class Selection(
-        val series: PointLine3DSeries,
-        val datum: PointLine3DDatum,
-    )
+internal class PointCloud3DRenderer : GLSurfaceView.Renderer {
 
     private data class ScenePoint(
-        val datum: PointLine3DDatum,
+        val datum: PointCloud3DDatum,
         val x: Float,
         val y: Float,
         val z: Float,
         val color: Int,
-    )
-
-    private data class SceneSeries(
-        val series: PointLine3DSeries,
-        val points: List<ScenePoint>,
-        val lineVertices: FloatArray,
+        val pointSize: Float,
     )
 
     private data class SelectedPoint(
-        val seriesIndex: Int,
         val pointIndex: Int,
     )
 
     private data class RenderSnapshot(
-        val series: List<SceneSeries>,
+        val points: List<ScenePoint>,
         val axisOptions: Point3DAxisOptions,
         val cameraOptions: Point3DCameraOptions,
-        val presentationOptions: PointLine3DPresentationOptions,
+        val presentationOptions: PointCloud3DPresentationOptions,
         val selectedPoint: SelectedPoint?,
         val viewportWidth: Int,
         val viewportHeight: Int,
@@ -57,12 +46,12 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
 
     private val lock = Any()
 
-    private var data: List<PointLine3DSeries> = emptyList()
+    private var data: List<PointCloud3DDatum> = emptyList()
     private var axisOptions = Point3DAxisOptions()
     private var cameraOptions = Point3DCameraOptions()
-    private var presentationOptions = PointLine3DPresentationOptions()
-    private var scaleOverride: PointLine3DScaleOverride? = null
-    private var sceneSeries: List<SceneSeries> = emptyList()
+    private var presentationOptions = PointCloud3DPresentationOptions()
+    private var scaleOverride: PointCloud3DScaleOverride? = null
+    private var scenePoints: List<ScenePoint> = emptyList()
     private var selectedPoint: SelectedPoint? = null
 
     private var viewportWidth = 1
@@ -72,21 +61,15 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
     private var pointProgram: PointSeries3DShaderProgram.PointProgram? = null
 
     /**
-     * Replaces the active series collection after filtering invalid numeric values.
+     * Replaces the active cloud dataset after filtering invalid numeric values.
      */
-    fun setSeries(series: List<PointLine3DSeries>) {
+    fun setData(points: List<PointCloud3DDatum>) {
         synchronized(lock) {
-            data = series.mapNotNull { entry ->
-                val filteredPoints = entry.points.filter { datum ->
-                    datum.x.isFinite() &&
-                        datum.y.isFinite() &&
-                        datum.z.isFinite()
-                }
-                if (filteredPoints.isEmpty()) {
-                    null
-                } else {
-                    entry.copy(points = filteredPoints)
-                }
+            data = points.filter { datum ->
+                datum.x.isFinite() &&
+                    datum.y.isFinite() &&
+                    datum.z.isFinite() &&
+                    datum.size.isFinite()
             }
             rebuildSceneLocked()
         }
@@ -102,18 +85,19 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
     }
 
     /**
-     * Applies scene colors, line visibility, and point marker styling.
+     * Applies scene colors and point-size styling.
      */
-    fun setPresentationOptions(options: PointLine3DPresentationOptions) {
+    fun setPresentationOptions(options: PointCloud3DPresentationOptions) {
         synchronized(lock) {
             presentationOptions = options
+            rebuildSceneLocked()
         }
     }
 
     /**
-     * Overrides automatic X/Y/Z domain resolution.
+     * Overrides automatic X/Y/Z/size domain resolution.
      */
-    fun setScaleOverride(override: PointLine3DScaleOverride?) {
+    fun setScaleOverride(override: PointCloud3DScaleOverride?) {
         synchronized(lock) {
             scaleOverride = override
             rebuildSceneLocked()
@@ -168,48 +152,46 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
     }
 
     /**
-     * Resolves the nearest tapped point using screen-space distance.
+     * Resolves the nearest tapped cloud point using screen-space distance.
      */
-    fun pickPoint(screenX: Float, screenY: Float): Selection? {
+    fun pickPoint(screenX: Float, screenY: Float): PointCloud3DDatum? {
         synchronized(lock) {
-            if (sceneSeries.isEmpty() || viewportWidth <= 0 || viewportHeight <= 0) return null
+            if (scenePoints.isEmpty() || viewportWidth <= 0 || viewportHeight <= 0) return null
 
             val viewProjectionMatrix = PointSeries3DMath.buildViewProjectionMatrix(
                 camera = cameraOptions.toOrbitCamera(),
                 aspectRatio = viewportWidth.toFloat() / viewportHeight.toFloat(),
             )
-            val hitRadiusPx = (presentationOptions.pointSize * presentationOptions.selectedPointScale).coerceAtLeast(16f)
 
-            var bestSelection: Selection? = null
-            var bestSelectionKey: SelectedPoint? = null
+            var bestDatum: PointCloud3DDatum? = null
+            var bestSelection: SelectedPoint? = null
             var bestDistance = Float.MAX_VALUE
             var bestDepth = Float.MAX_VALUE
 
-            sceneSeries.forEachIndexed { seriesIndex, sceneSeries ->
-                sceneSeries.points.forEachIndexed { pointIndex, point ->
-                    val projected = PointSeries3DMath.projectWorldToScreen(
-                        x = point.x,
-                        y = point.y,
-                        z = point.z,
-                        viewProjectionMatrix = viewProjectionMatrix,
-                        viewportWidth = viewportWidth,
-                        viewportHeight = viewportHeight,
-                    ) ?: return@forEachIndexed
+            scenePoints.forEachIndexed { pointIndex, point ->
+                val projected = PointSeries3DMath.projectWorldToScreen(
+                    x = point.x,
+                    y = point.y,
+                    z = point.z,
+                    viewProjectionMatrix = viewProjectionMatrix,
+                    viewportWidth = viewportWidth,
+                    viewportHeight = viewportHeight,
+                ) ?: return@forEachIndexed
 
-                    val dx = projected.x - screenX
-                    val dy = projected.y - screenY
-                    val distance = kotlin.math.sqrt((dx * dx) + (dy * dy))
-                    if (distance <= hitRadiusPx && (distance < bestDistance || (distance == bestDistance && projected.depth < bestDepth))) {
-                        bestDistance = distance
-                        bestDepth = projected.depth
-                        bestSelection = Selection(sceneSeries.series, point.datum)
-                        bestSelectionKey = SelectedPoint(seriesIndex = seriesIndex, pointIndex = pointIndex)
-                    }
+                val hitRadiusPx = (point.pointSize * presentationOptions.selectedPointScale * 0.75f).coerceAtLeast(10f)
+                val dx = projected.x - screenX
+                val dy = projected.y - screenY
+                val distance = kotlin.math.sqrt((dx * dx) + (dy * dy))
+                if (distance <= hitRadiusPx && (distance < bestDistance || (distance == bestDistance && projected.depth < bestDepth))) {
+                    bestDistance = distance
+                    bestDepth = projected.depth
+                    bestDatum = point.datum
+                    bestSelection = SelectedPoint(pointIndex = pointIndex)
                 }
             }
 
-            selectedPoint = bestSelectionKey
-            return bestSelection
+            selectedPoint = bestSelection
+            return bestDatum
         }
     }
 
@@ -240,7 +222,7 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
     override fun onDrawFrame(gl: GL10?) {
         val snapshot = synchronized(lock) {
             RenderSnapshot(
-                series = sceneSeries,
+                points = scenePoints,
                 axisOptions = axisOptions,
                 cameraOptions = cameraOptions,
                 presentationOptions = presentationOptions,
@@ -265,8 +247,7 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
         )
 
         drawGuides(snapshot, viewProjectionMatrix)
-        drawSeriesLines(snapshot, viewProjectionMatrix)
-        drawPointMarkers(snapshot, viewProjectionMatrix)
+        drawCloudPoints(snapshot, viewProjectionMatrix)
     }
 
     private fun drawGuides(
@@ -358,55 +339,79 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
         )
     }
 
-    private fun drawSeriesLines(
-        snapshot: RenderSnapshot,
-        viewProjectionMatrix: FloatArray,
-    ) {
-        val program = lineProgram ?: return
-        if (!snapshot.presentationOptions.showLines) return
-
-        GLES20.glUseProgram(program.programId)
-        GLES20.glUniformMatrix4fv(program.mvpMatrixHandle, 1, false, viewProjectionMatrix, 0)
-        snapshot.series.forEach { series ->
-            if (series.lineVertices.size < 6) return@forEach
-            val lineWidth = (snapshot.presentationOptions.lineWidth * (series.series.lineWidthPx / 3f)).coerceAtLeast(1f)
-            drawLines(
-                program = program,
-                vertices = series.lineVertices,
-                color = series.series.lineColor,
-                lineWidth = lineWidth,
-                alpha = snapshot.presentationOptions.lineAlpha.coerceIn(0f, 1f),
-                mode = GLES20.GL_LINE_STRIP,
-            )
-        }
-    }
-
-    private fun drawPointMarkers(
+    private fun drawCloudPoints(
         snapshot: RenderSnapshot,
         viewProjectionMatrix: FloatArray,
     ) {
         val program = pointProgram ?: return
-        if (!snapshot.presentationOptions.showPointMarkers) return
+        if (snapshot.points.isEmpty()) return
+
+        val pointVertices = FloatArray(snapshot.points.size * 3)
+        val pointColors = FloatArray(snapshot.points.size * 4)
+        val pointSizes = FloatArray(snapshot.points.size)
+
+        snapshot.points.forEachIndexed { index, point ->
+            val selected = snapshot.selectedPoint?.pointIndex == index
+            val vertexOffset = index * 3
+            pointVertices[vertexOffset] = point.x
+            pointVertices[vertexOffset + 1] = point.y
+            pointVertices[vertexOffset + 2] = point.z
+
+            val color = if (selected) brightenColor(point.color) else point.color
+            val colorOffset = index * 4
+            pointColors[colorOffset] = Color.red(color) / 255f
+            pointColors[colorOffset + 1] = Color.green(color) / 255f
+            pointColors[colorOffset + 2] = Color.blue(color) / 255f
+            pointColors[colorOffset + 3] = (Color.alpha(color) / 255f) * snapshot.presentationOptions.pointAlpha.coerceIn(0f, 1f)
+            pointSizes[index] = if (selected) {
+                point.pointSize * snapshot.presentationOptions.selectedPointScale
+            } else {
+                point.pointSize
+            }
+        }
+
+        val positionBuffer = pointVertices.toFloatBuffer()
+        val colorBuffer = pointColors.toFloatBuffer()
+        val sizeBuffer = pointSizes.toFloatBuffer()
 
         GLES20.glUseProgram(program.programId)
         GLES20.glUniformMatrix4fv(program.mvpMatrixHandle, 1, false, viewProjectionMatrix, 0)
 
-        snapshot.series.forEachIndexed { seriesIndex, sceneSeries ->
-            sceneSeries.points.forEachIndexed { pointIndex, point ->
-                val selected = snapshot.selectedPoint?.seriesIndex == seriesIndex &&
-                    snapshot.selectedPoint.pointIndex == pointIndex
-                val pointSize = snapshot.presentationOptions.pointSize *
-                    sceneSeries.series.pointRadiusScale *
-                    if (selected) snapshot.presentationOptions.selectedPointScale else 1f
-                drawPoints(
-                    program = program,
-                    vertices = floatArrayOf(point.x, point.y, point.z),
-                    color = if (selected) brightenColor(point.color) else point.color,
-                    pointSize = pointSize,
-                    alpha = snapshot.presentationOptions.pointAlpha.coerceIn(0f, 1f),
-                )
-            }
-        }
+        GLES20.glVertexAttribPointer(
+            program.positionHandle,
+            3,
+            GLES20.GL_FLOAT,
+            false,
+            0,
+            positionBuffer,
+        )
+        GLES20.glEnableVertexAttribArray(program.positionHandle)
+
+        GLES20.glVertexAttribPointer(
+            program.colorHandle,
+            4,
+            GLES20.GL_FLOAT,
+            false,
+            0,
+            colorBuffer,
+        )
+        GLES20.glEnableVertexAttribArray(program.colorHandle)
+
+        GLES20.glVertexAttribPointer(
+            program.pointSizeHandle,
+            1,
+            GLES20.GL_FLOAT,
+            false,
+            0,
+            sizeBuffer,
+        )
+        GLES20.glEnableVertexAttribArray(program.pointSizeHandle)
+
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, snapshot.points.size)
+
+        GLES20.glDisableVertexAttribArray(program.positionHandle)
+        GLES20.glDisableVertexAttribArray(program.colorHandle)
+        GLES20.glDisableVertexAttribArray(program.pointSizeHandle)
     }
 
     private fun drawLines(
@@ -468,54 +473,6 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
         GLES20.glDisableVertexAttribArray(program.positionHandle)
     }
 
-    private fun drawPoints(
-        program: PointSeries3DShaderProgram.PointProgram,
-        vertices: FloatArray,
-        color: Int,
-        pointSize: Float,
-        alpha: Float,
-    ) {
-        val positionBuffer = vertices.toFloatBuffer()
-        val sizeBuffer = floatArrayOf(pointSize.coerceAtLeast(1f)).toFloatBuffer()
-        val colorBuffer = floatArrayOf(
-            Color.red(color) / 255f,
-            Color.green(color) / 255f,
-            Color.blue(color) / 255f,
-            alpha,
-        ).toFloatBuffer()
-        GLES20.glVertexAttribPointer(
-            program.positionHandle,
-            3,
-            GLES20.GL_FLOAT,
-            false,
-            0,
-            positionBuffer,
-        )
-        GLES20.glEnableVertexAttribArray(program.positionHandle)
-        GLES20.glVertexAttribPointer(
-            program.pointSizeHandle,
-            1,
-            GLES20.GL_FLOAT,
-            false,
-            0,
-            sizeBuffer,
-        )
-        GLES20.glEnableVertexAttribArray(program.pointSizeHandle)
-        GLES20.glVertexAttribPointer(
-            program.colorHandle,
-            4,
-            GLES20.GL_FLOAT,
-            false,
-            0,
-            colorBuffer,
-        )
-        GLES20.glEnableVertexAttribArray(program.colorHandle)
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, vertices.size / 3)
-        GLES20.glDisableVertexAttribArray(program.colorHandle)
-        GLES20.glDisableVertexAttribArray(program.pointSizeHandle)
-        GLES20.glDisableVertexAttribArray(program.positionHandle)
-    }
-
     private fun buildGridVertices(divisions: Int): FloatArray {
         val safeDivisions = divisions.coerceIn(2, 10)
         val vertices = ArrayList<Float>((safeDivisions + 1) * 24)
@@ -565,39 +522,36 @@ internal class PointLine3DRenderer : GLSurfaceView.Renderer {
     }
 
     private fun rebuildSceneLocked() {
-        val flattened = data.flatMap { it.points }
-        if (flattened.isEmpty()) {
-            sceneSeries = emptyList()
+        if (data.isEmpty()) {
+            scenePoints = emptyList()
             selectedPoint = null
             return
         }
 
         val override = scaleOverride
-        val xRange = PointSeries3DMath.resolveRange(flattened.map { it.x }, override?.xMin, override?.xMax)
-        val yRange = PointSeries3DMath.resolveRange(flattened.map { it.y }, override?.yMin, override?.yMax)
-        val zRange = PointSeries3DMath.resolveRange(flattened.map { it.z }, override?.zMin, override?.zMax)
+        val xRange = PointSeries3DMath.resolveRange(data.map { it.x }, override?.xMin, override?.xMax)
+        val yRange = PointSeries3DMath.resolveRange(data.map { it.y }, override?.yMin, override?.yMax)
+        val zRange = PointSeries3DMath.resolveRange(data.map { it.z }, override?.zMin, override?.zMax)
+        val sizeRange = PointSeries3DMath.resolveRange(data.map { it.size }, override?.sizeMin, override?.sizeMax)
 
-        sceneSeries = data.map { series ->
-            val points = series.points.map { datum ->
-                ScenePoint(
-                    datum = datum,
-                    x = PointSeries3DMath.mapToWorld(datum.x, xRange),
-                    y = PointSeries3DMath.mapToWorld(datum.y, yRange),
-                    z = PointSeries3DMath.mapToWorld(datum.z, zRange),
-                    color = datum.color ?: series.pointColor,
-                )
-            }
-            SceneSeries(
-                series = series,
-                points = points,
-                lineVertices = points.flatMap { listOf(it.x, it.y, it.z) }.toFloatArray(),
+        scenePoints = data.map { datum ->
+            ScenePoint(
+                datum = datum,
+                x = PointSeries3DMath.mapToWorld(datum.x, xRange),
+                y = PointSeries3DMath.mapToWorld(datum.y, yRange),
+                z = PointSeries3DMath.mapToWorld(datum.z, zRange),
+                color = datum.color,
+                pointSize = PointSeries3DMath.mapToRange(
+                    value = datum.size,
+                    range = sizeRange,
+                    minValue = presentationOptions.minPointSize,
+                    maxValue = presentationOptions.maxPointSize,
+                ),
             )
         }
 
-        val currentSelection = selectedPoint
-        if (currentSelection != null) {
-            val series = sceneSeries.getOrNull(currentSelection.seriesIndex)
-            if (series == null || currentSelection.pointIndex !in series.points.indices) {
+        selectedPoint?.let { selection ->
+            if (selection.pointIndex !in scenePoints.indices) {
                 selectedPoint = null
             }
         }
