@@ -9,6 +9,8 @@ import com.magimon.eq.bar.BarSeries
 import com.magimon.eq.cycle.CycleLink
 import com.magimon.eq.cycle.CycleNode
 import com.magimon.eq.funnel.FunnelStage
+import com.magimon.eq.gantt.GanttDependency
+import com.magimon.eq.gantt.GanttTask
 import com.magimon.eq.gauge.GaugeRange
 import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.histogram.HistogramBin
@@ -233,6 +235,71 @@ object ChartSampleData {
                 color = Color.parseColor("#EF4444"),
                 payload = "Launch",
             ),
+        )
+    }
+
+    fun ganttTasks(): List<GanttTask> {
+        return listOf(
+            GanttTask(
+                id = "discovery",
+                label = "Discovery",
+                start = 0.0,
+                end = 2.0,
+                progress = 1f,
+                color = Color.parseColor("#2563EB"),
+                title = "Research complete",
+                payload = "Discovery",
+            ),
+            GanttTask(
+                id = "design",
+                label = "Design",
+                start = 1.0,
+                end = 4.0,
+                progress = 0.82f,
+                color = Color.parseColor("#14B8A6"),
+                title = "Flows and specs",
+                payload = "Design",
+            ),
+            GanttTask(
+                id = "platform",
+                label = "Platform",
+                start = 3.0,
+                end = 7.0,
+                progress = 0.58f,
+                color = Color.parseColor("#7C3AED"),
+                title = "Rendering and API",
+                payload = "Platform",
+            ),
+            GanttTask(
+                id = "qa",
+                label = "QA",
+                start = 6.0,
+                end = 8.0,
+                progress = 0.26f,
+                color = Color.parseColor("#F59E0B"),
+                title = "Regression pass",
+                payload = "QA",
+            ),
+            GanttTask(
+                id = "launch",
+                label = "Launch",
+                start = 9.0,
+                end = 9.0,
+                progress = 1f,
+                color = Color.parseColor("#EF4444"),
+                title = "GA milestone",
+                isMilestone = true,
+                payload = "Launch",
+            ),
+        )
+    }
+
+    fun ganttDependencies(): List<GanttDependency> {
+        return listOf(
+            GanttDependency("discovery", "design"),
+            GanttDependency("design", "platform"),
+            GanttDependency("platform", "qa"),
+            GanttDependency("qa", "launch"),
         )
     }
 
