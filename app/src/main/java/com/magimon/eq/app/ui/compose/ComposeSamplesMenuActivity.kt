@@ -24,6 +24,7 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
                 ChartMenuEntry("Area", R.drawable.ic_chart_area, Color.parseColor("#14B8A6"), ComposeAreaActivity::class.java),
                 ChartMenuEntry("Bar", R.drawable.ic_chart_bar, Color.parseColor("#F97316"), ComposeBarActivity::class.java),
                 ChartMenuEntry("Range Bar", R.drawable.ic_chart_bar, Color.parseColor("#0F766E"), ComposeRangeBarActivity::class.java),
+                ChartMenuEntry("Gantt", R.drawable.ic_chart_bar, Color.parseColor("#334155"), ComposeGanttActivity::class.java),
                 ChartMenuEntry("Histogram", R.drawable.ic_chart_histogram, Color.parseColor("#2563EB"), ComposeHistogramActivity::class.java),
                 ChartMenuEntry("Waterfall", R.drawable.ic_chart_waterfall, Color.parseColor("#0F766E"), ComposeWaterfallActivity::class.java),
                 ChartMenuEntry("Funnel", R.drawable.ic_chart_funnel, Color.parseColor("#DC2626"), ComposeFunnelActivity::class.java),
