@@ -6,6 +6,7 @@ import com.magimon.eq.heatmap.StockHeatmapHelper
 import com.magimon.eq.heatmap.StockHeatmapSection
 import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarSeries
+import com.magimon.eq.boxplot.BoxPlotEntry
 import com.magimon.eq.cycle.CycleLink
 import com.magimon.eq.cycle.CycleNode
 import com.magimon.eq.funnel.FunnelStage
@@ -234,6 +235,59 @@ object ChartSampleData {
                 end = 9.0,
                 color = Color.parseColor("#EF4444"),
                 payload = "Launch",
+            ),
+        )
+    }
+
+    fun boxPlotEntries(): List<BoxPlotEntry> {
+        return listOf(
+            BoxPlotEntry(
+                label = "API",
+                min = 92.0,
+                q1 = 118.0,
+                median = 142.0,
+                q3 = 181.0,
+                max = 226.0,
+                outliers = listOf(248.0),
+                color = Color.parseColor("#2563EB"),
+                title = "Median 142ms",
+                payload = "API",
+            ),
+            BoxPlotEntry(
+                label = "Worker",
+                min = 74.0,
+                q1 = 96.0,
+                median = 126.0,
+                q3 = 164.0,
+                max = 209.0,
+                outliers = listOf(58.0, 228.0),
+                color = Color.parseColor("#14B8A6"),
+                title = "Median 126ms",
+                payload = "Worker",
+            ),
+            BoxPlotEntry(
+                label = "Cache",
+                min = 38.0,
+                q1 = 51.0,
+                median = 63.0,
+                q3 = 79.0,
+                max = 101.0,
+                outliers = listOf(112.0),
+                color = Color.parseColor("#7C3AED"),
+                title = "Median 63ms",
+                payload = "Cache",
+            ),
+            BoxPlotEntry(
+                label = "Search",
+                min = 112.0,
+                q1 = 148.0,
+                median = 188.0,
+                q3 = 236.0,
+                max = 294.0,
+                outliers = listOf(324.0),
+                color = Color.parseColor("#F59E0B"),
+                title = "Median 188ms",
+                payload = "Search",
             ),
         )
     }

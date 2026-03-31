@@ -23,6 +23,7 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
                 ChartMenuEntry("Line", R.drawable.ic_chart_line, Color.parseColor("#2563EB"), ComposeLineActivity::class.java),
                 ChartMenuEntry("Area", R.drawable.ic_chart_area, Color.parseColor("#14B8A6"), ComposeAreaActivity::class.java),
                 ChartMenuEntry("Bar", R.drawable.ic_chart_bar, Color.parseColor("#F97316"), ComposeBarActivity::class.java),
+                ChartMenuEntry("Box Plot", R.drawable.ic_chart_boxplot, Color.parseColor("#2563EB"), ComposeBoxPlotActivity::class.java),
                 ChartMenuEntry("Range Bar", R.drawable.ic_chart_bar, Color.parseColor("#0F766E"), ComposeRangeBarActivity::class.java),
                 ChartMenuEntry("Gantt", R.drawable.ic_chart_bar, Color.parseColor("#334155"), ComposeGanttActivity::class.java),
                 ChartMenuEntry("Histogram", R.drawable.ic_chart_histogram, Color.parseColor("#2563EB"), ComposeHistogramActivity::class.java),

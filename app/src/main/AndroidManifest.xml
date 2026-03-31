@@ -53,6 +53,11 @@
             android:label="Bar Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.BoxPlotActivity"
+            android:exported="true"
+            android:label="Box Plot Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.RangeBarActivity"
             android:exported="true"
             android:label="Range Bar Timeline"
@@ -221,6 +226,11 @@
             android:name=".ui.compose.ComposeBarActivity"
             android:exported="true"
             android:label="Compose Bar"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeBoxPlotActivity"
+            android:exported="true"
+            android:label="Compose Box Plot"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeRangeBarActivity"
