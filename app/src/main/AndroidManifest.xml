@@ -33,6 +33,11 @@
             android:label="Compose Samples"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.TreemapActivity"
+            android:exported="true"
+            android:label="Treemap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.HeatmapActivity"
             android:exported="true"
             android:label="Stock Heatmap"
@@ -146,6 +151,11 @@
             android:name=".ui.android.StepFlowActivity"
             android:exported="true"
             android:label="Step Flow Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeTreemapActivity"
+            android:exported="true"
+            android:label="Compose Treemap"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeHeatmapActivity"

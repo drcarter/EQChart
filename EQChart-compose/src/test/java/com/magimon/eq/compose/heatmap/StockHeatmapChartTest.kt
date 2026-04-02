@@ -1,7 +1,6 @@
 package com.magimon.eq.compose.heatmap
 
 import android.graphics.Color
-import android.graphics.RectF
 import com.magimon.eq.heatmap.StockHeatmapItem
 import com.magimon.eq.heatmap.StockHeatmapSection
 import org.junit.Assert.assertEquals
@@ -48,23 +47,11 @@ class StockHeatmapChartTest {
     }
 
     @Test
-    fun heatmapHelpers_coverFormattingColorsAndSquarify() {
-        val squarified = heatmapLayoutSquarified(
-            items = listOf(
-                HeatmapWeightedItem("A", 3f),
-                HeatmapWeightedItem("B", 2f),
-            ),
-            bounds = RectF(0f, 0f, 100f, 60f),
-        )
-
+    fun heatmapHelpers_coverFormattingColorsAndWeightMapping() {
         assertEquals("+1.25%", heatmapFormatChange(1.25))
         assertTrue(heatmapItemWeight(tech.stocks.first()) > 0f)
-        assertTrue(heatmapWorstAspectRatio(listOf(HeatmapWeightedItem("A", 4f)), 10f) > 0f)
-        assertEquals(128, heatmapWithAlpha(0xFF0000FF.toInt(), 128).ushr(24) and 0xFF)
         assertTrue(heatmapMapSectorToColor("Tech") != 0)
         assertTrue(heatmapMapChangeToColor(5.0) != heatmapMapChangeToColor(-5.0))
-        assertTrue(heatmapInterpolateColor(0xFF000000.toInt(), 0xFFFFFFFF.toInt(), 0.5f) != 0)
-        assertEquals(2, squarified.size)
     }
 
     @Test

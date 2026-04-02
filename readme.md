@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is a modern Android chart library for expressive 2D and 3D visualizations.
-It is designed for easy integration across both Android View and Compose, and currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
+It is designed for easy integration across both Android View and Compose, and currently provides `Treemap`, `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
 
 ## Project Structure
 
@@ -20,6 +20,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 
 ## Supported Charts
 
+- Treemap: General-purpose grouped treemap with deterministic color fallback and optional second-line labels
 - Heatmap: Section-based treemap-style stock heatmap
 - Bubble: Scatter / Packed bubble chart
 - Line: Multi-series Cartesian line chart with grid / legend / point selection
@@ -46,7 +47,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 
 ## Chart Families
 
-- Tiled: Heatmap
+- Tiled: Treemap, Heatmap
 - Axis-based: Bubble, Line, Area, Bar, Box Plot, Range Bar, Gantt, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
 - Hierarchical radial: Sunburst
@@ -224,6 +225,7 @@ PieChart(
 ```
 
 Compose module exports:
+- `TreemapChart(...)`
 - `StockHeatmapChart(...)`
 - `BubbleChart(...)`
 - `LineChart(...)`, `AreaChart(...)`
@@ -245,7 +247,48 @@ Compose module exports:
 
 ## Usage by Chart
 
-### 1) Heatmap
+### 1) Treemap
+
+Key classes:
+- `TreemapChartView`
+- `TreemapGroup`
+- `TreemapItem`
+
+Basic example:
+
+```kotlin
+val treemapView = TreemapChartView(this).apply {
+    setGroups(
+        listOf(
+            TreemapGroup(
+                label = "Growth",
+                color = Color.parseColor("#2563EB"),
+                items = listOf(
+                    TreemapItem("Paid", 180.0, supportingText = "42%"),
+                    TreemapItem("Organic", 150.0, supportingText = "35%"),
+                ),
+            ),
+            TreemapGroup(
+                label = "Ops",
+                items = listOf(
+                    TreemapItem("Support", 120.0),
+                    TreemapItem("Logistics", 100.0),
+                ),
+            ),
+        ),
+    )
+
+    setOnItemClickListener { item ->
+        // use item.label, item.value, item.supportingText
+    }
+}
+```
+
+Notes:
+- Single-group input renders as a flat treemap without headers
+- When `item.color` is absent, the chart resolves a stable color from the group or fallback palette
+
+### 2) Heatmap
 
 Key classes:
 - `StockHeatmapView`
@@ -278,10 +321,11 @@ setContentView(ScrollView(this).apply { addView(heatmapView) })
 ```
 
 Notes:
+- `StockHeatmap` is the stock-specific preset built on top of the generic treemap renderer
 - `setData(List<StockHeatmapItem>)` is also supported (backward compatible)
 - If `sizeRatio` exists, it is used first for area weighting
 
-### 2) Bubble
+### 3) Bubble
 
 Key classes:
 - `BubbleChartView`
@@ -327,7 +371,7 @@ val bubbleView = BubbleChartView(this).apply {
 setContentView(bubbleView)
 ```
 
-### 3) Line / Area
+### 4) Line / Area
 
 Key classes:
 - `LineChartView`, `AreaChartView`
@@ -399,7 +443,7 @@ Notes:
 - `AreaChartView` is the filled variant that reuses the same `LineSeries` / `LineDatum` model
 - Only finite `(x, y)` points are rendered
 
-### 4) Bar
+### 5) Bar
 
 Key classes:
 - `BarChartView`
@@ -452,7 +496,7 @@ Notes:
 - Categories are resolved from the union of `BarDatum.category` values across all series
 - `layoutMode` supports `GROUPED` and `STACKED`; `orientation` supports `VERTICAL` and `HORIZONTAL`
 
-### 5) PCM Waveform
+### 6) PCM Waveform
 
 Key classes:
 - `PcmWaveFormView`
@@ -482,7 +526,7 @@ Notes:
 - Input data type is `ShortArray` (16-bit mono PCM)
 - Internally keeps only a recent N-ms window
 
-### 6) Radar
+### 7) Radar
 
 Key classes:
 - `RadarChartView`
@@ -531,7 +575,7 @@ setContentView(radarView)
 Note:
 - Each `RadarSeries.values` size must match axis count to render.
 
-### 7) Pie / Donut
+### 8) Pie / Donut
 
 Key classes:
 - `PieChartView`, `DonutChartView`
@@ -583,7 +627,7 @@ Notes:
 - If valid total is 0, `emptyText` is shown
 - Selection explode effect is controlled by `enableSelectionExpand`, `selectedSliceExpandDp`, and `selectedSliceExpandAnimMs`
 
-### 8) Gauge
+### 9) Gauge
 
 Key classes:
 - `GaugeChartView`
@@ -627,7 +671,7 @@ Notes:
 - Invalid ranges (`end <= start`, NaN, infinite) are ignored
 - Compose uses `GaugeChart(...)` with the same shared models/options
 
-### 9) Sankey
+### 10) Sankey
 
 Key classes:
 - `SankeyChartView`
@@ -676,7 +720,7 @@ Notes:
 - Cycles or backward stage assignments fall back to `emptyText`
 - Compose uses `SankeyChart(...)` with the same shared models/options
 
-### 10) Cycle
+### 11) Cycle
 
 Key classes:
 - `CycleChartView`
@@ -738,7 +782,7 @@ Notes:
 - `CycleChartPresentationOptions.startAngleDeg` and `clockwise` control ring ordering
 - Compose uses `CycleChart(...)` with the same shared models/options
 
-### 11) Step Flow
+### 12) Step Flow
 
 Key classes:
 - `StepFlowChartView`
@@ -791,7 +835,7 @@ Notes:
 - Compose uses `StepFlowChart(hubContent = ..., steps = ...)` with the same shared models/options
 - This chart is diagram-oriented and does not use axis or free-form graph links
 
-### 12) Sunburst
+### 13) Sunburst
 
 Key classes:
 - `SunburstChartView`
