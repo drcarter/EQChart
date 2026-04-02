@@ -15,7 +15,8 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
 
         val container = createChartMenuGrid(
             entries = listOf(
-                ChartMenuEntry("Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#0EA5E9"), ComposeHeatmapActivity::class.java),
+                ChartMenuEntry("Treemap", R.drawable.ic_chart_heatmap, Color.parseColor("#0EA5E9"), ComposeTreemapActivity::class.java),
+                ChartMenuEntry("Stock Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#0284C7"), ComposeHeatmapActivity::class.java),
                 ChartMenuEntry("Bubble", R.drawable.ic_chart_bubble, Color.parseColor("#EC4899"), ComposeBubbleActivity::class.java),
                 ChartMenuEntry("Bubble 3D", R.drawable.ic_chart_bubble, Color.parseColor("#7C3AED"), ComposeBubble3DActivity::class.java),
                 ChartMenuEntry("Point Line 3D", R.drawable.ic_chart_line, Color.parseColor("#0EA5E9"), ComposePointLine3DActivity::class.java),

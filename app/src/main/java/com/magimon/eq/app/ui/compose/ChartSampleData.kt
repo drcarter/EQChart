@@ -26,15 +26,47 @@ import com.magimon.eq.sankey.SankeyNode
 import com.magimon.eq.sunburst.SunburstNode
 import com.magimon.eq.stepflow.StepFlowHubContent
 import com.magimon.eq.stepflow.StepFlowStep
+import com.magimon.eq.treemap.TreemapGroup
+import com.magimon.eq.treemap.TreemapItem
 import com.magimon.eq.waterfall.WaterfallEntry
 import com.magimon.eq.waterfall.WaterfallEntryKind
-import kotlin.random.Random
 import kotlin.math.PI
 import kotlin.math.sin
+import kotlin.random.Random
 
 object ChartSampleData {
 
     fun heatmapSections(): List<StockHeatmapSection> = StockHeatmapHelper.createSampleSections()
+
+    fun treemapGroups(): List<TreemapGroup> {
+        return listOf(
+            TreemapGroup(
+                label = "Growth",
+                color = Color.parseColor("#2563EB"),
+                items = listOf(
+                    TreemapItem("Paid", 180.0, supportingText = "42%"),
+                    TreemapItem("Organic", 150.0, supportingText = "35%"),
+                    TreemapItem("Referral", 90.0, supportingText = "21%"),
+                ),
+            ),
+            TreemapGroup(
+                label = "Product",
+                color = Color.parseColor("#14B8A6"),
+                items = listOf(
+                    TreemapItem("Subscriptions", 240.0, supportingText = "MRR"),
+                    TreemapItem("Services", 120.0, supportingText = "Upsell"),
+                ),
+            ),
+            TreemapGroup(
+                label = "Ops",
+                color = Color.parseColor("#F97316"),
+                items = listOf(
+                    TreemapItem("Support", 120.0, supportingText = "SLA"),
+                    TreemapItem("Logistics", 100.0),
+                ),
+            ),
+        )
+    }
 
     fun bubbleData(): List<BubbleDatum> {
         return listOf(
