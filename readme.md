@@ -62,7 +62,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 - Compile / Target SDK: 36
 - Kotlin: 2.2.0
 - AGP: 8.11.1
-- Java / JVM Target: 11
+- Java / JVM Target: 17
 
 ## Versioning
 
