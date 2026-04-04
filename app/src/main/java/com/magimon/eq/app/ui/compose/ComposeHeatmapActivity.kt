@@ -27,7 +27,7 @@ private fun ComposeHeatmapSampleScreen() {
     val context = LocalContext.current
     val sections = remember { ChartSampleData.heatmapSections() }
 
-    ComposeSamplePage(title = "Compose Heatmap") {
+    ComposeSamplePage(title = "Compose Stock Heatmap") {
         StockHeatmapChart(
             sections = sections,
             onItemClick = { item ->

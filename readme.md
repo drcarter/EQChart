@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is a modern Android chart library for expressive 2D and 3D visualizations.
-It is designed for easy integration across both Android View and Compose, and currently provides `Treemap`, `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
+It is designed for easy integration across both Android View and Compose, and currently provides `Treemap`, `Stock Heatmap`, `Matrix Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
 
 ## Project Structure
 
@@ -21,7 +21,8 @@ It is designed for easy integration across both Android View and Compose, and cu
 ## Supported Charts
 
 - Treemap: General-purpose grouped treemap with deterministic color fallback and optional second-line labels
-- Heatmap: Section-based treemap-style stock heatmap
+- Stock Heatmap: Section-based treemap-style stock heatmap
+- Matrix Heatmap: Categorical X/Y grid heatmap with sparse cells, click callbacks, and optional cell text
 - Bubble: Scatter / Packed bubble chart
 - Line: Multi-series Cartesian line chart with grid / legend / point selection
 - Area: Filled line chart variant for trend comparison
@@ -47,7 +48,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 
 ## Chart Families
 
-- Tiled: Treemap, Heatmap
+- Tiled: Treemap, Stock Heatmap, Matrix Heatmap
 - Axis-based: Bubble, Line, Area, Bar, Box Plot, Range Bar, Gantt, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
 - Hierarchical radial: Sunburst
@@ -227,6 +228,7 @@ PieChart(
 Compose module exports:
 - `TreemapChart(...)`
 - `StockHeatmapChart(...)`
+- `MatrixHeatmapChart(...)`
 - `BubbleChart(...)`
 - `LineChart(...)`, `AreaChart(...)`
 - `BarChart(...)`
@@ -288,7 +290,7 @@ Notes:
 - Single-group input renders as a flat treemap without headers
 - When `item.color` is absent, the chart resolves a stable color from the group or fallback palette
 
-### 2) Heatmap
+### 2) Stock Heatmap
 
 Key classes:
 - `StockHeatmapView`
@@ -324,6 +326,40 @@ Notes:
 - `StockHeatmap` is the stock-specific preset built on top of the generic treemap renderer
 - `setData(List<StockHeatmapItem>)` is also supported (backward compatible)
 - If `sizeRatio` exists, it is used first for area weighting
+
+### 2a) Matrix Heatmap
+
+Key classes:
+- `MatrixHeatmapChartView`
+- `MatrixHeatmapData`
+- `MatrixHeatmapCell`
+
+Basic example:
+
+```kotlin
+val matrixView = MatrixHeatmapChartView(this).apply {
+    setData(
+        MatrixHeatmapData(
+            xLabels = listOf("Mon", "Tue", "Wed"),
+            yLabels = listOf("AM", "PM"),
+            cells = listOf(
+                MatrixHeatmapCell("Mon", "AM", 0.82),
+                MatrixHeatmapCell("Tue", "AM", -0.34),
+                MatrixHeatmapCell("Wed", "PM", 0.57, label = "57%"),
+            ),
+        ),
+    )
+
+    setOnCellClickListener { cell ->
+        // use cell.xKey, cell.yKey, cell.value, cell.payload
+    }
+}
+```
+
+Notes:
+- `xLabels` and `yLabels` define both display order and valid cell keys
+- Missing intersections render as empty cells and do not dispatch click callbacks
+- Duplicate `(xKey, yKey)` entries keep the last cell value
 
 ### 3) Bubble
 

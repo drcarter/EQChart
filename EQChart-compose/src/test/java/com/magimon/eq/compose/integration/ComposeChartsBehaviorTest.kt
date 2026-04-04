@@ -21,6 +21,7 @@ import com.magimon.eq.compose.gauge.GaugeChart
 import com.magimon.eq.compose.heatmap.StockHeatmapChart
 import com.magimon.eq.compose.histogram.HistogramChart
 import com.magimon.eq.compose.line.LineChart
+import com.magimon.eq.compose.matrixheatmap.MatrixHeatmapChart
 import com.magimon.eq.compose.pie.PieChart
 import com.magimon.eq.compose.pie.buildPieSegments
 import com.magimon.eq.compose.pie.computePieChartGeometry
@@ -50,6 +51,8 @@ import com.magimon.eq.histogram.HistogramChartPresentationOptions
 import com.magimon.eq.line.LineChartPresentationOptions
 import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
+import com.magimon.eq.matrixheatmap.MatrixHeatmapCell
+import com.magimon.eq.matrixheatmap.MatrixHeatmapData
 import com.magimon.eq.pie.PieDonutPresentationOptions
 import com.magimon.eq.pie.PieSlice
 import com.magimon.eq.radar.RadarAxis
@@ -534,6 +537,48 @@ class ComposeChartsBehaviorTest {
         composeRule.waitForIdle()
 
         assertNotNull(clicked)
+    }
+
+    @Test
+    fun matrixHeatmapChart_dispatchesClickForComputedCell() {
+        val data = MatrixHeatmapData(
+            xLabels = listOf("Mon", "Tue"),
+            yLabels = listOf("AM", "PM"),
+            cells = listOf(
+                MatrixHeatmapCell("Mon", "AM", 2.0, payload = "mon-am"),
+                MatrixHeatmapCell("Tue", "PM", -1.0, payload = "tue-pm"),
+            ),
+        )
+        val computed = invokePrivateTopLevel(
+            "com.magimon.eq.compose.matrixheatmap.MatrixHeatmapChartKt",
+            "computeMatrixHeatmapLayout",
+            360f,
+            260f,
+            data,
+            com.magimon.eq.matrixheatmap.MatrixHeatmapChartStyleOptions(),
+            com.magimon.eq.matrixheatmap.MatrixHeatmapChartPresentationOptions(),
+            1f,
+            1f,
+        ) ?: error("Expected computed matrix heatmap")
+        val cell = computed.readField<List<Any>>("cellLayouts").first()
+        val rect = cell.readField<com.magimon.eq.matrixheatmap.MatrixHeatmapRect>("rect")
+        val tap = Offset(rect.left + rect.width * 0.5f, rect.top + rect.height * 0.5f)
+
+        var clicked: MatrixHeatmapCell? = null
+        composeRule.setContent {
+            MatrixHeatmapChart(
+                data = data,
+                modifier = Modifier.size(360.dp, 260.dp),
+                onCellClick = { clicked = it },
+            )
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onRoot().performTouchInput { click(tap) }
+        composeRule.waitForIdle()
+
+        assertNotNull(clicked)
+        assertEquals("mon-am", clicked?.payload)
     }
 
     @Test
