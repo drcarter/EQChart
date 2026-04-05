@@ -232,6 +232,7 @@ Compose module exports:
 - `TreemapChart(...)`
 - `StockHeatmapChart(...)`
 - `MatrixHeatmapChart(...)`
+- `CalendarHeatmapChart(...)`
 - `BubbleChart(...)`
 - `LineChart(...)`, `AreaChart(...)`
 - `BarChart(...)`
@@ -250,6 +251,9 @@ Compose module exports:
 - `SankeyChart(...)`
 - `CycleChart(...)`
 - `StepFlowChart(...)`
+- `Bubble3DChart(...)`
+- `PointLine3DChart(...)`
+- `PointCloud3DChart(...)`
 
 ## Usage by Chart
 
