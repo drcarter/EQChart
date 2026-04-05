@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.click
@@ -29,6 +30,7 @@ import com.magimon.eq.compose.radar.RadarChart
 import com.magimon.eq.compose.sankey.SankeyChart
 import com.magimon.eq.compose.sankey.computeSankeyLayout
 import com.magimon.eq.compose.sankey.sankeyLinkCenterPoint
+import com.magimon.eq.compose.violin.ViolinPlotChart
 import com.magimon.eq.compose.waveform.PcmWaveformChart
 import com.magimon.eq.compose.waterfall.WaterfallChart
 import com.magimon.eq.compose.waveform.rememberPcmWaveformController
@@ -62,6 +64,8 @@ import com.magimon.eq.sankey.SankeyChartPresentationOptions
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
 import com.magimon.eq.funnel.FunnelStage
+import com.magimon.eq.violin.ViolinPlotChartPresentationOptions
+import com.magimon.eq.violin.ViolinPlotSeries
 import com.magimon.eq.waterfall.WaterfallChartPresentationOptions
 import com.magimon.eq.waterfall.WaterfallEntry
 import com.magimon.eq.waterfall.WaterfallEntryKind
@@ -188,6 +192,51 @@ class ComposeChartsBehaviorTest {
         assertEquals("a", clickedPayload)
         assertEquals(null, clickedLabel)
         assertEquals(null, clickedColor)
+    }
+
+    @Test
+    fun violinPlotChart_dispatchesClickForComputedSeries() {
+        val series = listOf(
+            ViolinPlotSeries("API", listOf(10.0, 12.0, 16.0, 22.0), payload = "api"),
+            ViolinPlotSeries("Worker", listOf(8.0, 9.0, 11.0, 14.0), payload = "worker"),
+        )
+        val options = ViolinPlotChartPresentationOptions(
+            animateOnDataChange = false,
+        )
+        val computed = invokePrivateTopLevel(
+            "com.magimon.eq.compose.violin.ViolinPlotChartKt",
+            "computeViolinPlotLayout",
+            360f,
+            240f,
+            series,
+            com.magimon.eq.violin.ViolinPlotChartStyleOptions(),
+            options,
+            1f,
+            1f,
+            1f,
+        ) ?: error("Expected computed violin plot")
+        val entry = computed.readField<List<Any>>("entries")[1]
+        val rect = entry.readField<Rect>("touchRect")
+        val tap = Offset(
+            (rect.left + rect.right) * 0.5f,
+            (rect.top + rect.bottom) * 0.5f,
+        )
+
+        var clickedPayload: Any? = null
+        composeRule.setContent {
+            ViolinPlotChart(
+                series = series,
+                modifier = Modifier.size(360.dp, 240.dp),
+                presentationOptions = options,
+                onSeriesClick = { _, clickedSeries -> clickedPayload = clickedSeries.payload },
+            )
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onRoot().performTouchInput { click(tap) }
+        composeRule.waitForIdle()
+
+        assertEquals("worker", clickedPayload)
     }
 
     @Test
