@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is a modern Android chart library for expressive 2D and 3D visualizations.
-It is designed for easy integration across both Android View and Compose, and currently provides `Treemap`, `Stock Heatmap`, `Matrix Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
+It is designed for easy integration across both Android View and Compose, and currently provides `Treemap`, `Stock Heatmap`, `Matrix Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Violin Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
 
 ## Project Structure
 
@@ -28,6 +28,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 - Area: Filled line chart variant for trend comparison
 - Bar: Grouped / stacked bar chart with vertical / horizontal orientation
 - Box Plot: Quartile spread chart with whiskers, median line, and outlier points
+- Violin Plot: Distribution chart with KDE-based mirrored density, quartile band, and median line
 - Range Bar: Horizontal start/end interval chart suitable for roadmap and timeline views
 - Gantt: Project timeline chart with task progress, milestones, and dependency links
 - Histogram: Ordered bucket chart for count / frequency distribution
@@ -49,7 +50,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 ## Chart Families
 
 - Tiled: Treemap, Stock Heatmap, Matrix Heatmap
-- Axis-based: Bubble, Line, Area, Bar, Box Plot, Range Bar, Gantt, Histogram, Waterfall, Funnel
+- Axis-based: Bubble, Line, Area, Bar, Box Plot, Violin Plot, Range Bar, Gantt, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
 - Hierarchical radial: Sunburst
 - Flow: Sankey, Cycle, Step Flow
@@ -233,6 +234,7 @@ Compose module exports:
 - `LineChart(...)`, `AreaChart(...)`
 - `BarChart(...)`
 - `BoxPlotChart(...)`
+- `ViolinPlotChart(...)`
 - `RangeBarChart(...)`
 - `GanttChart(...)`
 - `HistogramChart(...)`
@@ -531,6 +533,52 @@ val barChart = BarChartView(this).apply {
 Notes:
 - Categories are resolved from the union of `BarDatum.category` values across all series
 - `layoutMode` supports `GROUPED` and `STACKED`; `orientation` supports `VERTICAL` and `HORIZONTAL`
+
+### 5a) Violin Plot
+
+Key classes:
+- `ViolinPlotChartView`
+- `ViolinPlotSeries`
+- `ViolinPlotChartStyleOptions`, `ViolinPlotChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val violinChart = ViolinPlotChartView(this).apply {
+    setPresentationOptions(
+        ViolinPlotChartPresentationOptions(
+            showGrid = true,
+            showAxes = true,
+            showValueLabels = true,
+            yLabelFormatter = { value -> "${value.toInt()}ms" },
+        ),
+    )
+
+    setSeries(
+        listOf(
+            ViolinPlotSeries(
+                label = "API",
+                samples = listOf(82.0, 88.0, 90.0, 96.0, 104.0, 118.0, 138.0),
+                payload = "api",
+            ),
+            ViolinPlotSeries(
+                label = "Worker",
+                samples = listOf(58.0, 63.0, 70.0, 77.0, 86.0, 98.0, 124.0),
+                payload = "worker",
+            ),
+        ),
+    )
+
+    setOnSeriesClickListener { _, series ->
+        // use series.label, series.samples, series.payload
+    }
+}
+```
+
+Notes:
+- Raw finite samples are sanitized and converted into a KDE-based mirrored density shape
+- Flat or tiny sample sets fall back to a narrow symmetric violin centered on the median
+- v1 supports vertical categorical violins only
 
 ### 6) PCM Waveform
 

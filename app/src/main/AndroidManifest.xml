@@ -68,6 +68,11 @@
             android:label="Box Plot Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.ViolinPlotActivity"
+            android:exported="true"
+            android:label="Violin Plot Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.RangeBarActivity"
             android:exported="true"
             android:label="Range Bar Timeline"
@@ -251,6 +256,11 @@
             android:name=".ui.compose.ComposeBoxPlotActivity"
             android:exported="true"
             android:label="Compose Box Plot"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeViolinPlotActivity"
+            android:exported="true"
+            android:label="Compose Violin Plot"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeRangeBarActivity"
