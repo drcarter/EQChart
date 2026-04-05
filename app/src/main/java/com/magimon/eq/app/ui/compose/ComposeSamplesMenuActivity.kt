@@ -18,6 +18,7 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
                 ChartMenuEntry("Treemap", R.drawable.ic_chart_heatmap, Color.parseColor("#0EA5E9"), ComposeTreemapActivity::class.java),
                 ChartMenuEntry("Stock Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#0284C7"), ComposeHeatmapActivity::class.java),
                 ChartMenuEntry("Matrix Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#0F766E"), ComposeMatrixHeatmapActivity::class.java),
+                ChartMenuEntry("Calendar Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#15803D"), ComposeCalendarHeatmapActivity::class.java),
                 ChartMenuEntry("Bubble", R.drawable.ic_chart_bubble, Color.parseColor("#EC4899"), ComposeBubbleActivity::class.java),
                 ChartMenuEntry("Bubble 3D", R.drawable.ic_chart_bubble, Color.parseColor("#7C3AED"), ComposeBubble3DActivity::class.java),
                 ChartMenuEntry("Point Line 3D", R.drawable.ic_chart_line, Color.parseColor("#0EA5E9"), ComposePointLine3DActivity::class.java),
