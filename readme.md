@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is a modern Android chart library for expressive 2D and 3D visualizations.
-It is designed for easy integration across both Android View and Compose, and currently provides `Treemap`, `Stock Heatmap`, `Matrix Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Violin Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
+It is designed for easy integration across both Android View and Compose, and currently provides `Treemap`, `Stock Heatmap`, `Matrix Heatmap`, `Calendar Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Violin Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
 
 ## Project Structure
 
@@ -23,6 +23,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 - Treemap: General-purpose grouped treemap with deterministic color fallback and optional second-line labels
 - Stock Heatmap: Section-based treemap-style stock heatmap
 - Matrix Heatmap: Categorical X/Y grid heatmap with sparse cells, click callbacks, and optional cell text
+- Calendar Heatmap: GitHub-style single-year calendar grid with click callbacks and bucketed activity intensity
 - Bubble: Scatter / Packed bubble chart
 - Line: Multi-series Cartesian line chart with grid / legend / point selection
 - Area: Filled line chart variant for trend comparison
@@ -50,6 +51,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 ## Chart Families
 
 - Tiled: Treemap, Stock Heatmap, Matrix Heatmap
+- Calendar: Calendar Heatmap
 - Axis-based: Bubble, Line, Area, Bar, Box Plot, Violin Plot, Range Bar, Gantt, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
 - Hierarchical radial: Sunburst
@@ -362,6 +364,41 @@ Notes:
 - `xLabels` and `yLabels` define both display order and valid cell keys
 - Missing intersections render as empty cells and do not dispatch click callbacks
 - Duplicate `(xKey, yKey)` entries keep the last cell value
+
+### 2b) Calendar Heatmap
+
+Key classes:
+- `CalendarHeatmapChartView`
+- `CalendarHeatmapData`
+- `CalendarHeatmapDay`
+
+Basic example:
+
+```kotlin
+val calendarView = CalendarHeatmapChartView(this).apply {
+    setData(
+        CalendarHeatmapData(
+            year = 2025,
+            days = listOf(
+                CalendarHeatmapDay(1, 3, 1.0),
+                CalendarHeatmapDay(1, 7, 4.0),
+                CalendarHeatmapDay(2, 14, 8.0, payload = "valentine"),
+            ),
+        ),
+    )
+
+    setOnDayClickListener { day ->
+        // use day.month, day.dayOfMonth, day.value, day.payload
+    }
+}
+```
+
+Notes:
+- The chart renders a single GitHub-style year with Sunday-first week columns
+- `CalendarHeatmapData.year` is the only accepted year for all `CalendarHeatmapDay` values
+- Invalid dates and negative values are ignored before layout resolution
+- Positive values are mapped into four activity buckets between the configured green shades
+- Days with `value <= 0` render as empty cells and do not dispatch click callbacks
 
 ### 3) Bubble
 

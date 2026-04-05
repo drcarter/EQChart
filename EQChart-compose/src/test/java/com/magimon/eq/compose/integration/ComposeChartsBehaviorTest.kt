@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import com.magimon.eq.compose.bar.BarChart
 import com.magimon.eq.compose.bubble.BubbleChart
 import com.magimon.eq.compose.bubble.computeBubbleChart
+import com.magimon.eq.compose.calendarheatmap.CalendarHeatmapChart
+import com.magimon.eq.compose.calendarheatmap.computeCalendarHeatmapLayout
 import com.magimon.eq.compose.funnel.FunnelChart
 import com.magimon.eq.compose.gauge.GaugeChart
 import com.magimon.eq.compose.heatmap.StockHeatmapChart
@@ -44,6 +46,11 @@ import com.magimon.eq.bubble.BubbleAxisOptions
 import com.magimon.eq.bubble.BubbleDatum
 import com.magimon.eq.bubble.BubbleLayoutMode
 import com.magimon.eq.bubble.BubblePresentationOptions
+import com.magimon.eq.calendarheatmap.CalendarHeatmapChartPresentationOptions
+import com.magimon.eq.calendarheatmap.CalendarHeatmapChartStyleOptions
+import com.magimon.eq.calendarheatmap.CalendarHeatmapData
+import com.magimon.eq.calendarheatmap.CalendarHeatmapDay
+import com.magimon.eq.calendarheatmap.findCalendarHeatmapHit
 import com.magimon.eq.gauge.GaugeChartPresentationOptions
 import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.heatmap.StockHeatmapItem
@@ -237,6 +244,34 @@ class ComposeChartsBehaviorTest {
         composeRule.waitForIdle()
 
         assertEquals("worker", clickedPayload)
+    }
+
+    @Test
+    fun calendarHeatmapChart_dispatchesClickForComputedDay() {
+        val data = CalendarHeatmapData(
+            year = 2025,
+            days = listOf(
+                CalendarHeatmapDay(month = 1, dayOfMonth = 1, value = 3.0, payload = "jan-1"),
+                CalendarHeatmapDay(month = 1, dayOfMonth = 3, value = 8.0, payload = "jan-3"),
+            ),
+        )
+        val computed = computeCalendarHeatmapLayout(
+            widthPx = 760f,
+            heightPx = 220f,
+            data = data,
+            style = CalendarHeatmapChartStyleOptions(),
+            presentation = CalendarHeatmapChartPresentationOptions(),
+            density = 1f,
+            scaledDensity = 1f,
+        )
+        val populated = computed.dayCells.first { it.day?.payload == "jan-3" }
+        val tap = Offset(
+            populated.rect.left + populated.rect.width * 0.5f,
+            populated.rect.top + populated.rect.height * 0.5f,
+        )
+        val hit = findCalendarHeatmapHit(computed, tap.x, tap.y)
+
+        assertEquals("jan-3", hit?.day?.payload)
     }
 
     @Test

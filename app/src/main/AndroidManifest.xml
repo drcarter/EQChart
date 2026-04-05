@@ -48,6 +48,11 @@
             android:label="Matrix Heatmap"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.CalendarHeatmapActivity"
+            android:exported="true"
+            android:label="Calendar Heatmap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.LineActivity"
             android:exported="true"
             android:label="Line Chart"
@@ -176,6 +181,11 @@
             android:name=".ui.compose.ComposeMatrixHeatmapActivity"
             android:exported="true"
             android:label="Compose Matrix Heatmap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeCalendarHeatmapActivity"
+            android:exported="true"
+            android:label="Compose Calendar Heatmap"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeBubbleActivity"
