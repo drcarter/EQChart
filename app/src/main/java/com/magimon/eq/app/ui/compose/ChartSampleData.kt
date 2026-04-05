@@ -6,31 +6,96 @@ import com.magimon.eq.heatmap.StockHeatmapHelper
 import com.magimon.eq.heatmap.StockHeatmapSection
 import com.magimon.eq.bar.BarDatum
 import com.magimon.eq.bar.BarSeries
+import com.magimon.eq.boxplot.BoxPlotEntry
 import com.magimon.eq.cycle.CycleLink
 import com.magimon.eq.cycle.CycleNode
 import com.magimon.eq.funnel.FunnelStage
+import com.magimon.eq.gantt.GanttDependency
+import com.magimon.eq.gantt.GanttTask
 import com.magimon.eq.gauge.GaugeRange
 import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.histogram.HistogramBin
 import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
+import com.magimon.eq.matrixheatmap.MatrixHeatmapCell
+import com.magimon.eq.matrixheatmap.MatrixHeatmapData
 import com.magimon.eq.pie.PieSlice
 import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarSeries
+import com.magimon.eq.rangebar.RangeBarEntry
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
 import com.magimon.eq.sunburst.SunburstNode
 import com.magimon.eq.stepflow.StepFlowHubContent
 import com.magimon.eq.stepflow.StepFlowStep
+import com.magimon.eq.treemap.TreemapGroup
+import com.magimon.eq.treemap.TreemapItem
 import com.magimon.eq.waterfall.WaterfallEntry
 import com.magimon.eq.waterfall.WaterfallEntryKind
-import kotlin.random.Random
 import kotlin.math.PI
 import kotlin.math.sin
+import kotlin.random.Random
 
 object ChartSampleData {
 
     fun heatmapSections(): List<StockHeatmapSection> = StockHeatmapHelper.createSampleSections()
+
+    fun matrixHeatmapData(): MatrixHeatmapData {
+        return MatrixHeatmapData(
+            xLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri"),
+            yLabels = listOf("AM", "Noon", "PM", "Night"),
+            cells = listOf(
+                MatrixHeatmapCell("Mon", "AM", 0.82, payload = "Mon/AM"),
+                MatrixHeatmapCell("Tue", "AM", 0.47, payload = "Tue/AM"),
+                MatrixHeatmapCell("Wed", "AM", -0.18, payload = "Wed/AM"),
+                MatrixHeatmapCell("Thu", "AM", -0.62, payload = "Thu/AM"),
+                MatrixHeatmapCell("Fri", "AM", 0.33, payload = "Fri/AM"),
+                MatrixHeatmapCell("Mon", "Noon", 0.12, payload = "Mon/Noon"),
+                MatrixHeatmapCell("Tue", "Noon", 0.58, payload = "Tue/Noon"),
+                MatrixHeatmapCell("Thu", "Noon", -0.27, payload = "Thu/Noon"),
+                MatrixHeatmapCell("Fri", "Noon", 0.71, payload = "Fri/Noon"),
+                MatrixHeatmapCell("Mon", "PM", -0.44, payload = "Mon/PM"),
+                MatrixHeatmapCell("Tue", "PM", -0.08, payload = "Tue/PM"),
+                MatrixHeatmapCell("Wed", "PM", 0.64, payload = "Wed/PM"),
+                MatrixHeatmapCell("Thu", "PM", 0.91, payload = "Thu/PM"),
+                MatrixHeatmapCell("Fri", "PM", 0.15, payload = "Fri/PM"),
+                MatrixHeatmapCell("Mon", "Night", -0.76, payload = "Mon/Night"),
+                MatrixHeatmapCell("Wed", "Night", 0.29, payload = "Wed/Night"),
+                MatrixHeatmapCell("Thu", "Night", 0.05, payload = "Thu/Night"),
+                MatrixHeatmapCell("Fri", "Night", -0.49, payload = "Fri/Night"),
+            ),
+        )
+    }
+
+    fun treemapGroups(): List<TreemapGroup> {
+        return listOf(
+            TreemapGroup(
+                label = "Growth",
+                color = Color.parseColor("#2563EB"),
+                items = listOf(
+                    TreemapItem("Paid", 180.0, supportingText = "42%"),
+                    TreemapItem("Organic", 150.0, supportingText = "35%"),
+                    TreemapItem("Referral", 90.0, supportingText = "21%"),
+                ),
+            ),
+            TreemapGroup(
+                label = "Product",
+                color = Color.parseColor("#14B8A6"),
+                items = listOf(
+                    TreemapItem("Subscriptions", 240.0, supportingText = "MRR"),
+                    TreemapItem("Services", 120.0, supportingText = "Upsell"),
+                ),
+            ),
+            TreemapGroup(
+                label = "Ops",
+                color = Color.parseColor("#F97316"),
+                items = listOf(
+                    TreemapItem("Support", 120.0, supportingText = "SLA"),
+                    TreemapItem("Logistics", 100.0),
+                ),
+            ),
+        )
+    }
 
     fun bubbleData(): List<BubbleDatum> {
         return listOf(
@@ -192,6 +257,164 @@ object ChartSampleData {
             FunnelStage("Demo", 920.0, payload = "demo"),
             FunnelStage("Proposal", 410.0, payload = "proposal"),
             FunnelStage("Won", 180.0, payload = "won"),
+        )
+    }
+
+    fun rangeBarEntries(): List<RangeBarEntry> {
+        return listOf(
+            RangeBarEntry(
+                label = "Discovery",
+                start = 0.0,
+                end = 2.0,
+                color = Color.parseColor("#2563EB"),
+                payload = "Discovery",
+            ),
+            RangeBarEntry(
+                label = "Design",
+                start = 1.0,
+                end = 4.0,
+                color = Color.parseColor("#14B8A6"),
+                payload = "Design",
+            ),
+            RangeBarEntry(
+                label = "Platform",
+                start = 3.0,
+                end = 7.0,
+                color = Color.parseColor("#7C3AED"),
+                payload = "Platform",
+            ),
+            RangeBarEntry(
+                label = "QA",
+                start = 6.0,
+                end = 8.0,
+                color = Color.parseColor("#F59E0B"),
+                payload = "QA",
+            ),
+            RangeBarEntry(
+                label = "Launch",
+                start = 8.0,
+                end = 9.0,
+                color = Color.parseColor("#EF4444"),
+                payload = "Launch",
+            ),
+        )
+    }
+
+    fun boxPlotEntries(): List<BoxPlotEntry> {
+        return listOf(
+            BoxPlotEntry(
+                label = "API",
+                min = 92.0,
+                q1 = 118.0,
+                median = 142.0,
+                q3 = 181.0,
+                max = 226.0,
+                outliers = listOf(248.0),
+                color = Color.parseColor("#2563EB"),
+                title = "Median 142ms",
+                payload = "API",
+            ),
+            BoxPlotEntry(
+                label = "Worker",
+                min = 74.0,
+                q1 = 96.0,
+                median = 126.0,
+                q3 = 164.0,
+                max = 209.0,
+                outliers = listOf(58.0, 228.0),
+                color = Color.parseColor("#14B8A6"),
+                title = "Median 126ms",
+                payload = "Worker",
+            ),
+            BoxPlotEntry(
+                label = "Cache",
+                min = 38.0,
+                q1 = 51.0,
+                median = 63.0,
+                q3 = 79.0,
+                max = 101.0,
+                outliers = listOf(112.0),
+                color = Color.parseColor("#7C3AED"),
+                title = "Median 63ms",
+                payload = "Cache",
+            ),
+            BoxPlotEntry(
+                label = "Search",
+                min = 112.0,
+                q1 = 148.0,
+                median = 188.0,
+                q3 = 236.0,
+                max = 294.0,
+                outliers = listOf(324.0),
+                color = Color.parseColor("#F59E0B"),
+                title = "Median 188ms",
+                payload = "Search",
+            ),
+        )
+    }
+
+    fun ganttTasks(): List<GanttTask> {
+        return listOf(
+            GanttTask(
+                id = "discovery",
+                label = "Discovery",
+                start = 0.0,
+                end = 2.0,
+                progress = 1f,
+                color = Color.parseColor("#2563EB"),
+                title = "Research complete",
+                payload = "Discovery",
+            ),
+            GanttTask(
+                id = "design",
+                label = "Design",
+                start = 1.0,
+                end = 4.0,
+                progress = 0.82f,
+                color = Color.parseColor("#14B8A6"),
+                title = "Flows and specs",
+                payload = "Design",
+            ),
+            GanttTask(
+                id = "platform",
+                label = "Platform",
+                start = 3.0,
+                end = 7.0,
+                progress = 0.58f,
+                color = Color.parseColor("#7C3AED"),
+                title = "Rendering and API",
+                payload = "Platform",
+            ),
+            GanttTask(
+                id = "qa",
+                label = "QA",
+                start = 6.0,
+                end = 8.0,
+                progress = 0.26f,
+                color = Color.parseColor("#F59E0B"),
+                title = "Regression pass",
+                payload = "QA",
+            ),
+            GanttTask(
+                id = "launch",
+                label = "Launch",
+                start = 9.0,
+                end = 9.0,
+                progress = 1f,
+                color = Color.parseColor("#EF4444"),
+                title = "GA milestone",
+                isMilestone = true,
+                payload = "Launch",
+            ),
+        )
+    }
+
+    fun ganttDependencies(): List<GanttDependency> {
+        return listOf(
+            GanttDependency("discovery", "design"),
+            GanttDependency("design", "platform"),
+            GanttDependency("platform", "qa"),
+            GanttDependency("qa", "launch"),
         )
     }
 

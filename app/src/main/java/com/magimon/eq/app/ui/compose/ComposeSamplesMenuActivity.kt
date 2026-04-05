@@ -15,7 +15,10 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
 
         val container = createChartMenuGrid(
             entries = listOf(
-                ChartMenuEntry("Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#0EA5E9"), ComposeHeatmapActivity::class.java),
+                ChartMenuEntry("Treemap", R.drawable.ic_chart_heatmap, Color.parseColor("#0EA5E9"), ComposeTreemapActivity::class.java),
+                ChartMenuEntry("Stock Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#0284C7"), ComposeHeatmapActivity::class.java),
+                ChartMenuEntry("Matrix Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#0F766E"), ComposeMatrixHeatmapActivity::class.java),
+                ChartMenuEntry("Calendar Heatmap", R.drawable.ic_chart_heatmap, Color.parseColor("#15803D"), ComposeCalendarHeatmapActivity::class.java),
                 ChartMenuEntry("Bubble", R.drawable.ic_chart_bubble, Color.parseColor("#EC4899"), ComposeBubbleActivity::class.java),
                 ChartMenuEntry("Bubble 3D", R.drawable.ic_chart_bubble, Color.parseColor("#7C3AED"), ComposeBubble3DActivity::class.java),
                 ChartMenuEntry("Point Line 3D", R.drawable.ic_chart_line, Color.parseColor("#0EA5E9"), ComposePointLine3DActivity::class.java),
@@ -23,6 +26,10 @@ class ComposeSamplesMenuActivity : AppCompatActivity() {
                 ChartMenuEntry("Line", R.drawable.ic_chart_line, Color.parseColor("#2563EB"), ComposeLineActivity::class.java),
                 ChartMenuEntry("Area", R.drawable.ic_chart_area, Color.parseColor("#14B8A6"), ComposeAreaActivity::class.java),
                 ChartMenuEntry("Bar", R.drawable.ic_chart_bar, Color.parseColor("#F97316"), ComposeBarActivity::class.java),
+                ChartMenuEntry("Box Plot", R.drawable.ic_chart_boxplot, Color.parseColor("#2563EB"), ComposeBoxPlotActivity::class.java),
+                ChartMenuEntry("Violin Plot", R.drawable.ic_chart_boxplot, Color.parseColor("#6366F1"), ComposeViolinPlotActivity::class.java),
+                ChartMenuEntry("Range Bar", R.drawable.ic_chart_bar, Color.parseColor("#0F766E"), ComposeRangeBarActivity::class.java),
+                ChartMenuEntry("Gantt", R.drawable.ic_chart_bar, Color.parseColor("#334155"), ComposeGanttActivity::class.java),
                 ChartMenuEntry("Histogram", R.drawable.ic_chart_histogram, Color.parseColor("#2563EB"), ComposeHistogramActivity::class.java),
                 ChartMenuEntry("Waterfall", R.drawable.ic_chart_waterfall, Color.parseColor("#0F766E"), ComposeWaterfallActivity::class.java),
                 ChartMenuEntry("Funnel", R.drawable.ic_chart_funnel, Color.parseColor("#DC2626"), ComposeFunnelActivity::class.java),

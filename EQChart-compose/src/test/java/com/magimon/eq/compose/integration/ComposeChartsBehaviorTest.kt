@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.click
@@ -16,11 +17,13 @@ import androidx.compose.ui.unit.dp
 import com.magimon.eq.compose.bar.BarChart
 import com.magimon.eq.compose.bubble.BubbleChart
 import com.magimon.eq.compose.bubble.computeBubbleChart
+import com.magimon.eq.compose.calendarheatmap.computeCalendarHeatmapLayout
 import com.magimon.eq.compose.funnel.FunnelChart
 import com.magimon.eq.compose.gauge.GaugeChart
 import com.magimon.eq.compose.heatmap.StockHeatmapChart
 import com.magimon.eq.compose.histogram.HistogramChart
 import com.magimon.eq.compose.line.LineChart
+import com.magimon.eq.compose.matrixheatmap.MatrixHeatmapChart
 import com.magimon.eq.compose.pie.PieChart
 import com.magimon.eq.compose.pie.buildPieSegments
 import com.magimon.eq.compose.pie.computePieChartGeometry
@@ -28,6 +31,7 @@ import com.magimon.eq.compose.radar.RadarChart
 import com.magimon.eq.compose.sankey.SankeyChart
 import com.magimon.eq.compose.sankey.computeSankeyLayout
 import com.magimon.eq.compose.sankey.sankeyLinkCenterPoint
+import com.magimon.eq.compose.violin.ViolinPlotChart
 import com.magimon.eq.compose.waveform.PcmWaveformChart
 import com.magimon.eq.compose.waterfall.WaterfallChart
 import com.magimon.eq.compose.waveform.rememberPcmWaveformController
@@ -41,6 +45,11 @@ import com.magimon.eq.bubble.BubbleAxisOptions
 import com.magimon.eq.bubble.BubbleDatum
 import com.magimon.eq.bubble.BubbleLayoutMode
 import com.magimon.eq.bubble.BubblePresentationOptions
+import com.magimon.eq.calendarheatmap.CalendarHeatmapChartPresentationOptions
+import com.magimon.eq.calendarheatmap.CalendarHeatmapChartStyleOptions
+import com.magimon.eq.calendarheatmap.CalendarHeatmapData
+import com.magimon.eq.calendarheatmap.CalendarHeatmapDay
+import com.magimon.eq.calendarheatmap.findCalendarHeatmapHit
 import com.magimon.eq.gauge.GaugeChartPresentationOptions
 import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.heatmap.StockHeatmapItem
@@ -50,6 +59,8 @@ import com.magimon.eq.histogram.HistogramChartPresentationOptions
 import com.magimon.eq.line.LineChartPresentationOptions
 import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
+import com.magimon.eq.matrixheatmap.MatrixHeatmapCell
+import com.magimon.eq.matrixheatmap.MatrixHeatmapData
 import com.magimon.eq.pie.PieDonutPresentationOptions
 import com.magimon.eq.pie.PieSlice
 import com.magimon.eq.radar.RadarAxis
@@ -59,11 +70,14 @@ import com.magimon.eq.sankey.SankeyChartPresentationOptions
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
 import com.magimon.eq.funnel.FunnelStage
+import com.magimon.eq.violin.ViolinPlotChartPresentationOptions
+import com.magimon.eq.violin.ViolinPlotSeries
 import com.magimon.eq.waterfall.WaterfallChartPresentationOptions
 import com.magimon.eq.waterfall.WaterfallEntry
 import com.magimon.eq.waterfall.WaterfallEntryKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -185,6 +199,168 @@ class ComposeChartsBehaviorTest {
         assertEquals("a", clickedPayload)
         assertEquals(null, clickedLabel)
         assertEquals(null, clickedColor)
+    }
+
+    @Test
+    fun violinPlotChart_dispatchesClickForComputedSeries() {
+        val series = listOf(
+            ViolinPlotSeries("API", listOf(10.0, 12.0, 16.0, 22.0), payload = "api"),
+            ViolinPlotSeries("Worker", listOf(8.0, 9.0, 11.0, 14.0), payload = "worker"),
+        )
+        val options = ViolinPlotChartPresentationOptions(
+            animateOnDataChange = false,
+        )
+        val computed = invokePrivateTopLevel(
+            "com.magimon.eq.compose.violin.ViolinPlotChartKt",
+            "computeViolinPlotLayout",
+            360f,
+            240f,
+            series,
+            com.magimon.eq.violin.ViolinPlotChartStyleOptions(),
+            options,
+            1f,
+            1f,
+            1f,
+        ) ?: error("Expected computed violin plot")
+        val entry = computed.readField<List<Any>>("entries")[1]
+        val rect = entry.readField<Rect>("touchRect")
+        val tap = Offset(
+            (rect.left + rect.right) * 0.5f,
+            (rect.top + rect.bottom) * 0.5f,
+        )
+
+        var clickedPayload: Any? = null
+        composeRule.setContent {
+            ViolinPlotChart(
+                series = series,
+                modifier = Modifier.size(360.dp, 240.dp),
+                presentationOptions = options,
+                onSeriesClick = { _, clickedSeries -> clickedPayload = clickedSeries.payload },
+            )
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onRoot().performTouchInput { click(tap) }
+        composeRule.waitForIdle()
+
+        assertEquals("worker", clickedPayload)
+    }
+
+    @Test
+    fun calendarHeatmapChart_resolvesHitForComputedDay() {
+        val style = CalendarHeatmapChartStyleOptions(
+            contentPaddingDp = 0f,
+            labelGapDp = 0f,
+            cellGapDp = 0f,
+        )
+        val presentation = CalendarHeatmapChartPresentationOptions(
+            showMonthLabels = false,
+            showWeekdayLabels = false,
+            emptyText = "",
+        )
+        val widthPx = 760f
+        val heightPx = 220f
+        val density = Density(1f)
+        val emptyLayout = computeCalendarHeatmapLayout(
+            widthPx = widthPx,
+            heightPx = heightPx,
+            data = CalendarHeatmapData(year = 2025, days = emptyList()),
+            style = style,
+            presentation = presentation,
+            density = density.density,
+            scaledDensity = density.density * density.fontScale,
+        )
+        val centerCell = emptyLayout.dayCells.minByOrNull { cell ->
+            val cellCenterX = cell.rect.left + cell.rect.width * 0.5f
+            val cellCenterY = cell.rect.top + cell.rect.height * 0.5f
+            kotlin.math.abs(cellCenterX - widthPx * 0.5f) + kotlin.math.abs(cellCenterY - heightPx * 0.5f)
+        } ?: error("Expected calendar cell")
+        val computed = computeCalendarHeatmapLayout(
+            widthPx = widthPx,
+            heightPx = heightPx,
+            data = CalendarHeatmapData(
+                year = 2025,
+                days = listOf(
+                    CalendarHeatmapDay(
+                        month = centerCell.month,
+                        dayOfMonth = centerCell.dayOfMonth,
+                        value = 8.0,
+                        payload = "center",
+                    ),
+                ),
+            ),
+            style = style,
+            presentation = presentation,
+            density = density.density,
+            scaledDensity = density.density * density.fontScale,
+        )
+        val hit = findCalendarHeatmapHit(
+            computed,
+            centerCell.rect.left + centerCell.rect.width * 0.5f,
+            centerCell.rect.top + centerCell.rect.height * 0.5f,
+        )
+
+        assertEquals("center", hit?.day?.payload)
+    }
+
+    @Test
+    fun calendarHeatmapChart_ignoresEmptyCellHits() {
+        val style = CalendarHeatmapChartStyleOptions(
+            contentPaddingDp = 0f,
+            labelGapDp = 0f,
+            cellGapDp = 0f,
+        )
+        val presentation = CalendarHeatmapChartPresentationOptions(
+            showMonthLabels = false,
+            showWeekdayLabels = false,
+            emptyText = "",
+        )
+        val widthPx = 760f
+        val heightPx = 220f
+        val density = Density(1f)
+        val emptyLayout = computeCalendarHeatmapLayout(
+            widthPx = widthPx,
+            heightPx = heightPx,
+            data = CalendarHeatmapData(year = 2025, days = emptyList()),
+            style = style,
+            presentation = presentation,
+            density = density.density,
+            scaledDensity = density.density * density.fontScale,
+        )
+        val targetCell = emptyLayout.dayCells.minByOrNull { cell ->
+            val cellCenterX = cell.rect.left + cell.rect.width * 0.5f
+            val cellCenterY = cell.rect.top + cell.rect.height * 0.5f
+            kotlin.math.abs(cellCenterX - widthPx * 0.5f) + kotlin.math.abs(cellCenterY - heightPx * 0.5f)
+        } ?: error("Expected calendar cell")
+        val offCenterCell = emptyLayout.dayCells.firstOrNull { cell ->
+            cell.month != targetCell.month || cell.dayOfMonth != targetCell.dayOfMonth
+        } ?: error("Expected empty calendar cell")
+        val computed = computeCalendarHeatmapLayout(
+            widthPx = widthPx,
+            heightPx = heightPx,
+            data = CalendarHeatmapData(
+                year = 2025,
+                days = listOf(
+                    CalendarHeatmapDay(
+                        month = offCenterCell.month,
+                        dayOfMonth = offCenterCell.dayOfMonth,
+                        value = 5.0,
+                        payload = "off-center",
+                    ),
+                ),
+            ),
+            style = style,
+            presentation = presentation,
+            density = density.density,
+            scaledDensity = density.density * density.fontScale,
+        )
+        val hit = findCalendarHeatmapHit(
+            computed,
+            targetCell.rect.left + targetCell.rect.width * 0.5f,
+            targetCell.rect.top + targetCell.rect.height * 0.5f,
+        )
+
+        assertNull(hit)
     }
 
     @Test
@@ -534,6 +710,48 @@ class ComposeChartsBehaviorTest {
         composeRule.waitForIdle()
 
         assertNotNull(clicked)
+    }
+
+    @Test
+    fun matrixHeatmapChart_dispatchesClickForComputedCell() {
+        val data = MatrixHeatmapData(
+            xLabels = listOf("Mon", "Tue"),
+            yLabels = listOf("AM", "PM"),
+            cells = listOf(
+                MatrixHeatmapCell("Mon", "AM", 2.0, payload = "mon-am"),
+                MatrixHeatmapCell("Tue", "PM", -1.0, payload = "tue-pm"),
+            ),
+        )
+        val computed = invokePrivateTopLevel(
+            "com.magimon.eq.compose.matrixheatmap.MatrixHeatmapChartKt",
+            "computeMatrixHeatmapLayout",
+            360f,
+            260f,
+            data,
+            com.magimon.eq.matrixheatmap.MatrixHeatmapChartStyleOptions(),
+            com.magimon.eq.matrixheatmap.MatrixHeatmapChartPresentationOptions(),
+            1f,
+            1f,
+        ) ?: error("Expected computed matrix heatmap")
+        val cell = computed.readField<List<Any>>("cellLayouts").first()
+        val rect = cell.readField<com.magimon.eq.matrixheatmap.MatrixHeatmapRect>("rect")
+        val tap = Offset(rect.left + rect.width * 0.5f, rect.top + rect.height * 0.5f)
+
+        var clicked: MatrixHeatmapCell? = null
+        composeRule.setContent {
+            MatrixHeatmapChart(
+                data = data,
+                modifier = Modifier.size(360.dp, 260.dp),
+                onCellClick = { clicked = it },
+            )
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onRoot().performTouchInput { click(tap) }
+        composeRule.waitForIdle()
+
+        assertNotNull(clicked)
+        assertEquals("mon-am", clicked?.payload)
     }
 
     @Test

@@ -33,9 +33,24 @@
             android:label="Compose Samples"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.android.TreemapActivity"
+            android:exported="true"
+            android:label="Treemap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.android.HeatmapActivity"
             android:exported="true"
             android:label="Stock Heatmap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.MatrixHeatmapActivity"
+            android:exported="true"
+            android:label="Matrix Heatmap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.CalendarHeatmapActivity"
+            android:exported="true"
+            android:label="Calendar Heatmap"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.android.LineActivity"
@@ -51,6 +66,26 @@
             android:name=".ui.android.BarActivity"
             android:exported="true"
             android:label="Bar Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.BoxPlotActivity"
+            android:exported="true"
+            android:label="Box Plot Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.ViolinPlotActivity"
+            android:exported="true"
+            android:label="Violin Plot Chart"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.RangeBarActivity"
+            android:exported="true"
+            android:label="Range Bar Timeline"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.android.GanttActivity"
+            android:exported="true"
+            android:label="Gantt Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.android.HistogramActivity"
@@ -133,9 +168,24 @@
             android:label="Step Flow Chart"
             android:theme="@style/Theme.EQChart" />
         <activity
+            android:name=".ui.compose.ComposeTreemapActivity"
+            android:exported="true"
+            android:label="Compose Treemap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
             android:name=".ui.compose.ComposeHeatmapActivity"
             android:exported="true"
-            android:label="Compose Heatmap"
+            android:label="Compose Stock Heatmap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeMatrixHeatmapActivity"
+            android:exported="true"
+            android:label="Compose Matrix Heatmap"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeCalendarHeatmapActivity"
+            android:exported="true"
+            android:label="Compose Calendar Heatmap"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeBubbleActivity"
@@ -211,6 +261,26 @@
             android:name=".ui.compose.ComposeBarActivity"
             android:exported="true"
             android:label="Compose Bar"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeBoxPlotActivity"
+            android:exported="true"
+            android:label="Compose Box Plot"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeViolinPlotActivity"
+            android:exported="true"
+            android:label="Compose Violin Plot"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeRangeBarActivity"
+            android:exported="true"
+            android:label="Compose Range Bar Timeline"
+            android:theme="@style/Theme.EQChart" />
+        <activity
+            android:name=".ui.compose.ComposeGanttActivity"
+            android:exported="true"
+            android:label="Compose Gantt"
             android:theme="@style/Theme.EQChart" />
         <activity
             android:name=".ui.compose.ComposeHistogramActivity"

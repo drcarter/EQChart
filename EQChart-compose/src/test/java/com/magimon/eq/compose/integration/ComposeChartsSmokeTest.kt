@@ -21,6 +21,7 @@ import com.magimon.eq.compose.line.LineChart
 import com.magimon.eq.compose.pie.DonutChart
 import com.magimon.eq.compose.pie.PieChart
 import com.magimon.eq.compose.radar.RadarChart
+import com.magimon.eq.compose.rangebar.RangeBarChart
 import com.magimon.eq.compose.sankey.SankeyChart
 import com.magimon.eq.compose.waveform.PcmWaveformChart
 import com.magimon.eq.compose.waveform.PcmWaveformController
@@ -46,6 +47,8 @@ import com.magimon.eq.pointline3d.PointLine3DSeries
 import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarChartPresentationOptions
 import com.magimon.eq.radar.RadarSeries
+import com.magimon.eq.rangebar.RangeBarChartPresentationOptions
+import com.magimon.eq.rangebar.RangeBarEntry
 import com.magimon.eq.sankey.SankeyChartPresentationOptions
 import com.magimon.eq.sankey.SankeyLink
 import com.magimon.eq.sankey.SankeyNode
@@ -222,6 +225,27 @@ class ComposeChartsSmokeTest {
             )
         }
 
+        composeRule.waitForIdle()
+    }
+
+    @Test
+    fun rangeBarChart_rendersAndHandlesTap() {
+        composeRule.setContent {
+            RangeBarChart(
+                entries = listOf(
+                    RangeBarEntry(label = "Plan", start = 0.0, end = 2.0, color = 0xFF2563EB.toInt()),
+                    RangeBarEntry(label = "Build", start = 2.0, end = 5.0, color = 0xFF14B8A6.toInt()),
+                ),
+                modifier = Modifier.size(320.dp, 240.dp),
+                presentationOptions = RangeBarChartPresentationOptions(
+                    animateOnDataChange = false,
+                    showBarLabels = true,
+                ),
+            )
+        }
+
+        composeRule.waitForIdle()
+        composeRule.onRoot().performTouchInput { click() }
         composeRule.waitForIdle()
     }
 

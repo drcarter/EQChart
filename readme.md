@@ -1,7 +1,7 @@
 # EQChart
 
 EQChart is a modern Android chart library for expressive 2D and 3D visualizations.
-It is designed for easy integration across both Android View and Compose, and currently provides `Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
+It is designed for easy integration across both Android View and Compose, and currently provides `Treemap`, `Stock Heatmap`, `Matrix Heatmap`, `Calendar Heatmap`, `Bubble`, `Line`, `Area`, `Bar`, `Box Plot`, `Violin Plot`, `Range Bar`, `Gantt`, `Histogram`, `Waterfall`, `Funnel`, `Sunburst`, `PCM Waveform`, `Radar`, `Pie`, `Donut`, `Gauge`, `Sankey`, `Cycle`, `Step Flow`, `Bubble 3D`, `Point Line 3D`, and `Point Cloud 3D` charts.
 
 ## Project Structure
 
@@ -20,11 +20,18 @@ It is designed for easy integration across both Android View and Compose, and cu
 
 ## Supported Charts
 
-- Heatmap: Section-based treemap-style stock heatmap
+- Treemap: General-purpose grouped treemap with deterministic color fallback and optional second-line labels
+- Stock Heatmap: Section-based treemap-style stock heatmap
+- Matrix Heatmap: Categorical X/Y grid heatmap with sparse cells, click callbacks, and optional cell text
+- Calendar Heatmap: GitHub-style single-year calendar grid with click callbacks and bucketed activity intensity
 - Bubble: Scatter / Packed bubble chart
 - Line: Multi-series Cartesian line chart with grid / legend / point selection
 - Area: Filled line chart variant for trend comparison
 - Bar: Grouped / stacked bar chart with vertical / horizontal orientation
+- Box Plot: Quartile spread chart with whiskers, median line, and outlier points
+- Violin Plot: Distribution chart with KDE-based mirrored density, quartile band, and median line
+- Range Bar: Horizontal start/end interval chart suitable for roadmap and timeline views
+- Gantt: Project timeline chart with task progress, milestones, and dependency links
 - Histogram: Ordered bucket chart for count / frequency distribution
 - Waterfall: Ordered cumulative delta chart with subtotal / total bars and connectors
 - Funnel: Vertical conversion funnel chart with tapered stages and click callbacks
@@ -43,8 +50,9 @@ It is designed for easy integration across both Android View and Compose, and cu
 
 ## Chart Families
 
-- Tiled: Heatmap
-- Axis-based: Bubble, Line, Area, Bar, Histogram, Waterfall, Funnel
+- Tiled: Treemap, Stock Heatmap, Matrix Heatmap
+- Calendar: Calendar Heatmap
+- Axis-based: Bubble, Line, Area, Bar, Box Plot, Violin Plot, Range Bar, Gantt, Histogram, Waterfall, Funnel
 - Radial: Radar, Pie, Donut, Gauge
 - Hierarchical radial: Sunburst
 - Flow: Sankey, Cycle, Step Flow
@@ -57,7 +65,7 @@ It is designed for easy integration across both Android View and Compose, and cu
 - Compile / Target SDK: 36
 - Kotlin: 2.2.0
 - AGP: 8.11.1
-- Java / JVM Target: 11
+- Java / JVM Target: 17
 
 ## Versioning
 
@@ -221,10 +229,17 @@ PieChart(
 ```
 
 Compose module exports:
+- `TreemapChart(...)`
 - `StockHeatmapChart(...)`
+- `MatrixHeatmapChart(...)`
+- `CalendarHeatmapChart(...)`
 - `BubbleChart(...)`
 - `LineChart(...)`, `AreaChart(...)`
 - `BarChart(...)`
+- `BoxPlotChart(...)`
+- `ViolinPlotChart(...)`
+- `RangeBarChart(...)`
+- `GanttChart(...)`
 - `HistogramChart(...)`
 - `WaterfallChart(...)`
 - `FunnelChart(...)`
@@ -236,10 +251,54 @@ Compose module exports:
 - `SankeyChart(...)`
 - `CycleChart(...)`
 - `StepFlowChart(...)`
+- `Bubble3DChart(...)`
+- `PointLine3DChart(...)`
+- `PointCloud3DChart(...)`
 
 ## Usage by Chart
 
-### 1) Heatmap
+### 1) Treemap
+
+Key classes:
+- `TreemapChartView`
+- `TreemapGroup`
+- `TreemapItem`
+
+Basic example:
+
+```kotlin
+val treemapView = TreemapChartView(this).apply {
+    setGroups(
+        listOf(
+            TreemapGroup(
+                label = "Growth",
+                color = Color.parseColor("#2563EB"),
+                items = listOf(
+                    TreemapItem("Paid", 180.0, supportingText = "42%"),
+                    TreemapItem("Organic", 150.0, supportingText = "35%"),
+                ),
+            ),
+            TreemapGroup(
+                label = "Ops",
+                items = listOf(
+                    TreemapItem("Support", 120.0),
+                    TreemapItem("Logistics", 100.0),
+                ),
+            ),
+        ),
+    )
+
+    setOnItemClickListener { item ->
+        // use item.label, item.value, item.supportingText
+    }
+}
+```
+
+Notes:
+- Single-group input renders as a flat treemap without headers
+- When `item.color` is absent, the chart resolves a stable color from the group or fallback palette
+
+### 2) Stock Heatmap
 
 Key classes:
 - `StockHeatmapView`
@@ -272,10 +331,80 @@ setContentView(ScrollView(this).apply { addView(heatmapView) })
 ```
 
 Notes:
+- `StockHeatmap` is the stock-specific preset built on top of the generic treemap renderer
 - `setData(List<StockHeatmapItem>)` is also supported (backward compatible)
 - If `sizeRatio` exists, it is used first for area weighting
 
-### 2) Bubble
+### 2a) Matrix Heatmap
+
+Key classes:
+- `MatrixHeatmapChartView`
+- `MatrixHeatmapData`
+- `MatrixHeatmapCell`
+
+Basic example:
+
+```kotlin
+val matrixView = MatrixHeatmapChartView(this).apply {
+    setData(
+        MatrixHeatmapData(
+            xLabels = listOf("Mon", "Tue", "Wed"),
+            yLabels = listOf("AM", "PM"),
+            cells = listOf(
+                MatrixHeatmapCell("Mon", "AM", 0.82),
+                MatrixHeatmapCell("Tue", "AM", -0.34),
+                MatrixHeatmapCell("Wed", "PM", 0.57, label = "57%"),
+            ),
+        ),
+    )
+
+    setOnCellClickListener { cell ->
+        // use cell.xKey, cell.yKey, cell.value, cell.payload
+    }
+}
+```
+
+Notes:
+- `xLabels` and `yLabels` define both display order and valid cell keys
+- Missing intersections render as empty cells and do not dispatch click callbacks
+- Duplicate `(xKey, yKey)` entries keep the last cell value
+
+### 2b) Calendar Heatmap
+
+Key classes:
+- `CalendarHeatmapChartView`
+- `CalendarHeatmapData`
+- `CalendarHeatmapDay`
+
+Basic example:
+
+```kotlin
+val calendarView = CalendarHeatmapChartView(this).apply {
+    setData(
+        CalendarHeatmapData(
+            year = 2025,
+            days = listOf(
+                CalendarHeatmapDay(1, 3, 1.0),
+                CalendarHeatmapDay(1, 7, 4.0),
+                CalendarHeatmapDay(2, 14, 8.0, payload = "valentine"),
+            ),
+        ),
+    )
+
+    setOnDayClickListener { day ->
+        // use day.month, day.dayOfMonth, day.value, day.payload
+    }
+}
+```
+
+Notes:
+- The chart renders a single GitHub-style year with Sunday-first week columns
+- `CalendarHeatmapData.year` is the only accepted year for all `CalendarHeatmapDay` values
+- Invalid dates and negative values are ignored before layout resolution
+- Positive values are mapped into four activity buckets between the configured green shades
+- Days with `value <= 0` render as empty cells and do not dispatch click callbacks
+
+### 3) Bubble
 
 Key classes:
 - `BubbleChartView`
@@ -321,7 +450,7 @@ val bubbleView = BubbleChartView(this).apply {
 setContentView(bubbleView)
 ```
 
-### 3) Line / Area
+### 4) Line / Area
 
 Key classes:
 - `LineChartView`, `AreaChartView`
@@ -393,7 +522,7 @@ Notes:
 - `AreaChartView` is the filled variant that reuses the same `LineSeries` / `LineDatum` model
 - Only finite `(x, y)` points are rendered
 
-### 4) Bar
+### 5) Bar
 
 Key classes:
 - `BarChartView`
@@ -446,7 +575,53 @@ Notes:
 - Categories are resolved from the union of `BarDatum.category` values across all series
 - `layoutMode` supports `GROUPED` and `STACKED`; `orientation` supports `VERTICAL` and `HORIZONTAL`
 
-### 5) PCM Waveform
+### 5a) Violin Plot
+
+Key classes:
+- `ViolinPlotChartView`
+- `ViolinPlotSeries`
+- `ViolinPlotChartStyleOptions`, `ViolinPlotChartPresentationOptions`
+
+Basic example:
+
+```kotlin
+val violinChart = ViolinPlotChartView(this).apply {
+    setPresentationOptions(
+        ViolinPlotChartPresentationOptions(
+            showGrid = true,
+            showAxes = true,
+            showValueLabels = true,
+            yLabelFormatter = { value -> "${value.toInt()}ms" },
+        ),
+    )
+
+    setSeries(
+        listOf(
+            ViolinPlotSeries(
+                label = "API",
+                samples = listOf(82.0, 88.0, 90.0, 96.0, 104.0, 118.0, 138.0),
+                payload = "api",
+            ),
+            ViolinPlotSeries(
+                label = "Worker",
+                samples = listOf(58.0, 63.0, 70.0, 77.0, 86.0, 98.0, 124.0),
+                payload = "worker",
+            ),
+        ),
+    )
+
+    setOnSeriesClickListener { _, series ->
+        // use series.label, series.samples, series.payload
+    }
+}
+```
+
+Notes:
+- Raw finite samples are sanitized and converted into a KDE-based mirrored density shape
+- Flat or tiny sample sets fall back to a narrow symmetric violin centered on the median
+- v1 supports vertical categorical violins only
+
+### 6) PCM Waveform
 
 Key classes:
 - `PcmWaveFormView`
@@ -476,7 +651,7 @@ Notes:
 - Input data type is `ShortArray` (16-bit mono PCM)
 - Internally keeps only a recent N-ms window
 
-### 6) Radar
+### 7) Radar
 
 Key classes:
 - `RadarChartView`
@@ -525,7 +700,7 @@ setContentView(radarView)
 Note:
 - Each `RadarSeries.values` size must match axis count to render.
 
-### 7) Pie / Donut
+### 8) Pie / Donut
 
 Key classes:
 - `PieChartView`, `DonutChartView`
@@ -577,7 +752,7 @@ Notes:
 - If valid total is 0, `emptyText` is shown
 - Selection explode effect is controlled by `enableSelectionExpand`, `selectedSliceExpandDp`, and `selectedSliceExpandAnimMs`
 
-### 8) Gauge
+### 9) Gauge
 
 Key classes:
 - `GaugeChartView`
@@ -621,7 +796,7 @@ Notes:
 - Invalid ranges (`end <= start`, NaN, infinite) are ignored
 - Compose uses `GaugeChart(...)` with the same shared models/options
 
-### 9) Sankey
+### 10) Sankey
 
 Key classes:
 - `SankeyChartView`
@@ -670,7 +845,7 @@ Notes:
 - Cycles or backward stage assignments fall back to `emptyText`
 - Compose uses `SankeyChart(...)` with the same shared models/options
 
-### 10) Cycle
+### 11) Cycle
 
 Key classes:
 - `CycleChartView`
@@ -732,7 +907,7 @@ Notes:
 - `CycleChartPresentationOptions.startAngleDeg` and `clockwise` control ring ordering
 - Compose uses `CycleChart(...)` with the same shared models/options
 
-### 11) Step Flow
+### 12) Step Flow
 
 Key classes:
 - `StepFlowChartView`
@@ -785,7 +960,7 @@ Notes:
 - Compose uses `StepFlowChart(hubContent = ..., steps = ...)` with the same shared models/options
 - This chart is diagram-oriented and does not use axis or free-form graph links
 
-### 12) Sunburst
+### 13) Sunburst
 
 Key classes:
 - `SunburstChartView`

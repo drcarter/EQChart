@@ -62,7 +62,7 @@ subprojects {
             moduleName.set(moduleDisplayNames.getValue(project.path))
         }
         dokkaSourceSets.configureEach {
-            jdkVersion.set(11)
+            jdkVersion.set(17)
             skipEmptyPackages.set(true)
             suppressGeneratedFiles.set(true)
 
