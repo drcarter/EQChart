@@ -17,6 +17,8 @@ import com.magimon.eq.gauge.GaugeValue
 import com.magimon.eq.histogram.HistogramBin
 import com.magimon.eq.line.LineDatum
 import com.magimon.eq.line.LineSeries
+import com.magimon.eq.matrixheatmap.MatrixHeatmapCell
+import com.magimon.eq.matrixheatmap.MatrixHeatmapData
 import com.magimon.eq.pie.PieSlice
 import com.magimon.eq.radar.RadarAxis
 import com.magimon.eq.radar.RadarSeries
@@ -37,6 +39,33 @@ import kotlin.random.Random
 object ChartSampleData {
 
     fun heatmapSections(): List<StockHeatmapSection> = StockHeatmapHelper.createSampleSections()
+
+    fun matrixHeatmapData(): MatrixHeatmapData {
+        return MatrixHeatmapData(
+            xLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri"),
+            yLabels = listOf("AM", "Noon", "PM", "Night"),
+            cells = listOf(
+                MatrixHeatmapCell("Mon", "AM", 0.82, payload = "Mon/AM"),
+                MatrixHeatmapCell("Tue", "AM", 0.47, payload = "Tue/AM"),
+                MatrixHeatmapCell("Wed", "AM", -0.18, payload = "Wed/AM"),
+                MatrixHeatmapCell("Thu", "AM", -0.62, payload = "Thu/AM"),
+                MatrixHeatmapCell("Fri", "AM", 0.33, payload = "Fri/AM"),
+                MatrixHeatmapCell("Mon", "Noon", 0.12, payload = "Mon/Noon"),
+                MatrixHeatmapCell("Tue", "Noon", 0.58, payload = "Tue/Noon"),
+                MatrixHeatmapCell("Thu", "Noon", -0.27, payload = "Thu/Noon"),
+                MatrixHeatmapCell("Fri", "Noon", 0.71, payload = "Fri/Noon"),
+                MatrixHeatmapCell("Mon", "PM", -0.44, payload = "Mon/PM"),
+                MatrixHeatmapCell("Tue", "PM", -0.08, payload = "Tue/PM"),
+                MatrixHeatmapCell("Wed", "PM", 0.64, payload = "Wed/PM"),
+                MatrixHeatmapCell("Thu", "PM", 0.91, payload = "Thu/PM"),
+                MatrixHeatmapCell("Fri", "PM", 0.15, payload = "Fri/PM"),
+                MatrixHeatmapCell("Mon", "Night", -0.76, payload = "Mon/Night"),
+                MatrixHeatmapCell("Wed", "Night", 0.29, payload = "Wed/Night"),
+                MatrixHeatmapCell("Thu", "Night", 0.05, payload = "Thu/Night"),
+                MatrixHeatmapCell("Fri", "Night", -0.49, payload = "Fri/Night"),
+            ),
+        )
+    }
 
     fun treemapGroups(): List<TreemapGroup> {
         return listOf(
