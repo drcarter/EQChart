@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.magimon.eq.compose.bar.BarChart
 import com.magimon.eq.compose.bubble.BubbleChart
 import com.magimon.eq.compose.bubble.computeBubbleChart
-import com.magimon.eq.compose.calendarheatmap.CalendarHeatmapChart
 import com.magimon.eq.compose.calendarheatmap.computeCalendarHeatmapLayout
 import com.magimon.eq.compose.funnel.FunnelChart
 import com.magimon.eq.compose.gauge.GaugeChart
@@ -78,6 +77,7 @@ import com.magimon.eq.waterfall.WaterfallEntry
 import com.magimon.eq.waterfall.WaterfallEntryKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -247,31 +247,120 @@ class ComposeChartsBehaviorTest {
     }
 
     @Test
-    fun calendarHeatmapChart_dispatchesClickForComputedDay() {
-        val data = CalendarHeatmapData(
-            year = 2025,
-            days = listOf(
-                CalendarHeatmapDay(month = 1, dayOfMonth = 1, value = 3.0, payload = "jan-1"),
-                CalendarHeatmapDay(month = 1, dayOfMonth = 3, value = 8.0, payload = "jan-3"),
-            ),
+    fun calendarHeatmapChart_resolvesHitForComputedDay() {
+        val style = CalendarHeatmapChartStyleOptions(
+            contentPaddingDp = 0f,
+            labelGapDp = 0f,
+            cellGapDp = 0f,
         )
+        val presentation = CalendarHeatmapChartPresentationOptions(
+            showMonthLabels = false,
+            showWeekdayLabels = false,
+            emptyText = "",
+        )
+        val widthPx = 760f
+        val heightPx = 220f
+        val density = Density(1f)
+        val emptyLayout = computeCalendarHeatmapLayout(
+            widthPx = widthPx,
+            heightPx = heightPx,
+            data = CalendarHeatmapData(year = 2025, days = emptyList()),
+            style = style,
+            presentation = presentation,
+            density = density.density,
+            scaledDensity = density.density * density.fontScale,
+        )
+        val centerCell = emptyLayout.dayCells.minByOrNull { cell ->
+            val cellCenterX = cell.rect.left + cell.rect.width * 0.5f
+            val cellCenterY = cell.rect.top + cell.rect.height * 0.5f
+            kotlin.math.abs(cellCenterX - widthPx * 0.5f) + kotlin.math.abs(cellCenterY - heightPx * 0.5f)
+        } ?: error("Expected calendar cell")
         val computed = computeCalendarHeatmapLayout(
-            widthPx = 760f,
-            heightPx = 220f,
-            data = data,
-            style = CalendarHeatmapChartStyleOptions(),
-            presentation = CalendarHeatmapChartPresentationOptions(),
-            density = 1f,
-            scaledDensity = 1f,
+            widthPx = widthPx,
+            heightPx = heightPx,
+            data = CalendarHeatmapData(
+                year = 2025,
+                days = listOf(
+                    CalendarHeatmapDay(
+                        month = centerCell.month,
+                        dayOfMonth = centerCell.dayOfMonth,
+                        value = 8.0,
+                        payload = "center",
+                    ),
+                ),
+            ),
+            style = style,
+            presentation = presentation,
+            density = density.density,
+            scaledDensity = density.density * density.fontScale,
         )
-        val populated = computed.dayCells.first { it.day?.payload == "jan-3" }
-        val tap = Offset(
-            populated.rect.left + populated.rect.width * 0.5f,
-            populated.rect.top + populated.rect.height * 0.5f,
+        val hit = findCalendarHeatmapHit(
+            computed,
+            centerCell.rect.left + centerCell.rect.width * 0.5f,
+            centerCell.rect.top + centerCell.rect.height * 0.5f,
         )
-        val hit = findCalendarHeatmapHit(computed, tap.x, tap.y)
 
-        assertEquals("jan-3", hit?.day?.payload)
+        assertEquals("center", hit?.day?.payload)
+    }
+
+    @Test
+    fun calendarHeatmapChart_ignoresEmptyCellHits() {
+        val style = CalendarHeatmapChartStyleOptions(
+            contentPaddingDp = 0f,
+            labelGapDp = 0f,
+            cellGapDp = 0f,
+        )
+        val presentation = CalendarHeatmapChartPresentationOptions(
+            showMonthLabels = false,
+            showWeekdayLabels = false,
+            emptyText = "",
+        )
+        val widthPx = 760f
+        val heightPx = 220f
+        val density = Density(1f)
+        val emptyLayout = computeCalendarHeatmapLayout(
+            widthPx = widthPx,
+            heightPx = heightPx,
+            data = CalendarHeatmapData(year = 2025, days = emptyList()),
+            style = style,
+            presentation = presentation,
+            density = density.density,
+            scaledDensity = density.density * density.fontScale,
+        )
+        val targetCell = emptyLayout.dayCells.minByOrNull { cell ->
+            val cellCenterX = cell.rect.left + cell.rect.width * 0.5f
+            val cellCenterY = cell.rect.top + cell.rect.height * 0.5f
+            kotlin.math.abs(cellCenterX - widthPx * 0.5f) + kotlin.math.abs(cellCenterY - heightPx * 0.5f)
+        } ?: error("Expected calendar cell")
+        val offCenterCell = emptyLayout.dayCells.firstOrNull { cell ->
+            cell.month != targetCell.month || cell.dayOfMonth != targetCell.dayOfMonth
+        } ?: error("Expected empty calendar cell")
+        val computed = computeCalendarHeatmapLayout(
+            widthPx = widthPx,
+            heightPx = heightPx,
+            data = CalendarHeatmapData(
+                year = 2025,
+                days = listOf(
+                    CalendarHeatmapDay(
+                        month = offCenterCell.month,
+                        dayOfMonth = offCenterCell.dayOfMonth,
+                        value = 5.0,
+                        payload = "off-center",
+                    ),
+                ),
+            ),
+            style = style,
+            presentation = presentation,
+            density = density.density,
+            scaledDensity = density.density * density.fontScale,
+        )
+        val hit = findCalendarHeatmapHit(
+            computed,
+            targetCell.rect.left + targetCell.rect.width * 0.5f,
+            targetCell.rect.top + targetCell.rect.height * 0.5f,
+        )
+
+        assertNull(hit)
     }
 
     @Test
